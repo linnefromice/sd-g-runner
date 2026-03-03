@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { AppState, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { useSharedValue } from 'react-native-reanimated';
 import { useGameLoop, type GameSystem } from '@/engine/GameLoop';
@@ -89,6 +89,20 @@ export default function GameScreen() {
   ]);
 
   useGameLoop(systemsRef, entitiesRef, running);
+
+  // Auto-pause when app goes to background
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState !== 'active') {
+        const { isGameOver, isStageClear } = useGameSessionStore.getState();
+        if (!isGameOver && !isStageClear) {
+          setRunning(false);
+          useGameSessionStore.getState().setPaused(true);
+        }
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
   // Sync scroll SharedValue for background
   useEffect(() => {
