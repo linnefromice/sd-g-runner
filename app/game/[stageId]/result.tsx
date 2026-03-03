@@ -13,7 +13,6 @@ export default function ResultScreen() {
 
   const score = useGameSessionStore((s) => s.score);
   const credits = useGameSessionStore((s) => s.credits);
-  const isGameOver = useGameSessionStore((s) => s.isGameOver);
   const isStageClear = useGameSessionStore((s) => s.isStageClear);
 
   // Persist results

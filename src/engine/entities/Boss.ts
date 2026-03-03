@@ -1,6 +1,6 @@
 import type { BossEntity } from '@/types/entities';
 import { HITBOX, LOGICAL_WIDTH } from '@/constants/dimensions';
-import { BOSS_BASE_HP, BOSS_Y_POSITION } from '@/constants/balance';
+import { BOSS_BASE_HP } from '@/constants/balance';
 
 let nextId = 0;
 
