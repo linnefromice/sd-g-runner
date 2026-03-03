@@ -10,7 +10,7 @@ Full requirements: `docs/v1/REQUIREMENTS-r3.md` (v3.1, authoritative spec)
 ## Tech Stack
 
 - **Framework:** Expo (Managed Workflow) with `expo-router` (file-based routing)
-- **Game Loop / ECS:** `react-native-game-engine` (RNGE) — 60fps update loop
+- **Game Loop:** Custom `useGameLoop` hook — 60fps rAF-based update loop (no RNGE dependency)
 - **Rendering:** `@shopify/react-native-skia` — GPU-accelerated 2D drawing (glow, particles, neon effects)
 - **Collision:** Custom AABB (no matter-js / no physics engine)
 - **State:** `zustand` (game session + persistent data)
@@ -40,28 +40,38 @@ eas build --profile development # EAS dev build
 
 ```
 app/          → expo-router pages (screens, navigation)
-src/engine/   → Game logic (RNGE systems, entities, collision) — pure TS, no React
+src/engine/   → Game logic (systems, entities, collision, GameLoop) — pure TS, no React
 src/rendering/→ Skia drawing (reads engine state, renders to Canvas) — no game logic
 src/stores/   → Zustand stores bridging engine↔UI
 src/game/     → Data definitions (forms, stages, difficulty, scoring)
 src/ui/       → React Native HUD components (HP bar, EX button, combo gauge)
 ```
 
-### RNGE + Skia Integration (MUST follow)
+### Game Loop + Skia Integration (MUST follow)
 
 **Entity coordinates must NEVER use `useState`/`setState`.** This causes 60fps re-render storms.
 
 The correct pattern:
-1. RNGE `systems` mutate `entities` (plain JS objects) directly each frame
-2. Skia `GameCanvas` reads entities via `useFrameCallback` — bypasses React render cycle
-3. Only HUD elements (HP, score, EX gauge) use Zustand/React state — event-driven updates only
+1. `useGameLoop` systems mutate `entities` (plain JS objects in a `useRef`) directly each frame
+2. A sync system copies entity positions to a Reanimated `SharedValue` each frame
+3. Skia `GameCanvas` reads from `SharedValue` via `useDerivedValue` — bypasses React render cycle
+4. Only HUD elements (HP, score, EX gauge) use Zustand/React state — event-driven updates only
 
 ```
-RNGE Systems → entities (plain object mutation) → Skia useFrameCallback reads & draws
-                                                → Zustand setState (event-driven, for HUD only)
+Game Loop Systems → entities (plain object mutation) → SharedValue sync → Skia useDerivedValue reads & draws
+                                                     → Zustand setState (event-driven, for HUD only)
 ```
 
-**Banned:** Individual React components per entity (`<Enemy />` × 100). All entities draw on a single Skia Canvas.
+**Banned:** Individual React components per entity (`<Enemy />` × 100). All entities draw on a single Skia Canvas via pre-allocated slots.
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/engine/GameLoop.ts` | `useGameLoop` hook — rAF loop calling systems with delta time |
+| `src/rendering/GameCanvas.tsx` | Skia Canvas with pre-allocated entity slots reading from SharedValue |
+| `src/stores/gameSessionStore.ts` | Zustand store — systems call `getState().setHp()` etc. |
+| `src/ui/HUD.tsx` | React Native overlay — subscribes to Zustand via selectors |
 
 ### Coordinate System
 
@@ -72,7 +82,7 @@ Scale: `screenWidth / 320`. Player hitbox (16×16) is smaller than visual (32×4
 
 | Layer | Storage | Purpose |
 |-------|---------|---------|
-| Game entities | RNGE entities (plain JS) | Positions, bullets, enemies — mutated by systems |
+| Game entities | useRef plain JS objects | Positions, bullets, enemies — mutated by systems |
 | Session UI | Zustand `gameSessionStore` | HP display, score, combo, EX gauge — React-connected |
 | Persistent | Zustand `saveDataStore` + AsyncStorage | High scores, unlocks, credits, upgrades |
 
