@@ -28,6 +28,7 @@ interface GameSessionState {
   comboCount: number;
   isAwakened: boolean;
   awakenedTimer: number;
+  awakenedWarning: boolean;
 
   // EX
   exGauge: number;
@@ -57,6 +58,7 @@ interface GameSessionState {
   resetCombo: () => void;
   activateAwakened: () => void;
   deactivateAwakened: () => void;
+  setAwakenedWarning: (value: boolean) => void;
   setGameOver: (value: boolean) => void;
   setStageClear: (value: boolean) => void;
   setPaused: (value: boolean) => void;
@@ -75,6 +77,7 @@ const INITIAL_STATE = {
   comboCount: 0,
   isAwakened: false,
   awakenedTimer: 0,
+  awakenedWarning: false,
   exGauge: 0,
   score: 0,
   credits: 0,
@@ -154,8 +157,11 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
     set((s) => ({
       isAwakened: false,
       awakenedTimer: 0,
+      awakenedWarning: false,
       currentForm: s.previousForm,
     })),
+
+  setAwakenedWarning: (value) => set({ awakenedWarning: value }),
 
   setGameOver: (value) => set({ isGameOver: value }),
   setStageClear: (value) => set({ isStageClear: value }),
