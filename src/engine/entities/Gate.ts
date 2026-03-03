@@ -1,6 +1,6 @@
 import type { GateEntity } from '@/types/entities';
 import type { GateDefinition, GatePairConfig } from '@/types/gates';
-import { HITBOX, GATE_FORCED_GAP, GATE_OPTIONAL_WIDTH, LOGICAL_WIDTH } from '@/constants/dimensions';
+import { HITBOX, GATE_OPTIONAL_WIDTH, LOGICAL_WIDTH } from '@/constants/dimensions';
 
 let nextId = 0;
 
