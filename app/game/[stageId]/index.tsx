@@ -1,191 +1,150 @@
-import { useCallback, useRef, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
-import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import { useSharedValue } from "react-native-reanimated";
-import { useGameLoop, type GameSystem } from "@/engine/GameLoop";
-import { GameCanvas, type RenderEntity } from "@/rendering/GameCanvas";
-import { HUD } from "@/ui/HUD";
-import { useGameSessionStore } from "@/stores/gameSessionStore";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import { useSharedValue } from 'react-native-reanimated';
+import { useGameLoop, type GameSystem } from '@/engine/GameLoop';
+import { GameCanvas, type RenderEntity } from '@/rendering/GameCanvas';
+import { HUD } from '@/ui/HUD';
+import { useGameSessionStore } from '@/stores/gameSessionStore';
+import { getStage } from '@/game/stages';
+import { getFormDefinition } from '@/game/forms';
+import { createGameEntities } from '@/engine/createGameEntities';
+import { getScreenMetrics } from '@/constants/dimensions';
+import type { GameEntities } from '@/types/entities';
 
-type SpikeEntity = {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  width: number;
-  height: number;
-  color: string;
-};
-
-type SpikeEntities = {
-  entities: SpikeEntity[];
-  player: { targetX: number; targetY: number };
-};
-
-const ENTITY_COUNT = 50;
-const COLORS = ["#00e5ff", "#ff4081", "#76ff03", "#ffea00", "#e040fb"];
-
-function createInitialEntities(
-  screenWidth: number,
-  screenHeight: number
-): SpikeEntities {
-  const entities: SpikeEntity[] = [];
-  for (let i = 0; i < ENTITY_COUNT; i++) {
-    entities.push({
-      x: Math.random() * (screenWidth - 16),
-      y: Math.random() * (screenHeight - 16),
-      vx: (Math.random() - 0.5) * 120,
-      vy: (Math.random() - 0.5) * 120,
-      width: 12 + Math.random() * 12,
-      height: 12 + Math.random() * 12,
-      color: COLORS[i % COLORS.length],
-    });
-  }
-  return {
-    entities,
-    player: { targetX: screenWidth / 2, targetY: screenHeight * 0.75 },
-  };
-}
-
-const movementSystem: GameSystem<SpikeEntities> = (data, { time }) => {
-  const dt = time.delta / 1000;
-  for (const e of data.entities) {
-    e.x += e.vx * dt;
-    e.y += e.vy * dt;
-  }
-};
-
-const bounceSystem =
-  (width: number, height: number): GameSystem<SpikeEntities> =>
-  (data) => {
-    for (const e of data.entities) {
-      if (e.x < 0) {
-        e.x = 0;
-        e.vx *= -1;
-      }
-      if (e.x + e.width > width) {
-        e.x = width - e.width;
-        e.vx *= -1;
-      }
-      if (e.y < 0) {
-        e.y = 0;
-        e.vy *= -1;
-      }
-      if (e.y + e.height > height) {
-        e.y = height - e.height;
-        e.vy *= -1;
-      }
-    }
-  };
-
-const playerTrackSystem: GameSystem<SpikeEntities> = (data, { time }) => {
-  const dt = time.delta / 1000;
-  const lerp = Math.min(1, 10 * dt);
-  const first = data.entities[0];
-  if (first) {
-    first.x += (data.player.targetX - first.x - first.width / 2) * lerp;
-    first.y += (data.player.targetY - first.y - first.height / 2) * lerp;
-    first.vx = 0;
-    first.vy = 0;
-    first.width = 32;
-    first.height = 40;
-    first.color = "#00e5ff";
-  }
-};
-
-// Event-driven HUD update: only updates store every 500ms, not every frame
-let lastScoreUpdate = 0;
-const hudBridgeSystem: GameSystem<SpikeEntities> = (_data, { time }) => {
-  if (time.elapsed - lastScoreUpdate > 500) {
-    lastScoreUpdate = time.elapsed;
-    useGameSessionStore.getState().addScore(10);
-  }
-};
+// Systems
+import { scrollSystem } from '@/engine/systems/ScrollSystem';
+import { movementSystem } from '@/engine/systems/MovementSystem';
+import { createShootingSystem } from '@/engine/systems/ShootingSystem';
+import { enemyAISystem } from '@/engine/systems/EnemyAISystem';
+import { createSpawnSystem } from '@/engine/systems/SpawnSystem';
+import { collisionSystem } from '@/engine/systems/CollisionSystem';
+import { gateSystem } from '@/engine/systems/GateSystem';
+import { iframeSystem } from '@/engine/systems/IFrameSystem';
+import { bossSystem } from '@/engine/systems/BossSystem';
+import { gameOverSystem } from '@/engine/systems/GameOverSystem';
+import { createSyncRenderSystem } from '@/engine/systems/SyncRenderSystem';
 
 export default function GameScreen() {
   const { stageId } = useLocalSearchParams<{ stageId: string }>();
+  const router = useRouter();
   const { width, height } = useWindowDimensions();
-  const [running] = useState(true);
+  const stageIdNum = Number(stageId) || 1;
 
-  const entitiesRef = useRef<SpikeEntities>(
-    createInitialEntities(width, height)
-  );
+  const stage = getStage(stageIdNum);
+  const { scale } = getScreenMetrics(width, height);
 
+  const [running, setRunning] = useState(true);
+
+  // Initialize entities pool
+  const entitiesRef = useRef<GameEntities>(createGameEntities(width, height));
+
+  // SharedValue for Skia rendering
   const renderData = useSharedValue<RenderEntity[]>([]);
+  const scrollYShared = useSharedValue(0);
 
-  const bounce = useCallback(bounceSystem(width, height), [width, height]);
+  // Reset session store
+  useEffect(() => {
+    useGameSessionStore.getState().resetSession(stageIdNum);
+  }, [stageIdNum]);
 
-  const syncToRenderSystem: GameSystem<SpikeEntities> = useCallback(
-    (data) => {
-      renderData.value = data.entities.map((e) => ({
-        x: e.x,
-        y: e.y,
-        width: e.width,
-        height: e.height,
-        color: e.color,
-      }));
-    },
-    [renderData]
+  // Watch for game-over or stage-clear
+  useEffect(() => {
+    const unsub = useGameSessionStore.subscribe((state) => {
+      if (state.isGameOver || state.isStageClear) {
+        setRunning(false);
+        setTimeout(() => {
+          router.replace(`/game/${stageIdNum}/result`);
+        }, 1000);
+      }
+    });
+    return unsub;
+  }, [stageIdNum, router]);
+
+  // Build systems
+  const getForm = useCallback(
+    () => getFormDefinition(useGameSessionStore.getState().currentForm),
+    []
   );
 
-  const systemsRef = useRef<GameSystem<SpikeEntities>[]>([
+  const systemsRef = useRef<GameSystem<GameEntities>[]>([
+    scrollSystem,
     movementSystem,
-    bounce,
-    playerTrackSystem,
-    hudBridgeSystem,
-    syncToRenderSystem,
+    createShootingSystem(getForm),
+    enemyAISystem,
+    createSpawnSystem(stage),
+    collisionSystem,
+    gateSystem,
+    iframeSystem,
+    bossSystem,
+    gameOverSystem,
+    createSyncRenderSystem(renderData),
   ]);
 
   useGameLoop(systemsRef, entitiesRef, running);
 
+  // Sync scroll SharedValue for background
+  useEffect(() => {
+    const interval = setInterval(() => {
+      scrollYShared.value = entitiesRef.current?.scrollY ?? 0;
+    }, 16);
+    return () => clearInterval(interval);
+  }, [scrollYShared]);
+
+  // Gesture: drag to move player
   const pan = Gesture.Pan().onUpdate((e) => {
     const entities = entitiesRef.current;
-    if (entities) {
-      entities.player.targetX = e.absoluteX;
-      entities.player.targetY = e.absoluteY;
-    }
+    if (!entities) return;
+    entities.player.x = e.absoluteX / scale - entities.player.width / 2;
+    entities.player.y = e.absoluteY / scale - entities.player.height / 2;
   });
 
   const tap = Gesture.Tap().onEnd((e) => {
     const entities = entitiesRef.current;
-    if (entities) {
-      entities.player.targetX = e.absoluteX;
-      entities.player.targetY = e.absoluteY;
-    }
+    if (!entities) return;
+    entities.player.x = e.absoluteX / scale - entities.player.width / 2;
+    entities.player.y = e.absoluteY / scale - entities.player.height / 2;
   });
 
   const gesture = Gesture.Race(pan, tap);
 
+  // HUD callbacks
+  const handlePause = useCallback(() => {
+    setRunning((r) => {
+      useGameSessionStore.getState().setPaused(!r);
+      return !r;
+    });
+  }, []);
+
+  const handleEXBurst = useCallback(() => {
+    const store = useGameSessionStore.getState();
+    if (store.exGauge >= 100) {
+      // Kill all active enemies
+      const entities = entitiesRef.current;
+      if (entities) {
+        for (const enemy of entities.enemies) {
+          if (enemy.active) {
+            enemy.hp = 0;
+            enemy.active = false;
+            store.addScore(100);
+          }
+        }
+      }
+      store.addExGauge(-100);
+    }
+  }, []);
+
   return (
     <GestureDetector gesture={gesture}>
       <View style={styles.container}>
-        <GameCanvas renderData={renderData} />
-        <HUD />
-        <View style={styles.overlay} pointerEvents="none">
-          <Text style={styles.hud}>
-            Stage {stageId} | Entities: {ENTITY_COUNT}
-          </Text>
-        </View>
+        <GameCanvas renderData={renderData} scrollY={scrollYShared} scale={scale} />
+        <HUD onPause={handlePause} onEXBurst={handleEXBurst} />
       </View>
     </GestureDetector>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0a0a14",
-  },
-  overlay: {
-    position: "absolute",
-    top: 50,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-  },
-  hud: {
-    fontSize: 14,
-    color: "#ffffff88",
-  },
+  container: { flex: 1, backgroundColor: '#0a0a14' },
 });

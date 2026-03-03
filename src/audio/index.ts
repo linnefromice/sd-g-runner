@@ -1,1 +1,1 @@
-// barrel
+export { AudioManager } from './AudioManager';

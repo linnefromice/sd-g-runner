@@ -10,7 +10,8 @@ export type SystemArgs = {
   time: TimeInfo;
 };
 
-export type Entities = Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type Entities = {};
 
 export type GameSystem<E extends Entities = Entities> = (
   entities: E,

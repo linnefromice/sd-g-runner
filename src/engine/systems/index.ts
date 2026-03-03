@@ -1,1 +1,11 @@
-// barrel
+export { scrollSystem } from './ScrollSystem';
+export { movementSystem } from './MovementSystem';
+export { createShootingSystem } from './ShootingSystem';
+export { enemyAISystem } from './EnemyAISystem';
+export { createSpawnSystem } from './SpawnSystem';
+export { collisionSystem } from './CollisionSystem';
+export { gateSystem } from './GateSystem';
+export { iframeSystem } from './IFrameSystem';
+export { bossSystem } from './BossSystem';
+export { gameOverSystem } from './GameOverSystem';
+export { createSyncRenderSystem } from './SyncRenderSystem';
