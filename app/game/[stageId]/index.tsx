@@ -22,6 +22,7 @@ import { createSpawnSystem } from '@/engine/systems/SpawnSystem';
 import { collisionSystem } from '@/engine/systems/CollisionSystem';
 import { gateSystem } from '@/engine/systems/GateSystem';
 import { iframeSystem } from '@/engine/systems/IFrameSystem';
+import { awakenedSystem } from '@/engine/systems/AwakenedSystem';
 import { bossSystem } from '@/engine/systems/BossSystem';
 import { gameOverSystem } from '@/engine/systems/GameOverSystem';
 import { createSyncRenderSystem } from '@/engine/systems/SyncRenderSystem';
@@ -74,6 +75,7 @@ export default function GameScreen() {
     createShootingSystem(getForm),
     enemyAISystem,
     createSpawnSystem(stage),
+    awakenedSystem,
     collisionSystem,
     gateSystem,
     iframeSystem,
