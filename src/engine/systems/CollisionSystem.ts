@@ -66,7 +66,10 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
   // Skip damage checks if player is invincible
   if (player.isInvincible) return;
 
-  // Enemy bullets → Player
+  // Awakened with homing_invincible: immune to body contact damage
+  const isAwakenedInvincible = store.isAwakened;
+
+  // Enemy bullets → Player (always takes damage, even when awakened)
   for (const bullet of entities.enemyBullets) {
     if (!bullet.active) continue;
     if (checkAABBOverlap(playerHB, bullet)) {
@@ -76,17 +79,19 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
     }
   }
 
-  // Enemy collision → Player
-  for (const enemy of entities.enemies) {
-    if (!enemy.active) continue;
-    if (checkAABBOverlap(playerHB, enemy)) {
-      applyDamage(player, 15, store); // §6.2 enemy collision
-      return;
+  // Enemy collision → Player (skip if awakened)
+  if (!isAwakenedInvincible) {
+    for (const enemy of entities.enemies) {
+      if (!enemy.active) continue;
+      if (checkAABBOverlap(playerHB, enemy)) {
+        applyDamage(player, 15, store); // §6.2 enemy collision
+        return;
+      }
     }
   }
 
-  // Boss collision → Player
-  if (entities.boss?.active && checkAABBOverlap(playerHB, entities.boss)) {
+  // Boss collision → Player (skip if awakened)
+  if (!isAwakenedInvincible && entities.boss?.active && checkAABBOverlap(playerHB, entities.boss)) {
     applyDamage(player, 50, store); // §6.2 boss collision
   }
 };
