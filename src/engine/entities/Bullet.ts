@@ -8,7 +8,7 @@ export function createPlayerBullet(
   x: number,
   y: number,
   damage: number,
-  config?: { width?: number; height?: number; speed?: number }
+  config?: { width?: number; height?: number; speed?: number; homing?: boolean }
 ): BulletEntity {
   return {
     id: `pb_${nextId++}`,
@@ -20,6 +20,7 @@ export function createPlayerBullet(
     active: true,
     damage,
     speed: config?.speed ?? PLAYER_BULLET_SPEED,
+    homing: config?.homing ?? false,
   };
 }
 
@@ -39,6 +40,7 @@ export function createEnemyBullet(
     active: true,
     damage,
     speed: speed ?? ENEMY_BULLET_SPEED,
+    homing: false,
   };
 }
 

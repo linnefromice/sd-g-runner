@@ -21,7 +21,7 @@ function createInactiveEnemy(): EnemyEntity {
 function createInactiveBullet(type: 'playerBullet' | 'enemyBullet'): BulletEntity {
   return {
     id: '', type, x: -100, y: -100, width: 0, height: 0,
-    active: false, damage: 0, speed: 0,
+    active: false, damage: 0, speed: 0, homing: false,
   };
 }
 

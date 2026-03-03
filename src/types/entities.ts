@@ -38,6 +38,7 @@ export interface BulletEntity extends BaseEntity {
   type: 'playerBullet' | 'enemyBullet';
   damage: number;
   speed: number;
+  homing: boolean;
 }
 
 export interface GateEntity extends BaseEntity {
