@@ -12,6 +12,7 @@ import { getFormDefinition } from '@/game/forms';
 import { createGameEntities } from '@/engine/createGameEntities';
 import { getScreenMetrics } from '@/constants/dimensions';
 import type { GameEntities } from '@/types/entities';
+import type { MechaFormId } from '@/types/forms';
 
 // Systems
 import { scrollSystem } from '@/engine/systems/ScrollSystem';
@@ -28,7 +29,7 @@ import { gameOverSystem } from '@/engine/systems/GameOverSystem';
 import { createSyncRenderSystem } from '@/engine/systems/SyncRenderSystem';
 
 export default function GameScreen() {
-  const { stageId } = useLocalSearchParams<{ stageId: string }>();
+  const { stageId, form } = useLocalSearchParams<{ stageId: string; form?: string }>();
   const router = useRouter();
   const { width, height } = useWindowDimensions();
   const stageIdNum = Number(stageId) || 1;
@@ -47,8 +48,11 @@ export default function GameScreen() {
 
   // Reset session store
   useEffect(() => {
-    useGameSessionStore.getState().resetSession(stageIdNum);
-  }, [stageIdNum]);
+    useGameSessionStore.getState().resetSession(
+      stageIdNum,
+      (form as MechaFormId) || undefined,
+    );
+  }, [stageIdNum, form]);
 
   // Watch for game-over or stage-clear
   useEffect(() => {

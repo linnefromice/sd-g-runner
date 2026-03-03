@@ -5,6 +5,7 @@ import { useSaveDataStore } from '@/stores/saveDataStore';
 import { useEffect } from 'react';
 import { COLORS } from '@/constants/colors';
 import { getStageClearCredits } from '@/game/scoring';
+import { getStage } from '@/game/stages';
 
 export default function ResultScreen() {
   const { stageId } = useLocalSearchParams<{ stageId: string }>();
@@ -15,18 +16,19 @@ export default function ResultScreen() {
   const credits = useGameSessionStore((s) => s.credits);
   const isStageClear = useGameSessionStore((s) => s.isStageClear);
 
+  const stage = getStage(stageIdNum);
+  const clearBonus = isStageClear ? getStageClearCredits(stage.isBossStage) : 0;
+  const totalCredits = credits + clearBonus;
+
   // Persist results
   useEffect(() => {
     const saveStore = useSaveDataStore.getState();
+    saveStore.updateHighScore(stageIdNum, score);
+    saveStore.addCredits(totalCredits);
     if (isStageClear) {
-      saveStore.updateHighScore(stageIdNum, score);
-      saveStore.addCredits(credits + getStageClearCredits(false));
       saveStore.unlockStage(stageIdNum + 1);
-    } else {
-      saveStore.updateHighScore(stageIdNum, score);
-      saveStore.addCredits(credits);
     }
-  }, [stageIdNum, score, credits, isStageClear]);
+  }, [stageIdNum, score, totalCredits, isStageClear]);
 
   return (
     <View style={styles.container}>
@@ -39,7 +41,10 @@ export default function ResultScreen() {
         <Text style={styles.value}>{score.toLocaleString()}</Text>
 
         <Text style={styles.label}>Credits Earned</Text>
-        <Text style={styles.value}>{credits} Cr</Text>
+        <Text style={styles.value}>{totalCredits} Cr</Text>
+        {clearBonus > 0 && (
+          <Text style={styles.bonusText}>(+{clearBonus} clear bonus)</Text>
+        )}
       </View>
 
       <View style={styles.buttons}>
@@ -106,4 +111,5 @@ const styles = StyleSheet.create({
   },
   nextButton: { backgroundColor: COLORS.neonBlue + '44' },
   buttonText: { fontSize: 16, color: COLORS.white, fontWeight: '600' },
+  bonusText: { fontSize: 12, color: COLORS.neonGreen, marginTop: -4 },
 });

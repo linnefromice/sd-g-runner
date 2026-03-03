@@ -10,6 +10,8 @@ import {
   AWAKENED_DURATION,
   EX_GAUGE_MAX,
 } from '@/constants/balance';
+import { useSaveDataStore } from '@/stores/saveDataStore';
+import { getUpgradeEffect } from '@/game/upgrades';
 
 interface GameSessionState {
   // Player stats
@@ -62,7 +64,7 @@ interface GameSessionState {
   setGameOver: (value: boolean) => void;
   setStageClear: (value: boolean) => void;
   setPaused: (value: boolean) => void;
-  resetSession: (stageId: number) => void;
+  resetSession: (stageId: number, formId?: MechaFormId) => void;
 }
 
 const INITIAL_STATE = {
@@ -167,9 +169,21 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
   setStageClear: (value) => set({ isStageClear: value }),
   setPaused: (value) => set({ isPaused: value }),
 
-  resetSession: (stageId) =>
+  resetSession: (stageId, formId) => {
+    const { upgrades } = useSaveDataStore.getState();
+    const initialForm = formId ?? 'SD_Standard';
+    const bonusHp = getUpgradeEffect('hp', upgrades.baseHp);
+    const bonusAtk = getUpgradeEffect('atk', upgrades.baseAtk);
+    const bonusSpeed = getUpgradeEffect('speed', upgrades.baseSpeed);
     set({
       ...INITIAL_STATE,
       currentStageId: stageId,
-    }),
+      currentForm: initialForm,
+      previousForm: initialForm,
+      hp: PLAYER_INITIAL_HP + bonusHp,
+      maxHp: PLAYER_INITIAL_HP + bonusHp,
+      atk: PLAYER_INITIAL_ATK + bonusAtk,
+      speed: PLAYER_INITIAL_SPEED + bonusSpeed,
+    });
+  },
 }));
