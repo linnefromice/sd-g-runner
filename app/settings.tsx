@@ -1,33 +1,61 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSaveDataStore } from '@/stores/saveDataStore';
+import { useTranslation, type LocaleSetting } from '@/i18n';
 import { COLORS } from '@/constants/colors';
 
 const VOLUME_STEPS = [0, 0.25, 0.5, 0.75, 1.0];
 
+const LOCALE_OPTIONS: { value: LocaleSetting; labelKey: 'localeSystem' | 'localeEn' | 'localeJa' }[] = [
+  { value: 'system', labelKey: 'localeSystem' },
+  { value: 'en', labelKey: 'localeEn' },
+  { value: 'ja', labelKey: 'localeJa' },
+];
+
 export default function SettingsScreen() {
   const router = useRouter();
+  const t = useTranslation();
   const bgmVolume = useSaveDataStore((s) => s.settings.bgmVolume);
   const seVolume = useSaveDataStore((s) => s.settings.seVolume);
+  const locale = useSaveDataStore((s) => s.settings.locale);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
+      <Text style={styles.title}>{t.settings.title}</Text>
 
       <VolumeControl
-        label="BGM Volume"
+        label={t.settings.bgmVolume}
         value={bgmVolume}
         onChange={(v) => useSaveDataStore.getState().setVolume('bgm', v)}
       />
 
       <VolumeControl
-        label="SE Volume"
+        label={t.settings.seVolume}
         value={seVolume}
         onChange={(v) => useSaveDataStore.getState().setVolume('se', v)}
       />
 
+      <View style={styles.volumeSection}>
+        <View style={styles.volumeHeader}>
+          <Text style={styles.volumeLabel}>{t.settings.language}</Text>
+        </View>
+        <View style={styles.volumeSteps}>
+          {LOCALE_OPTIONS.map((opt) => (
+            <TouchableOpacity
+              key={opt.value}
+              style={[styles.volumeStep, locale === opt.value && styles.volumeStepActive]}
+              onPress={() => useSaveDataStore.getState().setLocale(opt.value)}
+            >
+              <Text style={[styles.volumeStepText, locale === opt.value && styles.volumeStepTextActive]}>
+                {t.settings[opt.labelKey]}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
       <TouchableOpacity style={styles.backButton} onPress={() => router.push('/')}>
-        <Text style={styles.backButtonText}>Back to Title</Text>
+        <Text style={styles.backButtonText}>{t.settings.backToTitle}</Text>
       </TouchableOpacity>
     </View>
   );

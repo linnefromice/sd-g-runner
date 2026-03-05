@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSaveDataStore } from '@/stores/saveDataStore';
 import { UPGRADE_CONFIG, getUpgradeCost } from '@/game/upgrades';
+import { useTranslation } from '@/i18n';
 import { COLORS } from '@/constants/colors';
 
 type UpgradeKey = 'atk' | 'hp' | 'speed';
@@ -16,6 +17,7 @@ const UPGRADE_ACTIONS: Record<UpgradeKey, () => boolean> = {
 
 export default function UpgradeScreen() {
   const router = useRouter();
+  const t = useTranslation();
   const credits = useSaveDataStore((s) => s.credits);
   const upgrades = useSaveDataStore((s) => s.upgrades);
 
@@ -34,7 +36,7 @@ export default function UpgradeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Upgrade</Text>
+        <Text style={styles.title}>{t.upgrade.title}</Text>
         <Text style={styles.credits}>{credits} Cr</Text>
       </View>
 
@@ -51,7 +53,7 @@ export default function UpgradeScreen() {
               <View style={styles.cardHeader}>
                 <Text style={styles.cardLabel}>{config.label}</Text>
                 {isMaxed ? (
-                  <Text style={styles.maxBadge}>MAX</Text>
+                  <Text style={styles.maxBadge}>{t.upgrade.max}</Text>
                 ) : (
                   <Text style={styles.levelText}>
                     Lv.{level} / {config.maxLevel}
@@ -73,7 +75,7 @@ export default function UpgradeScreen() {
                     disabled={!canAfford || isMaxed}
                     onPress={() => handleUpgrade(key)}
                   >
-                    <Text style={styles.upgradeButtonText}>Upgrade</Text>
+                    <Text style={styles.upgradeButtonText}>{t.upgrade.title}</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -83,7 +85,7 @@ export default function UpgradeScreen() {
       </View>
 
       <TouchableOpacity style={styles.backButton} onPress={() => router.push('/stages')}>
-        <Text style={styles.backButtonText}>Back to Stages</Text>
+        <Text style={styles.backButtonText}>{t.upgrade.backToStages}</Text>
       </TouchableOpacity>
     </View>
   );

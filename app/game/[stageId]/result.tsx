@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { useSaveDataStore } from '@/stores/saveDataStore';
 import { useEffect } from 'react';
+import { useTranslation } from '@/i18n';
 import { COLORS } from '@/constants/colors';
 import { getStageClearCredits } from '@/game/scoring';
 import { getStage } from '@/game/stages';
@@ -11,6 +12,7 @@ export default function ResultScreen() {
   const { stageId } = useLocalSearchParams<{ stageId: string }>();
   const router = useRouter();
   const stageIdNum = Number(stageId) || 1;
+  const t = useTranslation();
 
   const score = useGameSessionStore((s) => s.score);
   const credits = useGameSessionStore((s) => s.credits);
@@ -33,17 +35,17 @@ export default function ResultScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>
-        {isStageClear ? 'STAGE CLEAR!' : 'GAME OVER'}
+        {isStageClear ? t.result.stageClear : t.result.gameOver}
       </Text>
 
       <View style={styles.stats}>
-        <Text style={styles.label}>Score</Text>
+        <Text style={styles.label}>{t.result.score}</Text>
         <Text style={styles.value}>{score.toLocaleString()}</Text>
 
-        <Text style={styles.label}>Credits Earned</Text>
+        <Text style={styles.label}>{t.result.creditsEarned}</Text>
         <Text style={styles.value}>{totalCredits} Cr</Text>
         {clearBonus > 0 && (
-          <Text style={styles.bonusText}>(+{clearBonus} clear bonus)</Text>
+          <Text style={styles.bonusText}>{t.result.clearBonus(clearBonus)}</Text>
         )}
       </View>
 
@@ -52,14 +54,14 @@ export default function ResultScreen() {
           style={styles.button}
           onPress={() => router.replace(`/game/${stageIdNum}`)}
         >
-          <Text style={styles.buttonText}>Replay</Text>
+          <Text style={styles.buttonText}>{t.result.replay}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => router.replace('/stages')}
         >
-          <Text style={styles.buttonText}>Stage Select</Text>
+          <Text style={styles.buttonText}>{t.result.stageSelect}</Text>
         </TouchableOpacity>
 
         {isStageClear && (
@@ -67,7 +69,7 @@ export default function ResultScreen() {
             style={[styles.button, styles.nextButton]}
             onPress={() => router.replace(`/game/${stageIdNum + 1}`)}
           >
-            <Text style={styles.buttonText}>Next Stage</Text>
+            <Text style={styles.buttonText}>{t.result.nextStage}</Text>
           </TouchableOpacity>
         )}
       </View>

@@ -3,8 +3,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSaveDataStore } from '@/stores/saveDataStore';
-import { FORM_DEFINITIONS } from '@/game/forms';
+import { FORM_DEFINITIONS, FORM_DISPLAY_KEY } from '@/game/forms';
 import { FORM_UNLOCK_CONDITIONS, canUnlockForm } from '@/game/upgrades';
+import { useTranslation } from '@/i18n';
 import { COLORS } from '@/constants/colors';
 import type { MechaFormId } from '@/types/forms';
 
@@ -14,17 +15,11 @@ const SELECTABLE_FORMS: MechaFormId[] = [
   'SD_HighSpeed',
 ];
 
-const ABILITY_LABELS: Record<string, string> = {
-  none: '-',
-  explosion_radius: 'Explosion',
-  pierce: 'Pierce',
-  homing_invincible: 'Homing + Invincible',
-};
-
 export default function SelectFormScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const stageIdNum = Number(id) || 1;
+  const t = useTranslation();
 
   const insets = useSafeAreaInsets();
   const unlockedForms = useSaveDataStore((s) => s.unlockedForms);
@@ -67,8 +62,8 @@ export default function SelectFormScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Select Form</Text>
-        <Text style={styles.subtitle}>Stage {stageIdNum}</Text>
+        <Text style={styles.title}>{t.selectForm.title}</Text>
+        <Text style={styles.subtitle}>{t.selectForm.stage} {stageIdNum}</Text>
       </View>
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
@@ -77,6 +72,7 @@ export default function SelectFormScreen() {
           const isUnlocked = unlockedForms.includes(formId);
           const cond = FORM_UNLOCK_CONDITIONS[formId];
           const canBuy = !isUnlocked && canUnlockForm(formId, unlockedStages, credits);
+          const formName = t.forms[FORM_DISPLAY_KEY[formId]];
 
           return (
             <View key={formId} style={[styles.formCard, !isUnlocked && styles.formCardLocked]}>
@@ -85,7 +81,7 @@ export default function SelectFormScreen() {
                   style={[styles.formColor, { backgroundColor: form.spriteConfig.bodyColor }]}
                 />
                 <Text style={[styles.formName, !isUnlocked && styles.textLocked]}>
-                  {form.displayName}
+                  {formName}
                 </Text>
               </View>
 
@@ -97,17 +93,17 @@ export default function SelectFormScreen() {
 
               {isUnlocked && (
                 <Text style={styles.ability}>
-                  {ABILITY_LABELS[form.specialAbility] ?? form.specialAbility}
+                  {t.abilities[form.specialAbility as keyof typeof t.abilities] ?? form.specialAbility}
                 </Text>
               )}
 
               {isUnlocked ? (
                 <View style={styles.selectRow}>
                   {primaryForm === formId && (
-                    <Text style={styles.selectedBadge}>PRIMARY</Text>
+                    <Text style={styles.selectedBadge}>{t.selectForm.primary}</Text>
                   )}
                   {secondaryForm === formId && (
-                    <Text style={styles.selectedBadgeSecondary}>SECONDARY</Text>
+                    <Text style={styles.selectedBadgeSecondary}>{t.selectForm.secondary}</Text>
                   )}
                   <TouchableOpacity
                     style={[
@@ -117,21 +113,21 @@ export default function SelectFormScreen() {
                     onPress={() => handleFormTap(formId)}
                   >
                     <Text style={styles.selectButtonText}>
-                      {primaryForm === formId || secondaryForm === formId ? 'Selected' : 'Select'}
+                      {primaryForm === formId || secondaryForm === formId ? t.selectForm.selected : t.selectForm.select}
                     </Text>
                   </TouchableOpacity>
                 </View>
               ) : cond.type === 'unlock' ? (
                 <View style={styles.unlockRow}>
                   <Text style={styles.unlockCondition}>
-                    Stage {cond.requiredStage} Clear + {cond.cost} Cr
+                    {t.selectForm.unlockCondition(cond.requiredStage, cond.cost)}
                   </Text>
                   <TouchableOpacity
                     style={[styles.unlockButton, !canBuy && styles.unlockButtonDisabled]}
                     disabled={!canBuy}
                     onPress={() => handleUnlock(formId)}
                   >
-                    <Text style={styles.unlockButtonText}>Unlock</Text>
+                    <Text style={styles.unlockButtonText}>{t.selectForm.unlock}</Text>
                   </TouchableOpacity>
                 </View>
               ) : null}
@@ -144,20 +140,20 @@ export default function SelectFormScreen() {
             <View
               style={[styles.formColor, { backgroundColor: FORM_DEFINITIONS.SD_Awakened.spriteConfig.bodyColor }]}
             />
-            <Text style={styles.formName}>Awakened</Text>
+            <Text style={styles.formName}>{t.forms.awakened}</Text>
           </View>
-          <Text style={styles.comboOnly}>Activated via Combo (3 consecutive enhance gates)</Text>
+          <Text style={styles.comboOnly}>{t.selectForm.awakenedComboOnly}</Text>
         </View>
       </ScrollView>
 
       {primaryForm && secondaryForm && (
         <TouchableOpacity style={styles.startButton} onPress={handleStart}>
-          <Text style={styles.startButtonText}>Start Stage</Text>
+          <Text style={styles.startButtonText}>{t.selectForm.startStage}</Text>
         </TouchableOpacity>
       )}
 
       <TouchableOpacity style={[styles.backButton, { marginBottom: Math.max(insets.bottom, 24) }]} onPress={() => router.push('/stages')}>
-        <Text style={styles.backButtonText}>Back to Stages</Text>
+        <Text style={styles.backButtonText}>{t.selectForm.backToStages}</Text>
       </TouchableOpacity>
     </View>
   );
