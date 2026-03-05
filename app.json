@@ -44,6 +44,9 @@
         "projectId": "27b68e0e-8aa2-4893-b51f-3b6efc8dec1d"
       }
     },
-    "owner": "linnefromice"
+    "owner": "linnefromice",
+    "updates": {
+      "url": "https://u.expo.dev/27b68e0e-8aa2-4893-b51f-3b6efc8dec1d"
+    }
   }
 }

@@ -17,22 +17,42 @@ Full requirements: `docs/v1/REQUIREMENTS-r3.md` (v3.1, authoritative spec)
 - **Sound:** `expo-av`
 - **Storage:** `AsyncStorage`
 
+## Platform Support
+
+**Native only (iOS / Android)**. Web is not supported.
+
+This project uses `@shopify/react-native-skia` which requires native modules. **Expo Go does NOT work** — you must use a development build (`expo-dev-client`).
+
 ## Commands
 
 ```bash
-# Development
-npx expo start                  # Start dev server
-npx expo start --ios            # iOS simulator
-npx expo start --android        # Android emulator
+# Development (requires development build installed on device/emulator)
+npx expo start --dev-client     # Start dev server for dev client
+npx expo start --dev-client --ios      # iOS simulator
+npx expo start --dev-client --android  # Android emulator
+
+# ⚠️ DO NOT use `npx expo start` without --dev-client (Expo Go lacks Skia support)
 
 # Type checking & linting
 npx tsc --noEmit                # TypeScript check
 npx expo lint                   # ESLint
 
 # Build
-npx expo prebuild               # Generate native projects
-eas build --profile development # EAS dev build
+eas build --profile development --platform android  # Dev build (Android)
+eas build --profile development --platform ios       # Dev build (iOS)
+eas build --profile preview --platform all           # Preview build (internal distribution)
+
+# OTA update (preview channel)
+CI=1 eas update --auto --environment preview --platform ios
+CI=1 eas update --auto --environment preview --platform android
 ```
+
+### First-time setup
+
+1. `npx eas login` — Log in to Expo account
+2. `eas build --profile development --platform <platform>` — Create initial dev build
+3. Install the built APK/IPA on your device
+4. `npx expo start --dev-client` — Start dev server
 
 ## Architecture (Critical)
 
