@@ -7,7 +7,10 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "build": "npx eas-cli@latest build",
+    "build:dev": "npx eas-cli@latest build --profile development",
+    "build:preview": "npx eas-cli@latest build --profile preview",
     "test": "jest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
     "lint": "expo lint"
   },
   "dependencies": {
@@ -23,7 +26,6 @@
     "expo-status-bar": "~55.0.4",
     "expo-updates": "~55.0.12",
     "react": "19.2.0",
-    "react-dom": "^19.2.0",
     "react-native": "0.83.2",
     "react-native-gesture-handler": "~2.30.0",
     "react-native-reanimated": "4.2.1",
