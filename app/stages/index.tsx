@@ -3,11 +3,13 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSaveDataStore } from '@/stores/saveDataStore';
 import { getAvailableStageIds, getStage } from '@/game/stages';
+import { useTranslation } from '@/i18n';
 import { COLORS } from '@/constants/colors';
 
 export default function StageSelectScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const t = useTranslation();
   const unlockedStages = useSaveDataStore((s) => s.unlockedStages);
   const highScores = useSaveDataStore((s) => s.highScores);
   const credits = useSaveDataStore((s) => s.credits);
@@ -17,7 +19,7 @@ export default function StageSelectScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Stage Select</Text>
+        <Text style={styles.title}>{t.stageSelect.title}</Text>
         <Text style={styles.credits}>{credits} Cr</Text>
       </View>
 
@@ -36,13 +38,13 @@ export default function StageSelectScreen() {
             >
               <View style={styles.stageInfo}>
                 <Text style={[styles.stageNumber, !isUnlocked && styles.textLocked]}>
-                  {isUnlocked ? `Stage ${id}` : '???'}
+                  {isUnlocked ? `${t.stageSelect.stage} ${id}` : t.stageSelect.unknown}
                 </Text>
                 <Text style={[styles.stageName, !isUnlocked && styles.textLocked]}>
-                  {isUnlocked ? stage.name : 'LOCKED'}
+                  {isUnlocked ? stage.name : t.stageSelect.locked}
                 </Text>
                 {stage.isBossStage && isUnlocked && (
-                  <Text style={styles.bossBadge}>BOSS</Text>
+                  <Text style={styles.bossBadge}>{t.stageSelect.boss}</Text>
                 )}
               </View>
               <View style={styles.stageScore}>
@@ -51,7 +53,7 @@ export default function StageSelectScreen() {
                 ) : isUnlocked ? (
                   <Text style={styles.noScore}>---</Text>
                 ) : (
-                  <Text style={styles.lockIcon}>LOCK</Text>
+                  <Text style={styles.lockIcon}>{t.stageSelect.lock}</Text>
                 )}
               </View>
             </TouchableOpacity>
@@ -61,10 +63,10 @@ export default function StageSelectScreen() {
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
         <TouchableOpacity style={styles.footerButton} onPress={() => router.push('/upgrade')}>
-          <Text style={styles.footerButtonText}>Upgrade</Text>
+          <Text style={styles.footerButtonText}>{t.stageSelect.upgrade}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.footerButton} onPress={() => router.push('/')}>
-          <Text style={styles.footerButtonText}>Back</Text>
+          <Text style={styles.footerButtonText}>{t.stageSelect.back}</Text>
         </TouchableOpacity>
       </View>
     </View>

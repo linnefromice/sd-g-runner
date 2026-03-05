@@ -1,71 +1,54 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { COLORS } from '@/constants/colors';
+import { useTranslation } from '@/i18n';
 
 type GateHelpOverlayProps = {
   onClose: () => void;
 };
 
-const GATE_INFO = [
-  {
-    name: 'Enhance',
-    color: COLORS.gateEnhance,
-    effect: 'Boosts a stat permanently for the stage.',
-    examples: 'ATK +5, SPD +10%, Fire Rate +20%',
-    combo: 'Combo +1 — build toward Awakening',
-  },
-  {
-    name: 'Recovery',
-    color: COLORS.gateRecovery,
-    effect: 'Restores HP by a flat amount or percentage.',
-    examples: 'HP +20, HP +30, HP +50%',
-    combo: 'No effect on combo',
-  },
-  {
-    name: 'Tradeoff',
-    color: COLORS.gateTradeoff,
-    effect: 'Raises one stat but lowers another.',
-    examples: 'ATK↑ SPD↓, SPD↑ ATK↓, FR↑ ATK↓',
-    combo: 'Resets combo to 0',
-  },
-  {
-    name: 'Refit',
-    color: COLORS.gateRefit,
-    effect: 'Switches your mecha to a different form.',
-    examples: '→ Heavy Artillery, → High Speed',
-    combo: 'Resets combo to 0',
-  },
-] as const;
+const GATE_KEYS = ['enhance', 'recovery', 'tradeoff', 'refit'] as const;
+
+const GATE_COLORS: Record<typeof GATE_KEYS[number], string> = {
+  enhance: COLORS.gateEnhance,
+  recovery: COLORS.gateRecovery,
+  tradeoff: COLORS.gateTradeoff,
+  refit: COLORS.gateRefit,
+};
 
 function GateHelpOverlayInner({ onClose }: GateHelpOverlayProps) {
+  const t = useTranslation();
+
   return (
     <View style={styles.overlay}>
       <View style={styles.card}>
-        <Text style={styles.title}>GATE TYPES</Text>
+        <Text style={styles.title}>{t.gateHelp.title}</Text>
 
         <ScrollView style={styles.list}>
-          {GATE_INFO.map((gate) => (
-            <View key={gate.name} style={styles.row}>
-              <View style={[styles.swatch, { backgroundColor: gate.color }]} />
-              <View style={styles.info}>
-                <Text style={[styles.gateName, { color: gate.color }]}>{gate.name}</Text>
-                <Text style={styles.effect}>{gate.effect}</Text>
-                <Text style={styles.examples}>{gate.examples}</Text>
-                <Text style={styles.combo}>{gate.combo}</Text>
+          {GATE_KEYS.map((key) => {
+            const gate = t.gateHelp[key];
+            const color = GATE_COLORS[key];
+            return (
+              <View key={key} style={styles.row}>
+                <View style={[styles.swatch, { backgroundColor: color }]} />
+                <View style={styles.info}>
+                  <Text style={[styles.gateName, { color }]}>{gate.name}</Text>
+                  <Text style={styles.effect}>{gate.effect}</Text>
+                  <Text style={styles.examples}>{gate.examples}</Text>
+                  <Text style={styles.combo}>{gate.combo}</Text>
+                </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
 
           <View style={styles.tipBox}>
-            <Text style={styles.tipTitle}>TIP</Text>
-            <Text style={styles.tipText}>
-              3 consecutive Enhance gates triggers Awakened form (10s) — 2x ATK, homing shots, invincible!
-            </Text>
+            <Text style={styles.tipTitle}>{t.gateHelp.tip}</Text>
+            <Text style={styles.tipText}>{t.gateHelp.tipText}</Text>
           </View>
         </ScrollView>
 
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Text style={styles.closeText}>Close</Text>
+          <Text style={styles.closeText}>{t.gateHelp.close}</Text>
         </TouchableOpacity>
       </View>
     </View>

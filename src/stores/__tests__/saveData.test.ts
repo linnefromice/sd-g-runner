@@ -8,7 +8,7 @@ beforeEach(() => {
     unlockedStages: [1],
     credits: 0,
     upgrades: { baseAtk: 0, baseHp: 0, baseSpeed: 0 },
-    settings: { bgmVolume: 0.7, seVolume: 1.0 },
+    settings: { bgmVolume: 0.7, seVolume: 1.0, locale: 'system' as const },
     isLoaded: false,
   });
 });

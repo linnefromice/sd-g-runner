@@ -4,7 +4,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { COLORS } from '@/constants/colors';
 import { EX_GAUGE_MAX, COMBO_THRESHOLD, TRANSFORM_GAUGE_MAX } from '@/constants/balance';
+import { useTranslation } from '@/i18n';
+import { FORM_DISPLAY_KEY } from '@/game/forms';
 import type { GameEntities } from '@/types/entities';
+import type { MechaFormId } from '@/types/forms';
 
 function HPBar() {
   const hp = useGameSessionStore((s) => s.hp);
@@ -46,7 +49,9 @@ function PauseButton({ onPause }: { onPause: () => void }) {
 
 function FormIndicator() {
   const form = useGameSessionStore((s) => s.currentForm);
-  const name = form.replace('SD_', '');
+  const t = useTranslation();
+  const key = FORM_DISPLAY_KEY[form as MechaFormId];
+  const name = key ? t.forms[key] : form.replace('SD_', '');
   return (
     <View style={styles.formBadge}>
       <Text style={styles.formText}>{name}</Text>
@@ -58,6 +63,7 @@ function ComboGauge() {
   const comboCount = useGameSessionStore((s) => s.comboCount);
   const isAwakened = useGameSessionStore((s) => s.isAwakened);
   const awakenedWarning = useGameSessionStore((s) => s.awakenedWarning);
+  const t = useTranslation();
 
   if (isAwakened) {
     return (
@@ -68,7 +74,7 @@ function ComboGauge() {
             { color: awakenedWarning ? COLORS.hpCritical : COLORS.scoreYellow },
           ]}
         >
-          {awakenedWarning ? 'FADING!' : 'AWAKENED'}
+          {awakenedWarning ? t.hud.fading : t.hud.awakened}
         </Text>
       </View>
     );

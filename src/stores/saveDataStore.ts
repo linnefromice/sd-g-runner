@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { MechaFormId } from '@/types/forms';
+import type { LocaleSetting } from '@/i18n';
 
 interface SaveData {
   highScores: Record<number, number>;
@@ -15,6 +16,7 @@ interface SaveData {
   settings: {
     bgmVolume: number;
     seVolume: number;
+    locale: LocaleSetting;
   };
 }
 
@@ -31,6 +33,7 @@ interface SaveDataState extends SaveData {
   upgradeHp: () => boolean;
   upgradeSpeed: () => boolean;
   setVolume: (type: 'bgm' | 'se', value: number) => void;
+  setLocale: (locale: LocaleSetting) => void;
 }
 
 const STORAGE_KEY = 'g_runner_save';
@@ -41,7 +44,7 @@ const INITIAL_SAVE: SaveData = {
   unlockedStages: [1],
   credits: 0,
   upgrades: { baseAtk: 0, baseHp: 0, baseSpeed: 0 },
-  settings: { bgmVolume: 0.7, seVolume: 1.0 },
+  settings: { bgmVolume: 0.7, seVolume: 1.0, locale: 'system' as LocaleSetting },
 };
 
 export const useSaveDataStore = create<SaveDataState>((set, get) => ({
@@ -151,6 +154,11 @@ export const useSaveDataStore = create<SaveDataState>((set, get) => ({
         [type === 'bgm' ? 'bgmVolume' : 'seVolume']: Math.max(0, Math.min(1, value)),
       },
     }));
+    get().save();
+  },
+
+  setLocale: (locale) => {
+    set((s) => ({ settings: { ...s.settings, locale } }));
     get().save();
   },
 }));
