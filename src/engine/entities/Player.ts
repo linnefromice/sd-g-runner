@@ -14,5 +14,7 @@ export function createPlayer(x: number, y: number): PlayerEntity {
     active: true,
     isInvincible: false,
     invincibleTimer: 0,
+    targetX: null,
+    targetY: null,
   };
 }

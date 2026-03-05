@@ -22,6 +22,9 @@ export interface PlayerEntity extends BaseEntity {
   type: 'player';
   isInvincible: boolean;
   invincibleTimer: number;
+  /** When set, player slides toward this position (from tap gesture) */
+  targetX: number | null;
+  targetY: number | null;
 }
 
 export interface EnemyEntity extends BaseEntity {
@@ -77,6 +80,10 @@ export interface GameEntities {
   boss: BossEntity | null;
   /** Stage timeline progress in seconds */
   stageTime: number;
+  /** Stage duration in seconds (for non-boss stage completion) */
+  stageDuration: number;
+  /** Whether this is a boss stage */
+  isBossStage: boolean;
   /** Current timeline event index */
   timelineIndex: number;
   /** Is the game in boss phase? */

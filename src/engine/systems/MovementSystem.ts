@@ -6,6 +6,7 @@ import {
   PLAYER_Y_TOP_RATIO,
   PLAYER_Y_BOTTOM_MARGIN,
 } from '@/constants/dimensions';
+import { PLAYER_MOVE_SPEED } from '@/constants/balance';
 import { deactivateBullet } from '@/engine/entities/Bullet';
 import { deactivateEnemy } from '@/engine/entities/Enemy';
 
@@ -19,8 +20,27 @@ export const movementSystem: GameSystem<GameEntities> = (entities, { time }) => 
   const dt = time.delta / 1000;
   const { visibleHeight } = entities.screen;
 
-  // Clamp player position to allowed bounds (§3.1)
+  // Smooth slide toward tap target (if set)
   const p = entities.player;
+  if (p.targetX != null && p.targetY != null) {
+    const dx = p.targetX - p.x;
+    const dy = p.targetY - p.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const step = PLAYER_MOVE_SPEED * dt;
+
+    if (dist <= step) {
+      // Arrived at target
+      p.x = p.targetX;
+      p.y = p.targetY;
+      p.targetX = null;
+      p.targetY = null;
+    } else {
+      p.x += (dx / dist) * step;
+      p.y += (dy / dist) * step;
+    }
+  }
+
+  // Clamp player position to allowed bounds (§3.1)
   const minY = visibleHeight * PLAYER_Y_TOP_RATIO;
   const maxY = visibleHeight - PLAYER_Y_BOTTOM_MARGIN;
   p.x = Math.max(PLAYER_MIN_X, Math.min(PLAYER_MAX_X - p.width, p.x));

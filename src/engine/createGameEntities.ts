@@ -50,6 +50,8 @@ export function createGameEntities(
     gates: Array.from({ length: MAX_GATES }, createInactiveGate),
     boss: null,
     stageTime: 0,
+    stageDuration: 0,
+    isBossStage: false,
     timelineIndex: 0,
     isBossPhase: false,
     scrollY: 0,

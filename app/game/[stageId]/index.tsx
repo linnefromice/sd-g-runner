@@ -6,6 +6,7 @@ import Animated, { useSharedValue } from 'react-native-reanimated';
 import { useGameLoop, type GameSystem } from '@/engine/GameLoop';
 import { GameCanvas, type RenderEntity } from '@/rendering/GameCanvas';
 import { HUD } from '@/ui/HUD';
+import { PauseMenu } from '@/ui/PauseMenu';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { getStage } from '@/game/stages';
 import { getFormDefinition } from '@/game/forms';
@@ -39,8 +40,13 @@ export default function GameScreen() {
 
   const [running, setRunning] = useState(true);
 
-  // Initialize entities pool
-  const entitiesRef = useRef<GameEntities>(createGameEntities(width, height));
+  // Initialize entities pool with stage metadata
+  const entitiesRef = useRef<GameEntities>(
+    Object.assign(createGameEntities(width, height), {
+      stageDuration: stage.duration,
+      isBossStage: stage.isBossStage,
+    })
+  );
 
   // SharedValue for Skia rendering
   const renderData = useSharedValue<RenderEntity[]>([]);
@@ -112,32 +118,54 @@ export default function GameScreen() {
     return () => clearInterval(interval);
   }, [scrollYShared]);
 
-  // Gesture: drag to move player
+  // Gesture: drag to move player directly, tap to slide toward position
   // runOnJS(true) is required — without it, RNGH v2 runs callbacks as Reanimated
   // worklets which freezes entitiesRef.current, breaking the game loop.
-  const pan = Gesture.Pan().runOnJS(true).onUpdate((e) => {
-    const entities = entitiesRef.current;
-    if (!entities) return;
-    entities.player.x = e.absoluteX / scale - entities.player.width / 2;
-    entities.player.y = e.absoluteY / scale - entities.player.height / 2;
-  });
+  const pan = Gesture.Pan().runOnJS(true)
+    .onStart(() => {
+      // Cancel any ongoing slide when drag starts
+      const entities = entitiesRef.current;
+      if (entities) {
+        entities.player.targetX = null;
+        entities.player.targetY = null;
+      }
+    })
+    .onUpdate((e) => {
+      const entities = entitiesRef.current;
+      if (!entities) return;
+      entities.player.x = e.absoluteX / scale - entities.player.width / 2;
+      entities.player.y = e.absoluteY / scale - entities.player.height / 2;
+    });
 
   const tap = Gesture.Tap().runOnJS(true).onEnd((e) => {
     const entities = entitiesRef.current;
     if (!entities) return;
-    entities.player.x = e.absoluteX / scale - entities.player.width / 2;
-    entities.player.y = e.absoluteY / scale - entities.player.height / 2;
+    // Set target — MovementSystem will smoothly slide the player there
+    entities.player.targetX = e.absoluteX / scale - entities.player.width / 2;
+    entities.player.targetY = e.absoluteY / scale - entities.player.height / 2;
   });
 
   const gesture = Gesture.Race(pan, tap);
 
+  const [showPauseMenu, setShowPauseMenu] = useState(false);
+
   // HUD callbacks
   const handlePause = useCallback(() => {
-    setRunning((r) => {
-      useGameSessionStore.getState().setPaused(!r);
-      return !r;
-    });
+    setRunning(false);
+    useGameSessionStore.getState().setPaused(true);
+    setShowPauseMenu(true);
   }, []);
+
+  const handleResume = useCallback(() => {
+    setShowPauseMenu(false);
+    useGameSessionStore.getState().setPaused(false);
+    setRunning(true);
+  }, []);
+
+  const handleExit = useCallback(() => {
+    setShowPauseMenu(false);
+    router.replace('/stages');
+  }, [router]);
 
   const handleEXBurst = useCallback(() => {
     const store = useGameSessionStore.getState();
@@ -163,7 +191,15 @@ export default function GameScreen() {
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <GameCanvas renderData={renderData} scrollY={scrollYShared} scale={scale} />
         </View>
-        <HUD onPause={handlePause} onEXBurst={handleEXBurst} />
+        <HUD
+          onPause={handlePause}
+          onEXBurst={handleEXBurst}
+          entitiesRef={entitiesRef}
+          stageDuration={stage.duration}
+        />
+        {showPauseMenu && (
+          <PauseMenu onResume={handleResume} onExit={handleExit} />
+        )}
       </Animated.View>
     </GestureDetector>
   );

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { COLORS } from '@/constants/colors';
 import { EX_GAUGE_MAX, COMBO_THRESHOLD } from '@/constants/balance';
+import type { GameEntities } from '@/types/entities';
 
 function HPBar() {
   const hp = useGameSessionStore((s) => s.hp);
@@ -135,12 +136,46 @@ function EXButton({ onActivate }: { onActivate: () => void }) {
   );
 }
 
+function StageProgressBar({
+  entitiesRef,
+  stageDuration,
+}: {
+  entitiesRef: React.RefObject<GameEntities>;
+  stageDuration: number;
+}) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const stageTime = entitiesRef.current?.stageTime ?? 0;
+      setProgress(stageDuration > 0 ? Math.min(1, stageTime / stageDuration) : 0);
+    }, 250); // Update 4x/sec — sufficient for a progress bar
+    return () => clearInterval(interval);
+  }, [entitiesRef, stageDuration]);
+
+  return (
+    <View style={styles.progressContainer}>
+      <View style={styles.progressTrack}>
+        <View
+          style={[
+            styles.progressFill,
+            { width: `${progress * 100}%` as `${number}%` },
+          ]}
+        />
+      </View>
+      <Text style={styles.progressText}>{Math.floor(progress * 100)}%</Text>
+    </View>
+  );
+}
+
 type HUDProps = {
   onPause: () => void;
   onEXBurst: () => void;
+  entitiesRef: React.RefObject<GameEntities>;
+  stageDuration: number;
 };
 
-function HUDInner({ onPause, onEXBurst }: HUDProps) {
+function HUDInner({ onPause, onEXBurst, entitiesRef, stageDuration }: HUDProps) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -154,13 +189,18 @@ function HUDInner({ onPause, onEXBurst }: HUDProps) {
       ]}
       pointerEvents="box-none"
     >
-      {/* Top row: Pause, HP, Score */}
-      <View style={styles.topRow}>
-        <View style={styles.topLeft}>
-          <PauseButton onPause={onPause} />
-          <HPBar />
+      {/* Top section */}
+      <View>
+        {/* Stage progress bar */}
+        <StageProgressBar entitiesRef={entitiesRef} stageDuration={stageDuration} />
+        {/* Pause, HP, Score */}
+        <View style={styles.topRow}>
+          <View style={styles.topLeft}>
+            <PauseButton onPause={onPause} />
+            <HPBar />
+          </View>
+          <ScoreDisplay />
         </View>
-        <ScoreDisplay />
       </View>
 
       {/* Bottom area: Form icon, Combo, EX */}
@@ -187,6 +227,31 @@ const styles = StyleSheet.create({
     bottom: 0,
     paddingHorizontal: 12,
     justifyContent: 'space-between',
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  progressTrack: {
+    flex: 1,
+    height: 4,
+    backgroundColor: '#1a1a2e',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: COLORS.neonBlue,
+    borderRadius: 2,
+  },
+  progressText: {
+    fontSize: 10,
+    color: '#888',
+    fontVariant: ['tabular-nums'],
+    width: 30,
+    textAlign: 'right',
   },
   topRow: {
     flexDirection: 'row',
