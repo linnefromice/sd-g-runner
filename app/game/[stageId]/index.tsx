@@ -121,7 +121,7 @@ export default function GameScreen() {
   // Gesture: drag to move player directly, tap to slide toward position
   // runOnJS(true) is required — without it, RNGH v2 runs callbacks as Reanimated
   // worklets which freezes entitiesRef.current, breaking the game loop.
-  const pan = Gesture.Pan().runOnJS(true)
+  const pan = Gesture.Pan().runOnJS(true).minDistance(10)
     .onStart(() => {
       // Cancel any ongoing slide when drag starts
       const entities = entitiesRef.current;

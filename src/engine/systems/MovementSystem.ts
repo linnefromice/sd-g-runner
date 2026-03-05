@@ -6,12 +6,9 @@ import {
   PLAYER_Y_TOP_RATIO,
   PLAYER_Y_BOTTOM_MARGIN,
 } from '@/constants/dimensions';
-import { PLAYER_MOVE_SPEED } from '@/constants/balance';
+import { PLAYER_MOVE_SPEED, BASE_SCROLL_SPEED } from '@/constants/balance';
 import { deactivateBullet } from '@/engine/entities/Bullet';
 import { deactivateEnemy } from '@/engine/entities/Enemy';
-
-/** Logical scroll speed (units/sec at 1.0x) — used for entity movement */
-const BASE_SCROLL_SPEED_LOGICAL = 60;
 
 /** How strongly homing bullets turn toward targets (0-1 blend per second) */
 const HOMING_TURN_RATE = 3.0;
@@ -69,7 +66,7 @@ export const movementSystem: GameSystem<GameEntities> = (entities, { time }) => 
   // Move enemies (scroll down + deactivate off-screen)
   for (const e of entities.enemies) {
     if (!e.active) continue;
-    e.y += BASE_SCROLL_SPEED_LOGICAL * dt;
+    e.y += BASE_SCROLL_SPEED * dt;
     if (e.y > visibleHeight + 50) {
       deactivateEnemy(e);
     }
@@ -78,7 +75,7 @@ export const movementSystem: GameSystem<GameEntities> = (entities, { time }) => 
   // Move gates downward
   for (const g of entities.gates) {
     if (!g.active) continue;
-    g.y += BASE_SCROLL_SPEED_LOGICAL * dt;
+    g.y += BASE_SCROLL_SPEED * dt;
     if (g.y > visibleHeight + 50) {
       g.active = false;
     }

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '@/constants/colors';
+import { GateHelpOverlay } from '@/ui/GateHelpOverlay';
 
 type PauseMenuProps = {
   onResume: () => void;
@@ -10,6 +11,11 @@ type PauseMenuProps = {
 
 function PauseMenuInner({ onResume, onExit }: PauseMenuProps) {
   const insets = useSafeAreaInsets();
+  const [showGateHelp, setShowGateHelp] = useState(false);
+
+  if (showGateHelp) {
+    return <GateHelpOverlay onClose={() => setShowGateHelp(false)} />;
+  }
 
   return (
     <View style={[styles.overlay, { paddingBottom: Math.max(insets.bottom, 24) }]}>
@@ -18,6 +24,10 @@ function PauseMenuInner({ onResume, onExit }: PauseMenuProps) {
 
         <TouchableOpacity style={styles.button} onPress={onResume}>
           <Text style={styles.buttonText}>Resume</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={() => setShowGateHelp(true)}>
+          <Text style={styles.buttonText}>Gate Help</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.button, styles.exitButton]} onPress={onExit}>

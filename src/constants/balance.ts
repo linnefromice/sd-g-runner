@@ -59,4 +59,4 @@ export const BOSS_DRONE_COUNT = 3;
 export const PLAYER_BULLET_SPEED = 400;
 export const ENEMY_BULLET_SPEED = 150;
 export const PLAYER_MOVE_SPEED = 200;
-export const BASE_SCROLL_SPEED = 60;
+export const BASE_SCROLL_SPEED = 80;
