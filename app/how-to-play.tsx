@@ -59,6 +59,15 @@ const SECTIONS = [
     ],
   },
   {
+    title: 'TRANSFORM',
+    items: [
+      { label: 'Transform Gauge', desc: 'Builds up over time, and by defeating enemies (+8) and passing through gates (+12). When full, you can transform.' },
+      { label: 'How to Transform', desc: 'Tap the TF button (bottom-right) when the gauge is full. Switches between your Primary and Secondary form.' },
+      { label: 'Form Selection', desc: 'Choose two forms before starting a stage. Primary is your starting form, Secondary is your transform target.' },
+      { label: 'Refit Gates', desc: 'Refit gates still force-switch your form regardless of the transform gauge. This can put you in a form outside your selected pair.' },
+    ],
+  },
+  {
     title: 'MECHA FORMS',
     items: [
       { label: 'Standard', desc: 'Balanced stats. No special ability. Good for beginners.' },
