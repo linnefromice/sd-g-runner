@@ -1,11 +1,13 @@
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSaveDataStore } from '@/stores/saveDataStore';
 import { getAvailableStageIds, getStage } from '@/game/stages';
 import { COLORS } from '@/constants/colors';
 
 export default function StageSelectScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const unlockedStages = useSaveDataStore((s) => s.unlockedStages);
   const highScores = useSaveDataStore((s) => s.highScores);
   const credits = useSaveDataStore((s) => s.credits);
@@ -57,7 +59,7 @@ export default function StageSelectScreen() {
         })}
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
         <TouchableOpacity style={styles.footerButton} onPress={() => router.push('/upgrade')}>
           <Text style={styles.footerButtonText}>Upgrade</Text>
         </TouchableOpacity>
@@ -153,7 +155,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     paddingHorizontal: 24,
-    paddingBottom: 40,
+    paddingBottom: 24,
     paddingTop: 12,
   },
   footerButton: {

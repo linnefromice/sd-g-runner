@@ -1,5 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSaveDataStore } from '@/stores/saveDataStore';
 import { FORM_DEFINITIONS } from '@/game/forms';
 import { FORM_UNLOCK_CONDITIONS, canUnlockForm } from '@/game/upgrades';
@@ -24,6 +25,7 @@ export default function SelectFormScreen() {
   const router = useRouter();
   const stageIdNum = Number(id) || 1;
 
+  const insets = useSafeAreaInsets();
   const unlockedForms = useSaveDataStore((s) => s.unlockedForms);
   const unlockedStages = useSaveDataStore((s) => s.unlockedStages);
   const credits = useSaveDataStore((s) => s.credits);
@@ -114,7 +116,7 @@ export default function SelectFormScreen() {
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/stages')}>
+      <TouchableOpacity style={[styles.backButton, { marginBottom: Math.max(insets.bottom, 24) }]} onPress={() => router.push('/stages')}>
         <Text style={styles.backButtonText}>Back to Stages</Text>
       </TouchableOpacity>
     </View>
@@ -246,7 +248,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginHorizontal: 24,
-    marginBottom: 40,
+    marginBottom: 24,
     backgroundColor: '#ffffff22',
     paddingVertical: 14,
     borderRadius: 8,
