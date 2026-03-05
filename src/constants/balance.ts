@@ -60,3 +60,9 @@ export const PLAYER_BULLET_SPEED = 400;
 export const ENEMY_BULLET_SPEED = 150;
 export const PLAYER_MOVE_SPEED = 200;
 export const BASE_SCROLL_SPEED = 80;
+
+/** Transform System */
+export const TRANSFORM_GAUGE_MAX = 100;
+export const TRANSFORM_GAIN_ENEMY_KILL = 8;
+export const TRANSFORM_GAIN_GATE_PASS = 12;
+export const TRANSFORM_GAIN_PER_SECOND = 2;

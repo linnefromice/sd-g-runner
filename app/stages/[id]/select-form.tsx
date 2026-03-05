@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,8 +31,28 @@ export default function SelectFormScreen() {
   const unlockedStages = useSaveDataStore((s) => s.unlockedStages);
   const credits = useSaveDataStore((s) => s.credits);
 
-  const handleSelect = (formId: MechaFormId) => {
-    router.push(`/game/${stageIdNum}?form=${formId}`);
+  const [primaryForm, setPrimaryForm] = useState<MechaFormId | null>(null);
+  const [secondaryForm, setSecondaryForm] = useState<MechaFormId | null>(null);
+
+  const handleFormTap = (formId: MechaFormId) => {
+    if (primaryForm === null) {
+      setPrimaryForm(formId);
+    } else if (primaryForm === formId) {
+      setPrimaryForm(secondaryForm);
+      setSecondaryForm(null);
+    } else if (secondaryForm === formId) {
+      setSecondaryForm(null);
+    } else if (secondaryForm === null) {
+      setSecondaryForm(formId);
+    } else {
+      setSecondaryForm(formId);
+    }
+  };
+
+  const handleStart = () => {
+    if (primaryForm && secondaryForm) {
+      router.push(`/game/${stageIdNum}?form=${primaryForm}&secondary=${secondaryForm}`);
+    }
   };
 
   const handleUnlock = (formId: MechaFormId) => {
@@ -81,12 +102,25 @@ export default function SelectFormScreen() {
               )}
 
               {isUnlocked ? (
-                <TouchableOpacity
-                  style={styles.selectButton}
-                  onPress={() => handleSelect(formId)}
-                >
-                  <Text style={styles.selectButtonText}>Select</Text>
-                </TouchableOpacity>
+                <View style={styles.selectRow}>
+                  {primaryForm === formId && (
+                    <Text style={styles.selectedBadge}>PRIMARY</Text>
+                  )}
+                  {secondaryForm === formId && (
+                    <Text style={styles.selectedBadgeSecondary}>SECONDARY</Text>
+                  )}
+                  <TouchableOpacity
+                    style={[
+                      styles.selectButton,
+                      (primaryForm === formId || secondaryForm === formId) && styles.selectButtonSelected,
+                    ]}
+                    onPress={() => handleFormTap(formId)}
+                  >
+                    <Text style={styles.selectButtonText}>
+                      {primaryForm === formId || secondaryForm === formId ? 'Selected' : 'Select'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               ) : cond.type === 'unlock' ? (
                 <View style={styles.unlockRow}>
                   <Text style={styles.unlockCondition}>
@@ -115,6 +149,12 @@ export default function SelectFormScreen() {
           <Text style={styles.comboOnly}>Activated via Combo (3 consecutive enhance gates)</Text>
         </View>
       </ScrollView>
+
+      {primaryForm && secondaryForm && (
+        <TouchableOpacity style={styles.startButton} onPress={handleStart}>
+          <Text style={styles.startButtonText}>Start Stage</Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity style={[styles.backButton, { marginBottom: Math.max(insets.bottom, 24) }]} onPress={() => router.push('/stages')}>
         <Text style={styles.backButtonText}>Back to Stages</Text>
@@ -208,14 +248,58 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   textLocked: { color: '#555555' },
+  selectRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  selectedBadge: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: COLORS.neonBlue,
+    backgroundColor: COLORS.neonBlue + '22',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  selectedBadgeSecondary: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: COLORS.neonGreen,
+    backgroundColor: COLORS.neonGreen + '22',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
   selectButton: {
     backgroundColor: COLORS.neonBlue + '33',
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',
+    flex: 1,
+  },
+  selectButtonSelected: {
+    backgroundColor: COLORS.neonBlue + '55',
   },
   selectButtonText: {
     fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.neonBlue,
+  },
+  startButton: {
+    marginHorizontal: 24,
+    marginBottom: 8,
+    backgroundColor: COLORS.neonBlue + '44',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.neonBlue,
+  },
+  startButtonText: {
+    fontSize: 16,
     fontWeight: '600',
     color: COLORS.neonBlue,
   },

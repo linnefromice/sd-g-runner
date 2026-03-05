@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { COLORS } from '@/constants/colors';
-import { EX_GAUGE_MAX, COMBO_THRESHOLD } from '@/constants/balance';
+import { EX_GAUGE_MAX, COMBO_THRESHOLD, TRANSFORM_GAUGE_MAX } from '@/constants/balance';
 import type { GameEntities } from '@/types/entities';
 
 function HPBar() {
@@ -136,6 +136,48 @@ function EXButton({ onActivate }: { onActivate: () => void }) {
   );
 }
 
+function TransformGaugeBar() {
+  const transformGauge = useGameSessionStore((s) => s.transformGauge);
+  const ratio = transformGauge / TRANSFORM_GAUGE_MAX;
+  const isFull = transformGauge >= TRANSFORM_GAUGE_MAX;
+
+  return (
+    <View style={styles.transformContainer}>
+      <View style={styles.transformTrack}>
+        <View
+          style={[
+            styles.transformFill,
+            {
+              width: `${ratio * 100}%` as `${number}%`,
+              backgroundColor: isFull ? COLORS.neonGreen : COLORS.neonPink,
+            },
+          ]}
+        />
+      </View>
+      <Text style={styles.transformLabel}>TF</Text>
+    </View>
+  );
+}
+
+function TransformButton({ onActivate }: { onActivate: () => void }) {
+  const transformGauge = useGameSessionStore((s) => s.transformGauge);
+  const isAwakened = useGameSessionStore((s) => s.isAwakened);
+  const isFull = transformGauge >= TRANSFORM_GAUGE_MAX;
+  const canTransform = isFull && !isAwakened;
+
+  return (
+    <TouchableOpacity
+      style={[styles.transformButton, canTransform && styles.transformButtonActive]}
+      onPress={onActivate}
+      disabled={!canTransform}
+    >
+      <Text style={[styles.transformButtonText, canTransform && styles.transformButtonTextActive]}>
+        TF
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
 function StageProgressBar({
   entitiesRef,
   stageDuration,
@@ -171,11 +213,12 @@ function StageProgressBar({
 type HUDProps = {
   onPause: () => void;
   onEXBurst: () => void;
+  onTransform: () => void;
   entitiesRef: React.RefObject<GameEntities>;
   stageDuration: number;
 };
 
-function HUDInner({ onPause, onEXBurst, entitiesRef, stageDuration }: HUDProps) {
+function HUDInner({ onPause, onEXBurst, onTransform, entitiesRef, stageDuration }: HUDProps) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -208,7 +251,11 @@ function HUDInner({ onPause, onEXBurst, entitiesRef, stageDuration }: HUDProps) 
         <FormIndicator />
         <View style={styles.bottomRight}>
           <ComboGauge />
-          <EXButton onActivate={onEXBurst} />
+          <View style={styles.buttonRow}>
+            <TransformButton onActivate={onTransform} />
+            <EXButton onActivate={onEXBurst} />
+          </View>
+          <TransformGaugeBar />
           <EXGaugeBar />
         </View>
       </View>
@@ -340,4 +387,31 @@ const styles = StyleSheet.create({
   },
   exButtonText: { fontSize: 14, fontWeight: 'bold', color: '#666' },
   exButtonTextActive: { color: '#000' },
+  buttonRow: { flexDirection: 'row', gap: 8 },
+  transformContainer: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  transformTrack: {
+    width: 80,
+    height: 6,
+    backgroundColor: '#1a1a2e',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  transformFill: { height: '100%', borderRadius: 3 },
+  transformLabel: { fontSize: 10, color: '#888', fontWeight: '600' },
+  transformButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#333',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#555',
+  },
+  transformButtonActive: {
+    backgroundColor: COLORS.neonGreen,
+    borderColor: '#fff',
+  },
+  transformButtonText: { fontSize: 14, fontWeight: 'bold', color: '#666' },
+  transformButtonTextActive: { color: '#000' },
 });

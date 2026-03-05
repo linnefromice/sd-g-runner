@@ -3,7 +3,7 @@ import type { GameEntities } from '@/types/entities';
 import { checkAABBOverlap, getPlayerHitbox } from '@/engine/collision';
 import { deactivateGate } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
-import { SCORE, EX_GAIN } from '@/constants/balance';
+import { SCORE, EX_GAIN, TRANSFORM_GAIN_GATE_PASS } from '@/constants/balance';
 
 export const gateSystem: GameSystem<GameEntities> = (entities) => {
   const player = entities.player;
@@ -42,6 +42,7 @@ export const gateSystem: GameSystem<GameEntities> = (entities) => {
     // Scoring + EX
     store.addScore(SCORE.gatePass);
     store.addExGauge(EX_GAIN.gatePass);
+    store.addTransformGauge(TRANSFORM_GAIN_GATE_PASS);
 
     // Combo tracking (§10.2)
     switch (gate.gateType) {

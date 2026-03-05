@@ -3,7 +3,7 @@ import type { GameEntities } from '@/types/entities';
 import { checkAABBOverlap, getPlayerHitbox } from '@/engine/collision';
 import { deactivateEnemy } from '@/engine/entities/Enemy';
 import { deactivateBullet } from '@/engine/entities/Bullet';
-import { IFRAME_DURATION } from '@/constants/balance';
+import { IFRAME_DURATION, TRANSFORM_GAIN_ENEMY_KILL } from '@/constants/balance';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { getEnemyScore, getEnemyCredits } from '@/game/scoring';
 
@@ -27,6 +27,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
           store.addScore(getEnemyScore(enemy.enemyType));
           store.addCredits(getEnemyCredits());
           store.addExGauge(5);
+          store.addTransformGauge(TRANSFORM_GAIN_ENEMY_KILL);
         }
         break;
       }

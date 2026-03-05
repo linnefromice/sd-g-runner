@@ -1,5 +1,5 @@
 export { scrollSystem } from './ScrollSystem';
-export { movementSystem } from './MovementSystem';
+export { createMovementSystem } from './MovementSystem';
 export { createShootingSystem } from './ShootingSystem';
 export { enemyAISystem } from './EnemyAISystem';
 export { createSpawnSystem } from './SpawnSystem';

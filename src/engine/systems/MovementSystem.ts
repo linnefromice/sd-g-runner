@@ -1,5 +1,6 @@
 import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities, BulletEntity } from '@/types/entities';
+import type { MechaFormDefinition } from '@/types/forms';
 import {
   PLAYER_MIN_X,
   PLAYER_MAX_X,
@@ -13,9 +14,13 @@ import { deactivateEnemy } from '@/engine/entities/Enemy';
 /** How strongly homing bullets turn toward targets (0-1 blend per second) */
 const HOMING_TURN_RATE = 3.0;
 
-export const movementSystem: GameSystem<GameEntities> = (entities, { time }) => {
+export function createMovementSystem(
+  getForm: () => MechaFormDefinition
+): GameSystem<GameEntities> {
+  return (entities, { time }) => {
   const dt = time.delta / 1000;
   const { visibleHeight } = entities.screen;
+  const form = getForm();
 
   // Smooth slide toward tap target (if set)
   const p = entities.player;
@@ -23,7 +28,7 @@ export const movementSystem: GameSystem<GameEntities> = (entities, { time }) => 
     const dx = p.targetX - p.x;
     const dy = p.targetY - p.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const step = PLAYER_MOVE_SPEED * dt;
+    const step = PLAYER_MOVE_SPEED * form.moveSpeedMultiplier * dt;
 
     if (dist <= step) {
       // Arrived at target
@@ -80,7 +85,8 @@ export const movementSystem: GameSystem<GameEntities> = (entities, { time }) => 
       g.active = false;
     }
   }
-};
+  };
+}
 
 function moveHomingBullet(
   bullet: BulletEntity,

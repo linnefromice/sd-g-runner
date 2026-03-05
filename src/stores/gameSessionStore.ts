@@ -9,6 +9,7 @@ import {
   COMBO_THRESHOLD,
   AWAKENED_DURATION,
   EX_GAUGE_MAX,
+  TRANSFORM_GAUGE_MAX,
 } from '@/constants/balance';
 import { useSaveDataStore } from '@/stores/saveDataStore';
 import { getUpgradeEffect } from '@/game/upgrades';
@@ -35,6 +36,11 @@ interface GameSessionState {
   // EX
   exGauge: number;
 
+  // Transform
+  primaryForm: MechaFormId;
+  secondaryForm: MechaFormId;
+  transformGauge: number;
+
   // Score / Credits
   score: number;
   credits: number;
@@ -53,6 +59,8 @@ interface GameSessionState {
   addScore: (points: number) => void;
   addCredits: (amount: number) => void;
   addExGauge: (amount: number) => void;
+  addTransformGauge: (amount: number) => void;
+  activateTransform: () => void;
   setForm: (formId: MechaFormId) => void;
   addStat: (stat: StatKey, value: number) => void;
   multiplyStat: (stat: StatKey, value: number) => void;
@@ -64,7 +72,7 @@ interface GameSessionState {
   setGameOver: (value: boolean) => void;
   setStageClear: (value: boolean) => void;
   setPaused: (value: boolean) => void;
-  resetSession: (stageId: number, formId?: MechaFormId) => void;
+  resetSession: (stageId: number, formId?: MechaFormId, secondaryFormId?: MechaFormId) => void;
 }
 
 const INITIAL_STATE = {
@@ -81,6 +89,9 @@ const INITIAL_STATE = {
   awakenedTimer: 0,
   awakenedWarning: false,
   exGauge: 0,
+  primaryForm: 'SD_Standard' as MechaFormId,
+  secondaryForm: 'SD_HeavyArtillery' as MechaFormId,
+  transformGauge: 0,
   score: 0,
   credits: 0,
   currentStageId: 1,
@@ -110,6 +121,23 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
 
   addExGauge: (amount) =>
     set((s) => ({ exGauge: Math.min(EX_GAUGE_MAX, s.exGauge + amount) })),
+
+  addTransformGauge: (amount) =>
+    set((s) => ({ transformGauge: Math.min(TRANSFORM_GAUGE_MAX, s.transformGauge + amount) })),
+
+  activateTransform: () => {
+    const s = get();
+    if (s.transformGauge < TRANSFORM_GAUGE_MAX) return;
+    if (s.isAwakened) return;
+    const nextForm = s.currentForm === s.secondaryForm
+      ? s.primaryForm
+      : s.secondaryForm;
+    set({
+      currentForm: nextForm,
+      previousForm: s.currentForm,
+      transformGauge: 0,
+    });
+  },
 
   setForm: (formId) =>
     set((s) => ({
@@ -169,9 +197,10 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
   setStageClear: (value) => set({ isStageClear: value }),
   setPaused: (value) => set({ isPaused: value }),
 
-  resetSession: (stageId, formId) => {
+  resetSession: (stageId, formId, secondaryFormId) => {
     const { upgrades } = useSaveDataStore.getState();
     const initialForm = formId ?? 'SD_Standard';
+    const secondary = secondaryFormId ?? 'SD_HeavyArtillery';
     const bonusHp = getUpgradeEffect('hp', upgrades.baseHp);
     const bonusAtk = getUpgradeEffect('atk', upgrades.baseAtk);
     const bonusSpeed = getUpgradeEffect('speed', upgrades.baseSpeed);
@@ -180,6 +209,8 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
       currentStageId: stageId,
       currentForm: initialForm,
       previousForm: initialForm,
+      primaryForm: initialForm,
+      secondaryForm: secondary,
       hp: PLAYER_INITIAL_HP + bonusHp,
       maxHp: PLAYER_INITIAL_HP + bonusHp,
       atk: PLAYER_INITIAL_ATK + bonusAtk,
