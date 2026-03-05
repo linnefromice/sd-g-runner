@@ -1,11 +1,7 @@
-import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Link } from "expo-router";
-import { GateHelpOverlay } from "@/ui/GateHelpOverlay";
 
 export default function TitleScreen() {
-  const [showGateHelp, setShowGateHelp] = useState(false);
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Project G-Runner</Text>
@@ -15,10 +11,9 @@ export default function TitleScreen() {
       <Link href="/settings" style={styles.link}>
         <Text style={styles.linkText}>Settings</Text>
       </Link>
-      <TouchableOpacity style={styles.link} onPress={() => setShowGateHelp(true)}>
+      <Link href="/how-to-play" style={styles.link}>
         <Text style={styles.linkText}>How to Play</Text>
-      </TouchableOpacity>
-      {showGateHelp && <GateHelpOverlay onClose={() => setShowGateHelp(false)} />}
+      </Link>
     </View>
   );
 }
