@@ -113,14 +113,16 @@ export default function GameScreen() {
   }, [scrollYShared]);
 
   // Gesture: drag to move player
-  const pan = Gesture.Pan().onUpdate((e) => {
+  // runOnJS(true) is required — without it, RNGH v2 runs callbacks as Reanimated
+  // worklets which freezes entitiesRef.current, breaking the game loop.
+  const pan = Gesture.Pan().runOnJS(true).onUpdate((e) => {
     const entities = entitiesRef.current;
     if (!entities) return;
     entities.player.x = e.absoluteX / scale - entities.player.width / 2;
     entities.player.y = e.absoluteY / scale - entities.player.height / 2;
   });
 
-  const tap = Gesture.Tap().onEnd((e) => {
+  const tap = Gesture.Tap().runOnJS(true).onEnd((e) => {
     const entities = entitiesRef.current;
     if (!entities) return;
     entities.player.x = e.absoluteX / scale - entities.player.width / 2;

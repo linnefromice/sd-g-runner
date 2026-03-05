@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { COLORS } from '@/constants/colors';
 import { EX_GAUGE_MAX, COMBO_THRESHOLD } from '@/constants/balance';
@@ -140,8 +141,19 @@ type HUDProps = {
 };
 
 function HUDInner({ onPause, onEXBurst }: HUDProps) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.container} pointerEvents="box-none">
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: Math.max(insets.top, 12) + 8,
+          paddingBottom: Math.max(insets.bottom, 12) + 8,
+        },
+      ]}
+      pointerEvents="box-none"
+    >
       {/* Top row: Pause, HP, Score */}
       <View style={styles.topRow}>
         <View style={styles.topLeft}>
@@ -173,9 +185,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingTop: 50,
     paddingHorizontal: 12,
-    paddingBottom: 24,
     justifyContent: 'space-between',
   },
   topRow: {
