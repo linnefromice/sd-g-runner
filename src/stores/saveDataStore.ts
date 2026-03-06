@@ -56,7 +56,11 @@ export const useSaveDataStore = create<SaveDataState>((set, get) => ({
       const raw = await AsyncStorage.getItem(STORAGE_KEY);
       if (raw) {
         const data = JSON.parse(raw) as SaveData;
-        set({ ...data, isLoaded: true });
+        set({
+          ...data,
+          settings: { ...INITIAL_SAVE.settings, ...data.settings },
+          isLoaded: true,
+        });
       } else {
         set({ isLoaded: true });
       }

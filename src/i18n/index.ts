@@ -22,8 +22,8 @@ function getDeviceLanguage(): string {
   return cachedDeviceLang!;
 }
 
-export function resolveLocale(setting: LocaleSetting): ResolvedLocale {
-  if (setting !== 'system') return setting;
+export function resolveLocale(setting: LocaleSetting | undefined): ResolvedLocale {
+  if (setting === 'en' || setting === 'ja') return setting;
   return getDeviceLanguage() === 'ja' ? 'ja' : 'en';
 }
 
