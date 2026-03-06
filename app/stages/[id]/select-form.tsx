@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSaveDataStore } from '@/stores/saveDataStore';
-import { FORM_DEFINITIONS, FORM_DISPLAY_KEY } from '@/game/forms';
+import { FORM_DEFINITIONS } from '@/game/forms';
 import { FORM_UNLOCK_CONDITIONS, canUnlockForm } from '@/game/upgrades';
 import { useTranslation } from '@/i18n';
 import { COLORS } from '@/constants/colors';
@@ -72,7 +72,7 @@ export default function SelectFormScreen() {
           const isUnlocked = unlockedForms.includes(formId);
           const cond = FORM_UNLOCK_CONDITIONS[formId];
           const canBuy = !isUnlocked && canUnlockForm(formId, unlockedStages, credits);
-          const formName = t.forms[FORM_DISPLAY_KEY[formId]];
+          const formName = t.forms[formId];
 
           return (
             <View key={formId} style={[styles.formCard, !isUnlocked && styles.formCardLocked]}>
@@ -140,7 +140,7 @@ export default function SelectFormScreen() {
             <View
               style={[styles.formColor, { backgroundColor: FORM_DEFINITIONS.SD_Awakened.spriteConfig.bodyColor }]}
             />
-            <Text style={styles.formName}>{t.forms.awakened}</Text>
+            <Text style={styles.formName}>{t.forms.SD_Awakened}</Text>
           </View>
           <Text style={styles.comboOnly}>{t.selectForm.awakenedComboOnly}</Text>
         </View>

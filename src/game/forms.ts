@@ -1,12 +1,4 @@
-import type { MechaFormDefinition, MechaFormId } from '@/types/forms';
-import type { Translations } from '@/i18n/locales/en';
-
-export const FORM_DISPLAY_KEY: Record<MechaFormId, keyof Translations['forms']> = {
-  SD_Standard: 'standard',
-  SD_HeavyArtillery: 'heavyArtillery',
-  SD_HighSpeed: 'highSpeed',
-  SD_Awakened: 'awakened',
-};
+import type { MechaFormDefinition } from '@/types/forms';
 
 export const FORM_DEFINITIONS: Record<string, MechaFormDefinition> = {
   SD_Standard: {

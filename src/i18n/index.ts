@@ -12,6 +12,9 @@ let cachedDeviceLang: string | null = null;
 function getDeviceLanguage(): string {
   if (cachedDeviceLang !== null) return cachedDeviceLang;
   try {
+    // Dynamic require: expo-localization is a native module that crashes in Expo Go.
+    // Lazy require + try-catch ensures graceful fallback. Convert to static import
+    // once all dev environments use expo-dev-client exclusively.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { getLocales } = require('expo-localization');
     const lang: string = getLocales()[0]?.languageCode ?? 'en';

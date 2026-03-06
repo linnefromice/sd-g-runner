@@ -5,7 +5,6 @@ import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { COLORS } from '@/constants/colors';
 import { EX_GAUGE_MAX, COMBO_THRESHOLD, TRANSFORM_GAUGE_MAX } from '@/constants/balance';
 import { useTranslation } from '@/i18n';
-import { FORM_DISPLAY_KEY } from '@/game/forms';
 import type { GameEntities } from '@/types/entities';
 import type { MechaFormId } from '@/types/forms';
 
@@ -50,8 +49,8 @@ function PauseButton({ onPause }: { onPause: () => void }) {
 function FormIndicator() {
   const form = useGameSessionStore((s) => s.currentForm);
   const t = useTranslation();
-  const key = FORM_DISPLAY_KEY[form as MechaFormId];
-  const name = key ? t.forms[key] : form.replace('SD_', '');
+  const formId = form as MechaFormId;
+  const name = t.forms[formId] ?? form.replace('SD_', '');
   return (
     <View style={styles.formBadge}>
       <Text style={styles.formText}>{name}</Text>
