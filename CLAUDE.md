@@ -16,6 +16,7 @@ Full requirements: `docs/v1/REQUIREMENTS-r3.md` (v3.1, authoritative spec)
 - **State:** `zustand` (game session + persistent data)
 - **Sound:** `expo-av`
 - **Storage:** `AsyncStorage`
+- **i18n:** Custom lightweight — `expo-localization` (device language detection) + locale dictionaries (`src/i18n/`)
 
 ## Platform Support
 
@@ -59,12 +60,16 @@ CI=1 eas update --auto --environment preview --platform android
 ### Three-Layer Separation
 
 ```
-app/          → expo-router pages (screens, navigation)
-src/engine/   → Game logic (systems, entities, collision, GameLoop) — pure TS, no React
-src/rendering/→ Skia drawing (reads engine state, renders to Canvas) — no game logic
-src/stores/   → Zustand stores bridging engine↔UI
-src/game/     → Data definitions (forms, stages, difficulty, scoring)
-src/ui/       → React Native HUD components (HP bar, EX button, combo gauge)
+app/            → expo-router pages (screens, navigation)
+src/engine/     → Game logic (systems, entities, collision, GameLoop) — pure TS, no React
+src/rendering/  → Skia drawing (reads engine state, renders to Canvas) — no game logic
+src/stores/     → Zustand stores bridging engine↔UI
+src/game/       → Data definitions (forms, stages, difficulty, scoring, upgrades)
+src/ui/         → React Native HUD components (HP bar, EX button, combo gauge)
+src/i18n/       → Internationalization — locale dictionaries, useTranslation hook
+src/audio/      → Sound management (BGM, SE via expo-av)
+src/constants/  → Shared constants (balance values, colors, dimensions)
+src/types/      → TypeScript type definitions (entities, forms, gates, stages)
 ```
 
 ### Game Loop + Skia Integration (MUST follow)
@@ -114,7 +119,12 @@ const pan = Gesture.Pan().onUpdate((e) => {
 | `src/stores/gameSessionStore.ts` | Zustand store — systems call `getState().setHp()` etc. |
 | `src/ui/HUD.tsx` | React Native overlay — HP, score, combo, EX gauge, stage progress bar |
 | `src/ui/PauseMenu.tsx` | Pause overlay — Resume / Exit Stage buttons |
+| `src/i18n/index.ts` | i18n core — `useTranslation()` hook, `resolveLocale()`, `getTranslation()` |
+| `src/i18n/locales/en.ts` | English dictionary + `Translations` type (auto-derived via `Widen<T>`) |
+| `src/constants/balance.ts` | Game balance constants (combo threshold, gauge max, spawn rates, etc.) |
 | `app/game/[stageId]/index.tsx` | Main game screen — gesture handling, system registration, HUD wiring |
+| `app/stages/[id]/select-form.tsx` | Form selection screen — Primary/Secondary two-step selection |
+| `app/settings.tsx` | Settings screen — BGM/SE volume, language selector |
 
 ### Coordinate System
 
@@ -142,6 +152,8 @@ Systems bridge game→UI: e.g., `CollisionSystem` calls `gameSessionStore.getSta
 - **i-frame:** 1.5s invincibility after hit, with blink animation
 - **Player input**: Pan/drag moves player directly (1:1 follow). Tap sets a target — `MovementSystem` smoothly slides the player there at `PLAYER_MOVE_SPEED`. Gesture callbacks MUST use `.runOnJS(true)`.
 - **Pause menu**: Pause button opens `PauseMenu` overlay (Resume / Exit Stage). Game loop stops and `isPaused` is set in store.
+- **Transform system**: Transform gauge builds over time / enemy kills / gate passes. When full, TF button switches between Primary and Secondary forms. Refit gates override this.
+- **i18n**: `en` dictionary uses `as const` + `Widen<T>` to auto-derive `Translations` type. `ja` dictionary typed as `Translations`. HowToPlay content is in separate files (`src/i18n/content/`). New keys must be added to both dictionaries — CI runs key sync test. `MechaFormId` values are used directly as `t.forms` keys (no indirection layer).
 
 ## Performance Targets
 
