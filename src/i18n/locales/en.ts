@@ -55,6 +55,13 @@ export const en = {
     replay: 'Replay',
     stageSelect: 'Stage Select',
     nextStage: 'Next Stage',
+    bonusTitle: 'BONUS',
+    bonusNoDamage: 'No Damage',
+    bonusCombo: 'Combo',
+    bonusFullClear: 'Full Clear',
+    bonusSpeedClear: 'Speed Clear',
+    bonusScoreMultiplier: 'Score x1.5',
+    bonusCreditMultiplier: 'Credits x2',
   },
   hud: {
     awakened: 'AWAKENED',

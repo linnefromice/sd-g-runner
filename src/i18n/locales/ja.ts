@@ -55,6 +55,13 @@ export const ja: Translations = {
     replay: 'リプレイ',
     stageSelect: 'ステージ選択',
     nextStage: '次のステージ',
+    bonusTitle: 'ボーナス',
+    bonusNoDamage: 'ノーダメージ',
+    bonusCombo: 'コンボ',
+    bonusFullClear: 'フルクリア',
+    bonusSpeedClear: 'スピードクリア',
+    bonusScoreMultiplier: 'スコア x1.5',
+    bonusCreditMultiplier: 'クレジット x2',
   },
   hud: {
     awakened: 'AWAKENED',
