@@ -8,7 +8,7 @@ import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
 import { applyEnemyKillReward } from '@/engine/systems/enemyKillReward';
 import { deactivateDebris } from '@/engine/entities/Debris';
-import { onPlayerHit, onParry, onGraze, onDebrisDestroy, onBossKill } from '@/engine/effects';
+import { onPlayerHit, onParry, onGraze, onDebrisDestroy, onBossKill, onBulletImpact } from '@/engine/effects';
 
 export const collisionSystem: GameSystem<GameEntities> = (entities) => {
   const player = entities.player;
@@ -39,21 +39,23 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
           }
         }
 
+        // Capture impact point before potential deactivation
+        const hitX = bullet.x + bullet.width / 2;
+        const hitY = bullet.y + bullet.height / 2;
+
         enemy.hp -= bullet.damage;
 
         if (bullet.specialAbility === 'pierce') {
           // Pierce: don't deactivate, record hit
           bullet.piercedEnemyIds?.add(enemy.id);
         } else if (bullet.specialAbility === 'explosion_radius') {
-          // Explosion: capture impact point BEFORE deactivating (deactivate resets position)
-          const impactX = bullet.x + bullet.width / 2;
-          const impactY = bullet.y + bullet.height / 2;
+          // Explosion: deactivate and AoE
           deactivateBullet(bullet);
           for (const other of entities.enemies) {
             if (!other.active || other.id === enemy.id) continue;
             const otherCX = other.x + other.width / 2;
             const otherCY = other.y + other.height / 2;
-            const dist = Math.sqrt((impactX - otherCX) ** 2 + (impactY - otherCY) ** 2);
+            const dist = Math.sqrt((hitX - otherCX) ** 2 + (hitY - otherCY) ** 2);
             if (dist <= EXPLOSION_RADIUS) {
               other.hp -= bullet.damage;
               if (other.hp <= 0) applyEnemyKillReward(other, entities);
@@ -65,7 +67,11 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
         }
 
         // Kill check for the directly-hit enemy
-        if (enemy.hp <= 0) applyEnemyKillReward(enemy, entities);
+        if (enemy.hp <= 0) {
+          applyEnemyKillReward(enemy, entities);
+        } else {
+          onBulletImpact(entities, hitX, hitY);
+        }
 
         // Pierce continues to next enemy; others break
         if (bullet.specialAbility !== 'pierce') break;
@@ -143,6 +149,10 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
       // Pierce: skip boss if already hit by this bullet
       if (bullet.specialAbility === 'pierce' && bullet.piercedEnemyIds?.has(entities.boss.id)) continue;
       if (checkAABBOverlap(bullet, entities.boss)) {
+        // Capture impact point before potential deactivation
+        const hitX = bullet.x + bullet.width / 2;
+        const hitY = bullet.y + bullet.height / 2;
+
         const prevPercent = Math.floor((entities.boss.hp / entities.boss.maxHp) * 100);
         entities.boss.hp -= bullet.damage;
         const newPercent = Math.floor((entities.boss.hp / entities.boss.maxHp) * 100);
@@ -151,15 +161,12 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
           // Don't deactivate pierce bullets on boss, record hit
           bullet.piercedEnemyIds?.add(entities.boss.id);
         } else if (bullet.specialAbility === 'explosion_radius') {
-          // Capture impact point BEFORE deactivating (deactivate resets position)
-          const impactX = bullet.x + bullet.width / 2;
-          const impactY = bullet.y + bullet.height / 2;
           deactivateBullet(bullet);
           for (const enemy of entities.enemies) {
             if (!enemy.active) continue;
             const ecx = enemy.x + enemy.width / 2;
             const ecy = enemy.y + enemy.height / 2;
-            if (Math.sqrt((impactX - ecx) ** 2 + (impactY - ecy) ** 2) <= EXPLOSION_RADIUS) {
+            if (Math.sqrt((hitX - ecx) ** 2 + (hitY - ecy) ** 2) <= EXPLOSION_RADIUS) {
               enemy.hp -= bullet.damage;
               if (enemy.hp <= 0) applyEnemyKillReward(enemy, entities);
             }
@@ -183,6 +190,8 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
           store.setFinalStageTime(entities.stageTime);
           store.setStageClear(true);
           onBossKill(entities, bcx, bcy);
+        } else {
+          onBulletImpact(entities, hitX, hitY);
         }
       }
     }

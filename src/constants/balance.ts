@@ -142,6 +142,9 @@ export const PARTICLE_DEFAULT_SPEED = 80;
 export const PARTICLE_DEFAULT_SIZE = 4;
 export const PARTICLE_BOSS_SIZE = 8;
 
+export const PARTICLE_BULLET_IMPACT_COUNT = 3;
+export const PARTICLE_BULLET_IMPACT_LIFE = 200;
+
 /** Score Popup */
 export const SCORE_POPUP_SPEED = 40;
 export const SCORE_POPUP_LIFE = 800;
