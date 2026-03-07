@@ -14,7 +14,6 @@ export const enemyAISystem: GameSystem<GameEntities> = (entities, { time }) => {
     // Movement
     switch (enemy.enemyType) {
       case 'patrol': {
-        enemy.moveTimer += dt;
         const speed = 60;
         enemy.x += enemy.moveDirection * speed * dt;
 

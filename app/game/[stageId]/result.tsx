@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { useSaveDataStore } from '@/stores/saveDataStore';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from '@/i18n';
 import { COLORS } from '@/constants/colors';
 import { getStageClearCredits } from '@/game/scoring';
@@ -53,8 +53,11 @@ export default function ResultScreen() {
     speedClear: 'bonusSpeedClear',
   };
 
-  // Persist results
+  // Persist results (once only)
+  const hasSaved = useRef(false);
   useEffect(() => {
+    if (hasSaved.current) return;
+    hasSaved.current = true;
     const saveStore = useSaveDataStore.getState();
     saveStore.updateHighScore(stageIdNum, finalScore);
     saveStore.addCredits(finalCredits);

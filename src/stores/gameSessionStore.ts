@@ -134,7 +134,7 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
     set((s) => ({ hp: newHp, isInvincible: true, damageTaken: s.damageTaken + damage }));
   },
 
-  heal: (amount) => set((s) => ({ hp: Math.min(s.maxHp, s.hp + amount) })),
+  heal: (amount) => set((s) => ({ hp: Math.max(0, Math.min(s.maxHp, s.hp + amount)) })),
 
   healPercent: (percent) =>
     set((s) => ({ hp: Math.min(s.maxHp, s.hp + Math.round(s.maxHp * percent / 100)) })),

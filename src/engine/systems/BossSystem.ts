@@ -133,7 +133,7 @@ function fireSpreadShot(entities: GameEntities, boss: NonNullable<GameEntities['
 }
 
 function spawnDrones(entities: GameEntities, boss: NonNullable<GameEntities['boss']>) {
-  const droneCount = BOSS_DRONE_COUNTS[boss.bossIndex] ?? BOSS_DRONE_COUNT;
+  const droneCount = BOSS_DRONE_COUNTS[boss.bossIndex as keyof typeof BOSS_DRONE_COUNTS] ?? BOSS_DRONE_COUNT;
   for (let i = 0; i < droneCount; i++) {
     const slot = entities.enemies.find((e) => !e.active);
     if (!slot) break;
