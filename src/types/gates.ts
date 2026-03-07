@@ -1,4 +1,4 @@
-export type GateType = 'enhance' | 'refit' | 'tradeoff' | 'recovery';
+export type GateType = 'enhance' | 'refit' | 'tradeoff' | 'recovery' | 'growth' | 'roulette';
 
 export type StatKey = 'atk' | 'speed' | 'fireRate' | 'hp' | 'maxHp';
 
@@ -13,6 +13,8 @@ export interface GateDefinition {
   type: GateType;
   displayLabel: string;
   effects: GateEffect[];
+  rouletteAlternateEffects?: GateEffect[]; // For roulette: the alternate set
+  rouletteAlternateLabel?: string; // For roulette: the alternate label
 }
 
 export interface GatePairConfig {

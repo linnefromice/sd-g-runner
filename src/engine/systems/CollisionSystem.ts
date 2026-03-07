@@ -2,7 +2,8 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import { checkAABBOverlap, getPlayerHitbox, getPlayerVisualHitbox } from '@/engine/collision';
 import { deactivateBullet } from '@/engine/entities/Bullet';
-import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, DEBRIS_DESTROY_SCORE } from '@/constants/balance';
+import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, DEBRIS_DESTROY_SCORE, GROWTH_GATE_INITIAL_RATIO, GROWTH_GATE_PER_HIT } from '@/constants/balance';
+import { generateGateLabel } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
 import { applyEnemyKillReward } from '@/engine/systems/enemyKillReward';
@@ -104,6 +105,29 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
           break; // bullet consumed
         }
         // Normal/homing/shield_pierce bullets: absorbed by debris (no damage to debris)
+        deactivateBullet(bullet);
+        break;
+      }
+    }
+  }
+
+  // Player bullets → Growth Gates
+  for (const bullet of entities.playerBullets) {
+    if (!bullet.active) continue;
+    for (const gate of entities.gates) {
+      if (!gate.active || gate.passed || gate.gateType !== 'growth') continue;
+      if (checkAABBOverlap(bullet, gate)) {
+        gate.growthHits = (gate.growthHits ?? 0) + 1;
+        if (gate.baseEffectValue != null && gate.growthMax != null) {
+          const newValue = Math.min(
+            gate.growthMax,
+            gate.baseEffectValue * GROWTH_GATE_INITIAL_RATIO + gate.growthHits * GROWTH_GATE_PER_HIT
+          );
+          if (gate.effects.length > 0 && gate.effects[0].kind !== 'refit') {
+            gate.effects[0] = { ...gate.effects[0], value: newValue };
+          }
+          gate.displayLabel = generateGateLabel(gate.effects[0]);
+        }
         deactivateBullet(bullet);
         break;
       }

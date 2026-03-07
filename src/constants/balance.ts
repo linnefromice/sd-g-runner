@@ -93,3 +93,11 @@ export const DEBRIS_DESTROY_SCORE = 50;
 export const GRAZE_EX_GAIN = 3;
 export const GRAZE_TF_GAIN = 2;
 export const GRAZE_SCORE = 20;
+
+/** Growth Gate */
+export const GROWTH_GATE_INITIAL_RATIO = 0.5;
+export const GROWTH_GATE_MAX_RATIO = 3.0;
+export const GROWTH_GATE_PER_HIT = 1;
+
+/** Roulette Gate */
+export const ROULETTE_INTERVAL = 500;

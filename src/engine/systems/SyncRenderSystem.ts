@@ -108,7 +108,9 @@ export function createSyncRenderSystem(
         height: g.height,
         color: g.gateType === 'enhance' ? '#00FF88' :
                g.gateType === 'refit' ? '#00D4FF' :
-               g.gateType === 'tradeoff' ? '#FFD600' : '#FF69B4',
+               g.gateType === 'tradeoff' ? '#FFD600' :
+               g.gateType === 'growth' ? '#66FF66' :
+               g.gateType === 'roulette' ? '#FF8800' : '#FF69B4',
         opacity: 1.0,
         label: g.displayLabel,
       });

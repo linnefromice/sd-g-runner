@@ -1,13 +1,27 @@
 import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import { checkAABBOverlap, getPlayerHitbox } from '@/engine/collision';
-import { deactivateGate } from '@/engine/entities/Gate';
+import { deactivateGate, generateGateLabel } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
-import { SCORE, EX_GAIN, TRANSFORM_GAIN_GATE_PASS } from '@/constants/balance';
+import { SCORE, EX_GAIN, TRANSFORM_GAIN_GATE_PASS, ROULETTE_INTERVAL } from '@/constants/balance';
 
-export const gateSystem: GameSystem<GameEntities> = (entities) => {
+export const gateSystem: GameSystem<GameEntities> = (entities, { time }) => {
   const player = entities.player;
   if (!player.active) return;
+
+  // Roulette timer update
+  for (const gate of entities.gates) {
+    if (!gate.active || gate.passed || gate.gateType !== 'roulette') continue;
+    if (gate.rouletteEffects && gate.rouletteTimer != null && gate.rouletteIndex != null) {
+      gate.rouletteTimer += time.delta;
+      if (gate.rouletteTimer >= ROULETTE_INTERVAL) {
+        gate.rouletteTimer -= ROULETTE_INTERVAL;
+        gate.rouletteIndex = 1 - gate.rouletteIndex;
+        gate.effects = gate.rouletteEffects[gate.rouletteIndex];
+        gate.displayLabel = generateGateLabel(gate.effects[0]);
+      }
+    }
+  }
 
   const playerHB = getPlayerHitbox(player);
   const store = useGameSessionStore.getState();
@@ -51,6 +65,10 @@ export const gateSystem: GameSystem<GameEntities> = (entities) => {
         break;
       case 'recovery':
         // No change
+        break;
+      case 'growth':
+      case 'roulette':
+        store.incrementCombo();
         break;
       case 'tradeoff':
       case 'refit':

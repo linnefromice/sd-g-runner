@@ -131,6 +131,38 @@ export const GATE_TANK: GateDefinition = {
   ],
 };
 
+// === Growth gates ===
+
+export const GATE_GROWTH_ATK: GateDefinition = {
+  type: 'growth',
+  displayLabel: 'ATK +5',
+  effects: [{ kind: 'stat_add', stat: 'atk', value: 5 }],
+};
+
+export const GATE_GROWTH_SPD: GateDefinition = {
+  type: 'growth',
+  displayLabel: 'SPD +10%',
+  effects: [{ kind: 'stat_multiply', stat: 'speed', value: 1.1 }],
+};
+
+// === Roulette gates ===
+
+export const GATE_ROULETTE_ATK: GateDefinition = {
+  type: 'roulette',
+  displayLabel: 'ATK +10',
+  effects: [{ kind: 'stat_add', stat: 'atk', value: 10 }],
+  rouletteAlternateEffects: [{ kind: 'stat_add', stat: 'atk', value: -5 }],
+  rouletteAlternateLabel: 'ATK -5',
+};
+
+export const GATE_ROULETTE_ATK_PENALTY: GateDefinition = {
+  type: 'roulette',
+  displayLabel: 'ATK -5',
+  effects: [{ kind: 'stat_add', stat: 'atk', value: -5 }],
+  rouletteAlternateEffects: [{ kind: 'stat_add', stat: 'atk', value: 10 }],
+  rouletteAlternateLabel: 'ATK +10',
+};
+
 // === Gate pair configs ===
 
 export const PAIR_ATK_SPD: GatePairConfig = {
@@ -179,4 +211,16 @@ export const PAIR_ATK_FR: GatePairConfig = {
   layout: 'forced',
   left: GATE_ATK_UP_10,
   right: GATE_FR_UP,
+};
+
+export const PAIR_GROWTH_ATK_SPD: GatePairConfig = {
+  layout: 'forced',
+  left: GATE_GROWTH_ATK,
+  right: GATE_GROWTH_SPD,
+};
+
+export const PAIR_ROULETTE_ATK: GatePairConfig = {
+  layout: 'forced',
+  left: GATE_ROULETTE_ATK,
+  right: GATE_ROULETTE_ATK_PENALTY,
 };

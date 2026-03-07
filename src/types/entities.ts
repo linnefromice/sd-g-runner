@@ -54,6 +54,14 @@ export interface GateEntity extends BaseEntity {
   displayLabel: string;
   effects: import('./gates').GateEffect[];
   passed: boolean;
+  // Growth gate fields
+  growthHits?: number;
+  growthMax?: number;
+  baseEffectValue?: number;
+  // Roulette gate fields
+  rouletteEffects?: import('./gates').GateEffect[][];
+  rouletteTimer?: number;
+  rouletteIndex?: number;
 }
 
 export interface BossEntity extends BaseEntity {

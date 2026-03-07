@@ -31,6 +31,12 @@ function createInactiveGate(): GateEntity {
     id: '', type: 'gate', gateType: 'enhance',
     x: -100, y: -100, width: 0, height: 0,
     active: false, displayLabel: '', effects: [], passed: false,
+    growthHits: 0,
+    growthMax: undefined,
+    baseEffectValue: undefined,
+    rouletteEffects: undefined,
+    rouletteTimer: undefined,
+    rouletteIndex: undefined,
   };
 }
 
