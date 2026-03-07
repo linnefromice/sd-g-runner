@@ -24,6 +24,9 @@ import {
   SHAKE_PARRY_DURATION,
   SHAKE_BOSS_KILL_INTENSITY,
   SHAKE_BOSS_KILL_DURATION,
+  JUST_TF_SCORE,
+  GRAZE_SCORE,
+  DEBRIS_DESTROY_SCORE,
 } from '@/constants/balance';
 
 // --- Low-level spawners ---
@@ -136,7 +139,7 @@ export function onParry(entities: GameEntities, x: number, y: number) {
   triggerHitStop(entities, HIT_STOP_PARRY);
   triggerShake(entities, SHAKE_PARRY_INTENSITY, SHAKE_PARRY_DURATION);
   spawnParticles(entities, x, y, PARTICLE_PARRY_COUNT, '#FFFFFF');
-  spawnScorePopup(entities, x, y, `+${300}`, '#FFFFFF');
+  spawnScorePopup(entities, x, y, `+${JUST_TF_SCORE}`, '#FFFFFF');
 }
 
 export function onBossKill(entities: GameEntities, x: number, y: number) {
@@ -147,10 +150,10 @@ export function onBossKill(entities: GameEntities, x: number, y: number) {
 }
 
 export function onGraze(entities: GameEntities, x: number, y: number) {
-  spawnScorePopup(entities, x, y, '+20', '#00E5FF');
+  spawnScorePopup(entities, x, y, `+${GRAZE_SCORE}`, '#00E5FF');
 }
 
 export function onDebrisDestroy(entities: GameEntities, x: number, y: number) {
   spawnParticles(entities, x, y, 4, '#8B7355');
-  spawnScorePopup(entities, x, y, '+50', '#00FF88');
+  spawnScorePopup(entities, x, y, `+${DEBRIS_DESTROY_SCORE}`, '#00FF88');
 }

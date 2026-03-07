@@ -1,20 +1,9 @@
 import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
+import type { RenderEntity } from '@/types/rendering';
 import type { SharedValue } from 'react-native-reanimated';
 import { IFRAME_BLINK_INTERVAL } from '@/constants/balance';
-
-export type RenderEntity = {
-  type: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  color: string;
-  opacity: number;
-  label?: string;
-  text?: string;
-  fontSize?: number;
-};
+import { GATE_COLORS } from '@/constants/colors';
 
 export type RenderSyncTarget = SharedValue<RenderEntity[]>;
 
@@ -121,11 +110,7 @@ export function createSyncRenderSystem(
         y: g.y,
         width: g.width,
         height: g.height,
-        color: g.gateType === 'enhance' ? '#00FF88' :
-               g.gateType === 'refit' ? '#00D4FF' :
-               g.gateType === 'tradeoff' ? '#FFD600' :
-               g.gateType === 'growth' ? '#66FF66' :
-               g.gateType === 'roulette' ? '#FF8800' : '#FF69B4',
+        color: GATE_COLORS[g.gateType],
         opacity: 1.0,
         label: g.displayLabel,
       });

@@ -10,19 +10,8 @@ import {
 } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { COLORS } from '@/constants/colors';
-
-export type RenderEntity = {
-  type: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  color: string;
-  opacity: number;
-  label?: string;
-  text?: string;
-  fontSize?: number;
-};
+import type { RenderEntity } from '@/types/rendering';
+export type { RenderEntity };
 
 type GameCanvasProps = {
   renderData: ReturnType<typeof useSharedValue<RenderEntity[]>>;
