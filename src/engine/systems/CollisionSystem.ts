@@ -2,7 +2,7 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import { checkAABBOverlap, getPlayerHitbox } from '@/engine/collision';
 import { deactivateBullet } from '@/engine/entities/Bullet';
-import { IFRAME_DURATION, EXPLOSION_RADIUS } from '@/constants/balance';
+import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS } from '@/constants/balance';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
 import { applyEnemyKillReward } from '@/engine/systems/enemyKillReward';
@@ -112,6 +112,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
 
         if (entities.boss.hp <= 0) {
           entities.boss.active = false;
+          store.setFinalStageTime(entities.stageTime);
           store.setStageClear(true);
         }
       }
@@ -139,7 +140,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
     for (const enemy of entities.enemies) {
       if (!enemy.active) continue;
       if (checkAABBOverlap(playerHB, enemy)) {
-        applyDamage(player, 15, store); // §6.2 enemy collision
+        applyDamage(player, ENEMY_STATS[enemy.enemyType].attackDamage, store);
         return;
       }
     }

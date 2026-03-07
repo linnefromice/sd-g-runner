@@ -53,6 +53,7 @@ export const exBurstSystem: GameSystem<GameEntities> = (entities, { time }) => {
       updateBossPhase(entities.boss);
       if (entities.boss.hp <= 0) {
         entities.boss.active = false;
+        store.setFinalStageTime(entities.stageTime);
         store.setStageClear(true);
       }
     }
