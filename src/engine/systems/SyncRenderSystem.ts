@@ -55,6 +55,20 @@ export function createSyncRenderSystem(
       });
     }
 
+    // Debris
+    for (const d of entities.debris) {
+      if (!d.active) continue;
+      out.push({
+        type: 'debris',
+        x: d.x,
+        y: d.y,
+        width: d.width,
+        height: d.height,
+        color: '#8B7355',
+        opacity: 1.0,
+      });
+    }
+
     // Player bullets
     for (const b of entities.playerBullets) {
       if (!b.active) continue;

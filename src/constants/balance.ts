@@ -84,6 +84,11 @@ export const TRANSFORM_GAIN_PER_SECOND = 2;
 /** Explosion bullet */
 export const EXPLOSION_RADIUS = 40;
 
+/** Debris */
+export const DEBRIS_CONTACT_DAMAGE = 20;
+export const DEBRIS_HP = 50;
+export const DEBRIS_DESTROY_SCORE = 50;
+
 /** Graze (near-miss) */
 export const GRAZE_EX_GAIN = 3;
 export const GRAZE_TF_GAIN = 2;

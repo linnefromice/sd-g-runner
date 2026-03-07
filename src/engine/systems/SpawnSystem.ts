@@ -4,6 +4,7 @@ import type { StageDefinition } from '@/types/stages';
 import { createEnemy } from '@/engine/entities/Enemy';
 import { createGatePair } from '@/engine/entities/Gate';
 import { createBoss } from '@/engine/entities/Boss';
+import { createDebris } from '@/engine/entities/Debris';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 
 export function createSpawnSystem(stage: StageDefinition): GameSystem<GameEntities> {
@@ -48,6 +49,20 @@ export function createSpawnSystem(stage: StageDefinition): GameSystem<GameEntiti
             slots[0].active = true;
             Object.assign(slots[1], right);
             slots[1].active = true;
+          }
+          break;
+        }
+        case 'debris_spawn': {
+          const debrisCount = event.count ?? 1;
+          for (let i = 0; i < debrisCount; i++) {
+            const slot = entities.debris.find((d) => !d.active);
+            if (!slot) break;
+            const debris = createDebris(
+              event.x + i * 50, // offset for multiple spawns
+              -30 // spawn above screen
+            );
+            Object.assign(slot, debris);
+            slot.active = true;
           }
           break;
         }

@@ -32,6 +32,10 @@ export const MAX_PLAYER_BULLETS = 30;
 export const MAX_ENEMY_BULLETS = 50;
 export const MAX_GATES = 4;
 
+/** Debris hitbox */
+export const HITBOX_DEBRIS = { width: 40, height: 40 };
+export const MAX_DEBRIS = 10;
+
 /** Calculate scale and visible height from screen dimensions */
 export function getScreenMetrics(screenWidth: number, screenHeight: number) {
   const scale = screenWidth / LOGICAL_WIDTH;

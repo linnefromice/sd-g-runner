@@ -2,10 +2,11 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import { checkAABBOverlap, getPlayerHitbox, getPlayerVisualHitbox } from '@/engine/collision';
 import { deactivateBullet } from '@/engine/entities/Bullet';
-import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE } from '@/constants/balance';
+import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, DEBRIS_DESTROY_SCORE } from '@/constants/balance';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
 import { applyEnemyKillReward } from '@/engine/systems/enemyKillReward';
+import { deactivateDebris } from '@/engine/entities/Debris';
 
 export const collisionSystem: GameSystem<GameEntities> = (entities) => {
   const player = entities.player;
@@ -66,6 +67,45 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
 
         // Pierce continues to next enemy; others break
         if (bullet.specialAbility !== 'pierce') break;
+      }
+    }
+  }
+
+  // Player bullets → Debris
+  for (const bullet of entities.playerBullets) {
+    if (!bullet.active) continue;
+    for (const debris of entities.debris) {
+      if (!debris.active) continue;
+      if (checkAABBOverlap(bullet, debris)) {
+        if (bullet.specialAbility === 'pierce') {
+          // Pierce bullets pass through debris entirely
+          continue;
+        }
+        if (bullet.specialAbility === 'explosion_radius') {
+          // Explosion: damage debris, deactivate bullet, AoE to nearby enemies
+          debris.hp -= bullet.damage;
+          const impactX = bullet.x + bullet.width / 2;
+          const impactY = bullet.y + bullet.height / 2;
+          deactivateBullet(bullet);
+          for (const enemy of entities.enemies) {
+            if (!enemy.active) continue;
+            const ecx = enemy.x + enemy.width / 2;
+            const ecy = enemy.y + enemy.height / 2;
+            const dist = Math.sqrt((impactX - ecx) ** 2 + (impactY - ecy) ** 2);
+            if (dist <= EXPLOSION_RADIUS) {
+              enemy.hp -= bullet.damage;
+              if (enemy.hp <= 0) applyEnemyKillReward(enemy);
+            }
+          }
+          if (debris.hp <= 0) {
+            deactivateDebris(debris);
+            store.addScore(DEBRIS_DESTROY_SCORE);
+          }
+          break; // bullet consumed
+        }
+        // Normal/homing/shield_pierce bullets: absorbed by debris (no damage to debris)
+        deactivateBullet(bullet);
+        break;
       }
     }
   }
@@ -157,6 +197,17 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
       if (!enemy.active) continue;
       if (checkAABBOverlap(playerHB, enemy)) {
         applyDamage(player, ENEMY_STATS[enemy.enemyType].attackDamage, store);
+        return;
+      }
+    }
+  }
+
+  // Debris collision → Player (skip if awakened)
+  if (!isAwakenedInvincible) {
+    for (const debris of entities.debris) {
+      if (!debris.active) continue;
+      if (checkAABBOverlap(playerHB, debris)) {
+        applyDamage(player, DEBRIS_CONTACT_DAMAGE, store);
         return;
       }
     }

@@ -1,4 +1,4 @@
-import type { GameEntities, EnemyEntity, BulletEntity, GateEntity } from '@/types/entities';
+import type { GameEntities, EnemyEntity, BulletEntity, GateEntity, DebrisEntity } from '@/types/entities';
 import { createPlayer } from '@/engine/entities/Player';
 import {
   LOGICAL_WIDTH,
@@ -6,6 +6,7 @@ import {
   MAX_PLAYER_BULLETS,
   MAX_ENEMY_BULLETS,
   MAX_GATES,
+  MAX_DEBRIS,
   getScreenMetrics,
 } from '@/constants/dimensions';
 
@@ -33,6 +34,14 @@ function createInactiveGate(): GateEntity {
   };
 }
 
+function createInactiveDebris(): DebrisEntity {
+  return {
+    id: '', type: 'debris',
+    x: -100, y: -100, width: 0, height: 0,
+    active: false, hp: 0, maxHp: 0,
+  };
+}
+
 export function createGameEntities(
   screenWidth: number,
   screenHeight: number
@@ -48,6 +57,7 @@ export function createGameEntities(
     playerBullets: Array.from({ length: MAX_PLAYER_BULLETS }, () => createInactiveBullet('playerBullet')),
     enemyBullets: Array.from({ length: MAX_ENEMY_BULLETS }, () => createInactiveBullet('enemyBullet')),
     gates: Array.from({ length: MAX_GATES }, createInactiveGate),
+    debris: Array.from({ length: MAX_DEBRIS }, createInactiveDebris),
     boss: null,
     stageTime: 0,
     stageDuration: 0,

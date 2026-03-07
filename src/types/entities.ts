@@ -6,7 +6,8 @@ export type EntityType =
   | 'playerBullet'
   | 'enemyBullet'
   | 'gate'
-  | 'boss';
+  | 'boss'
+  | 'debris';
 
 export interface BaseEntity {
   id: string;
@@ -71,12 +72,19 @@ export interface BossEntity extends BaseEntity {
   laserTickTimer: number;
 }
 
+export interface DebrisEntity extends BaseEntity {
+  type: 'debris';
+  hp: number;
+  maxHp: number;
+}
+
 export type GameEntity =
   | PlayerEntity
   | EnemyEntity
   | BulletEntity
   | GateEntity
-  | BossEntity;
+  | BossEntity
+  | DebrisEntity;
 
 /** All game entities stored as flat arrays for pool management */
 export interface GameEntities {
@@ -85,6 +93,7 @@ export interface GameEntities {
   playerBullets: BulletEntity[];
   enemyBullets: BulletEntity[];
   gates: GateEntity[];
+  debris: DebrisEntity[];
   boss: BossEntity | null;
   /** Stage timeline progress in seconds */
   stageTime: number;

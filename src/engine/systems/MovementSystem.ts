@@ -10,6 +10,7 @@ import {
 import { PLAYER_MOVE_SPEED, BASE_SCROLL_SPEED } from '@/constants/balance';
 import { deactivateBullet } from '@/engine/entities/Bullet';
 import { deactivateEnemy } from '@/engine/entities/Enemy';
+import { deactivateDebris } from '@/engine/entities/Debris';
 
 /** How strongly homing bullets turn toward targets (0-1 blend per second) */
 const HOMING_TURN_RATE = 3.0;
@@ -83,6 +84,15 @@ export function createMovementSystem(
     g.y += BASE_SCROLL_SPEED * dt;
     if (g.y > visibleHeight + 50) {
       g.active = false;
+    }
+  }
+
+  // Move debris downward
+  for (const d of entities.debris) {
+    if (!d.active) continue;
+    d.y += BASE_SCROLL_SPEED * dt;
+    if (d.y > visibleHeight + 50) {
+      deactivateDebris(d);
     }
   }
   };
