@@ -1,5 +1,5 @@
 import type { DebrisEntity } from '@/types/entities';
-import { HITBOX_DEBRIS } from '@/constants/dimensions';
+import { HITBOX } from '@/constants/dimensions';
 import { DEBRIS_HP } from '@/constants/balance';
 
 let nextId = 0;
@@ -10,8 +10,8 @@ export function createDebris(x: number, y: number): DebrisEntity {
     type: 'debris',
     x,
     y,
-    width: HITBOX_DEBRIS.width,
-    height: HITBOX_DEBRIS.height,
+    width: HITBOX.debris.width,
+    height: HITBOX.debris.height,
     active: true,
     hp: DEBRIS_HP,
     maxHp: DEBRIS_HP,

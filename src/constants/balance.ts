@@ -112,3 +112,4 @@ export const JUST_TF_SHOCKWAVE_RADIUS = 60;
 export const JUST_TF_SHOCKWAVE_DAMAGE = 30;
 export const JUST_TF_SCORE = 300;
 export const JUST_TF_EX_GAIN = 15;
+export const SHOCKWAVE_EFFECT_DURATION = 200;

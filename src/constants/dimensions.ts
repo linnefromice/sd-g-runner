@@ -20,6 +20,7 @@ export const HITBOX = {
   enemyBullet:  { width: 6,  height: 6  },
   gate:         { width: 140, height: 24 },
   boss:         { width: 200, height: 120 },
+  debris:       { width: 40,  height: 40 },
 } as const;
 
 /** Gate layout (§9.3) */
@@ -32,8 +33,6 @@ export const MAX_PLAYER_BULLETS = 30;
 export const MAX_ENEMY_BULLETS = 50;
 export const MAX_GATES = 4;
 
-/** Debris hitbox */
-export const HITBOX_DEBRIS = { width: 40, height: 40 };
 export const MAX_DEBRIS = 10;
 
 /** Calculate scale and visible height from screen dimensions */

@@ -52,4 +52,5 @@ export function deactivateBullet(bullet: BulletEntity): void {
   bullet.active = false;
   bullet.x = -100;
   bullet.y = -100;
+  bullet.grazed = false;
 }
