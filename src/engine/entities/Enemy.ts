@@ -5,6 +5,15 @@ import { ENEMY_STATS } from '@/constants/balance';
 
 let nextId = 0;
 
+function getEnemyHitbox(enemyType: EnemyType) {
+  switch (enemyType) {
+    case 'swarm':      return HITBOX.swarm;
+    case 'phalanx':    return HITBOX.phalanx;
+    case 'juggernaut': return HITBOX.juggernaut;
+    default:           return HITBOX.enemy;
+  }
+}
+
 export function createEnemy(
   enemyType: EnemyType,
   x: number,
@@ -12,14 +21,15 @@ export function createEnemy(
   hpMultiplier: number = 1.0
 ): EnemyEntity {
   const stats = ENEMY_STATS[enemyType];
+  const hitbox = getEnemyHitbox(enemyType);
   return {
     id: `enemy_${nextId++}`,
     type: 'enemy',
     enemyType,
-    x: x - HITBOX.enemy.width / 2,
+    x: x - hitbox.width / 2,
     y,
-    width: HITBOX.enemy.width,
-    height: HITBOX.enemy.height,
+    width: hitbox.width,
+    height: hitbox.height,
     active: true,
     hp: Math.round(stats.hp * hpMultiplier),
     maxHp: Math.round(stats.hp * hpMultiplier),
