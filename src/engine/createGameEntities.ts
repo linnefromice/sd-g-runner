@@ -1,4 +1,4 @@
-import type { GameEntities, EnemyEntity, BulletEntity, GateEntity, DebrisEntity } from '@/types/entities';
+import type { GameEntities, EnemyEntity, BulletEntity, GateEntity, DebrisEntity, ParticleEntity, ScorePopupEntity } from '@/types/entities';
 import { createPlayer } from '@/engine/entities/Player';
 import {
   LOGICAL_WIDTH,
@@ -7,6 +7,8 @@ import {
   MAX_ENEMY_BULLETS,
   MAX_GATES,
   MAX_DEBRIS,
+  MAX_PARTICLES,
+  MAX_SCORE_POPUPS,
   getScreenMetrics,
 } from '@/constants/dimensions';
 
@@ -48,6 +50,20 @@ function createInactiveDebris(): DebrisEntity {
   };
 }
 
+function createInactiveParticle(): ParticleEntity {
+  return {
+    x: -100, y: -100, vx: 0, vy: 0,
+    life: 0, maxLife: 0, color: '#FFFFFF', size: 4, active: false,
+  };
+}
+
+function createInactiveScorePopup(): ScorePopupEntity {
+  return {
+    x: -100, y: -100, vy: 0,
+    text: '', life: 0, maxLife: 0, color: '#FFFFFF', active: false,
+  };
+}
+
 export function createGameEntities(
   screenWidth: number,
   screenHeight: number
@@ -76,5 +92,12 @@ export function createGameEntities(
     isBossPhase: false,
     scrollY: 0,
     screen: { width: screenWidth, height: screenHeight, scale, visibleHeight },
+    hitStopTimer: 0,
+    shakeTimer: 0,
+    shakeIntensity: 0,
+    shakeOffsetX: 0,
+    shakeOffsetY: 0,
+    particles: Array.from({ length: MAX_PARTICLES }, createInactiveParticle),
+    scorePopups: Array.from({ length: MAX_SCORE_POPUPS }, createInactiveScorePopup),
   };
 }

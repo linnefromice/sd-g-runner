@@ -1,10 +1,12 @@
 import React from 'react';
-import { useWindowDimensions } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
 import {
   Canvas,
+  matchFont,
   Rect,
   RoundedRect,
   Shadow,
+  Text as SkiaText,
 } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { COLORS } from '@/constants/colors';
@@ -18,6 +20,8 @@ export type RenderEntity = {
   color: string;
   opacity: number;
   label?: string;
+  text?: string;
+  fontSize?: number;
 };
 
 type GameCanvasProps = {
@@ -26,7 +30,92 @@ type GameCanvasProps = {
   scale: number;
 };
 
-const MAX_VISIBLE_ENTITIES = 128;
+const MAX_VISIBLE_ENTITIES = 256;
+
+const MAX_SCORE_POPUPS = 16;
+
+const popupFontFamily = Platform.select({ ios: 'Helvetica', default: 'serif' });
+const popupFont = matchFont({
+  fontFamily: popupFontFamily,
+  fontSize: 12,
+  fontWeight: 'bold',
+} as const);
+
+function ScorePopupSlot({
+  textEntries,
+  index,
+}: {
+  textEntries: ReturnType<
+    typeof useDerivedValue<
+      { x: number; y: number; text: string; color: string; opacity: number }[]
+    >
+  >;
+  index: number;
+}) {
+  const x = useDerivedValue(() => textEntries.value[index]?.x ?? -200);
+  const y = useDerivedValue(() => textEntries.value[index]?.y ?? -200);
+  const text = useDerivedValue(() => textEntries.value[index]?.text ?? '');
+  const color = useDerivedValue(
+    () => textEntries.value[index]?.color ?? 'transparent'
+  );
+  const opacity = useDerivedValue(
+    () => textEntries.value[index]?.opacity ?? 0
+  );
+
+  return (
+    <SkiaText
+      x={x}
+      y={y}
+      text={text}
+      font={popupFont}
+      color={color}
+      opacity={opacity}
+    />
+  );
+}
+
+function ScorePopups({
+  renderData,
+  scale,
+}: {
+  renderData: GameCanvasProps['renderData'];
+  scale: number;
+}) {
+  const textEntries = useDerivedValue(() => {
+    const entries: {
+      x: number;
+      y: number;
+      text: string;
+      color: string;
+      opacity: number;
+    }[] = [];
+    for (const e of renderData.value) {
+      if (e.text) {
+        entries.push({
+          x: e.x * scale,
+          y: e.y * scale,
+          text: e.text,
+          color: e.color,
+          opacity: e.opacity,
+        });
+      }
+    }
+    return entries;
+  });
+
+  const slots = React.useMemo(
+    () => Array.from({ length: MAX_SCORE_POPUPS }, (_, i) => i),
+    []
+  );
+
+  return (
+    <>
+      {slots.map((i) => (
+        <ScorePopupSlot key={i} textEntries={textEntries} index={i} />
+      ))}
+    </>
+  );
+}
 
 function EntitySlot({
   renderData,
@@ -83,6 +172,9 @@ function GameCanvasInner({ renderData, scrollY, scale }: GameCanvasProps) {
       {entitySlots.map((index) => (
         <EntitySlot key={index} renderData={renderData} index={index} scale={scale} />
       ))}
+
+      {/* Score popup text rendering */}
+      <ScorePopups renderData={renderData} scale={scale} />
     </Canvas>
   );
 }

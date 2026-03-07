@@ -4,6 +4,7 @@ import { checkAABBOverlap, getPlayerHitbox } from '@/engine/collision';
 import { deactivateGate, generateGateLabel } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { SCORE, EX_GAIN, TRANSFORM_GAIN_GATE_PASS, ROULETTE_INTERVAL } from '@/constants/balance';
+import { onGatePass } from '@/engine/effects';
 
 export const gateSystem: GameSystem<GameEntities> = (entities, { time }) => {
   const player = entities.player;
@@ -76,7 +77,17 @@ export const gateSystem: GameSystem<GameEntities> = (entities, { time }) => {
         break;
     }
 
-    // Deactivate after short delay (visual feedback)
+    // Visual effect (capture position BEFORE deactivation moves gate off-screen)
+    const gateColor = gate.gateType === 'enhance' ? '#00FF88' :
+                      gate.gateType === 'refit' ? '#00D4FF' :
+                      gate.gateType === 'tradeoff' ? '#FFD600' :
+                      gate.gateType === 'growth' ? '#66FF66' :
+                      gate.gateType === 'roulette' ? '#FF8800' : '#FF69B4';
+    const cx = gate.x + gate.width / 2;
+    const cy = gate.y + gate.height / 2;
+    onGatePass(entities, cx, cy, gateColor);
+
+    // Deactivate after visual effect capture
     deactivateGate(gate);
   }
 };

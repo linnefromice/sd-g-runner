@@ -8,6 +8,7 @@ import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
 import { applyEnemyKillReward } from '@/engine/systems/enemyKillReward';
 import { deactivateDebris } from '@/engine/entities/Debris';
+import { onPlayerHit, onParry, onGraze, onDebrisDestroy, onBossKill } from '@/engine/effects';
 
 export const collisionSystem: GameSystem<GameEntities> = (entities) => {
   const player = entities.player;
@@ -55,7 +56,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
             const dist = Math.sqrt((impactX - otherCX) ** 2 + (impactY - otherCY) ** 2);
             if (dist <= EXPLOSION_RADIUS) {
               other.hp -= bullet.damage;
-              if (other.hp <= 0) applyEnemyKillReward(other);
+              if (other.hp <= 0) applyEnemyKillReward(other, entities);
             }
           }
         } else {
@@ -64,7 +65,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
         }
 
         // Kill check for the directly-hit enemy
-        if (enemy.hp <= 0) applyEnemyKillReward(enemy);
+        if (enemy.hp <= 0) applyEnemyKillReward(enemy, entities);
 
         // Pierce continues to next enemy; others break
         if (bullet.specialAbility !== 'pierce') break;
@@ -95,12 +96,13 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
             const dist = Math.sqrt((impactX - ecx) ** 2 + (impactY - ecy) ** 2);
             if (dist <= EXPLOSION_RADIUS) {
               enemy.hp -= bullet.damage;
-              if (enemy.hp <= 0) applyEnemyKillReward(enemy);
+              if (enemy.hp <= 0) applyEnemyKillReward(enemy, entities);
             }
           }
           if (debris.hp <= 0) {
             deactivateDebris(debris);
             store.addScore(DEBRIS_DESTROY_SCORE);
+            onDebrisDestroy(entities, debris.x + debris.width / 2, debris.y + debris.height / 2);
           }
           break; // bullet consumed
         }
@@ -159,7 +161,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
             const ecy = enemy.y + enemy.height / 2;
             if (Math.sqrt((impactX - ecx) ** 2 + (impactY - ecy) ** 2) <= EXPLOSION_RADIUS) {
               enemy.hp -= bullet.damage;
-              if (enemy.hp <= 0) applyEnemyKillReward(enemy);
+              if (enemy.hp <= 0) applyEnemyKillReward(enemy, entities);
             }
           }
         } else {
@@ -175,9 +177,12 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
         updateBossPhase(entities.boss);
 
         if (entities.boss.hp <= 0) {
+          const bcx = entities.boss.x + entities.boss.width / 2;
+          const bcy = entities.boss.y + entities.boss.height / 2;
           entities.boss.active = false;
           store.setFinalStageTime(entities.stageTime);
           store.setStageClear(true);
+          onBossKill(entities, bcx, bcy);
         }
       }
     }
@@ -195,6 +200,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
         store.addScore(GRAZE_SCORE);
         if (!store.isEXBurstActive) store.addExGauge(GRAZE_EX_GAIN);
         store.addTransformGauge(GRAZE_TF_GAIN);
+        onGraze(entities, bullet.x + bullet.width / 2, bullet.y + bullet.height / 2);
       }
     }
   }
@@ -217,7 +223,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
       }
 
       deactivateBullet(bullet);
-      applyDamage(player, bullet.damage, store);
+      applyDamage(entities, player, bullet.damage, store);
       return;
     }
   }
@@ -227,7 +233,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
     for (const enemy of entities.enemies) {
       if (!enemy.active) continue;
       if (checkAABBOverlap(playerHB, enemy)) {
-        applyDamage(player, ENEMY_STATS[enemy.enemyType].attackDamage, store);
+        applyDamage(entities, player, ENEMY_STATS[enemy.enemyType].attackDamage, store);
         return;
       }
     }
@@ -238,7 +244,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
     for (const debris of entities.debris) {
       if (!debris.active) continue;
       if (checkAABBOverlap(playerHB, debris)) {
-        applyDamage(player, DEBRIS_CONTACT_DAMAGE, store);
+        applyDamage(entities, player, DEBRIS_CONTACT_DAMAGE, store);
         return;
       }
     }
@@ -251,11 +257,12 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
       applyParryShockwave(entities, store);
       return;
     }
-    applyDamage(player, 50, store); // §6.2 boss collision
+    applyDamage(entities, player, 50, store); // §6.2 boss collision
   }
 };
 
 function applyDamage(
+  entities: GameEntities,
   player: GameEntities['player'],
   damage: number,
   store: ReturnType<typeof useGameSessionStore.getState>
@@ -264,6 +271,7 @@ function applyDamage(
   player.isInvincible = true;
   player.invincibleTimer = IFRAME_DURATION;
   store.resetCombo();
+  onPlayerHit(entities, player.x + player.width / 2, player.y + player.height / 2);
 }
 
 function applyParryShockwave(
@@ -282,7 +290,7 @@ function applyParryShockwave(
     const dist = Math.sqrt((pcx - ecx) ** 2 + (pcy - ecy) ** 2);
     if (dist <= JUST_TF_SHOCKWAVE_RADIUS) {
       enemy.hp -= JUST_TF_SHOCKWAVE_DAMAGE;
-      if (enemy.hp <= 0) applyEnemyKillReward(enemy);
+      if (enemy.hp <= 0) applyEnemyKillReward(enemy, entities);
     }
   }
 
@@ -299,4 +307,6 @@ function applyParryShockwave(
   store.addScore(JUST_TF_SCORE);
   if (!store.isEXBurstActive) store.addExGauge(JUST_TF_EX_GAIN);
   entities.shockwaveTimer = SHOCKWAVE_EFFECT_DURATION;
+
+  onParry(entities, pcx, pcy);
 }

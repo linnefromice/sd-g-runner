@@ -1,7 +1,7 @@
 import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import type { SharedValue } from 'react-native-reanimated';
-import { IFRAME_BLINK_INTERVAL, JUST_TF_SHOCKWAVE_RADIUS, SHOCKWAVE_EFFECT_DURATION } from '@/constants/balance';
+import { IFRAME_BLINK_INTERVAL } from '@/constants/balance';
 
 export type RenderEntity = {
   type: string;
@@ -12,6 +12,8 @@ export type RenderEntity = {
   color: string;
   opacity: number;
   label?: string;
+  text?: string;
+  fontSize?: number;
 };
 
 export type RenderSyncTarget = SharedValue<RenderEntity[]>;
@@ -142,20 +144,47 @@ export function createSyncRenderSystem(
       });
     }
 
-    // Shockwave effect (placeholder: semi-transparent square)
-    if (entities.shockwaveTimer > 0) {
-      const p = entities.player;
-      const size = JUST_TF_SHOCKWAVE_RADIUS * 2;
-      const opacity = entities.shockwaveTimer / SHOCKWAVE_EFFECT_DURATION;
+    // Particles
+    for (const p of entities.particles) {
+      if (!p.active) continue;
+      const opacity = p.life / p.maxLife;
       out.push({
-        type: 'shockwave',
-        x: p.x + p.width / 2 - size / 2,
-        y: p.y + p.height / 2 - size / 2,
-        width: size,
-        height: size,
-        color: '#FFFFFF88',
+        type: 'particle',
+        x: p.x - p.size / 2,
+        y: p.y - p.size / 2,
+        width: p.size,
+        height: p.size,
+        color: p.color,
         opacity,
       });
+    }
+
+    // Score Popups
+    for (const popup of entities.scorePopups) {
+      if (!popup.active) continue;
+      const lifeRatio = popup.life / popup.maxLife;
+      const opacity = lifeRatio > 0.5 ? 1.0 : lifeRatio * 2;
+      out.push({
+        type: 'scorePopup',
+        x: popup.x,
+        y: popup.y,
+        width: 0,
+        height: 0,
+        color: popup.color,
+        opacity,
+        text: popup.text,
+        fontSize: 12,
+      });
+    }
+
+    // Apply screen shake offset to all entities
+    const shakeX = entities.shakeOffsetX;
+    const shakeY = entities.shakeOffsetY;
+    if (shakeX !== 0 || shakeY !== 0) {
+      for (const e of out) {
+        e.x += shakeX;
+        e.y += shakeY;
+      }
     }
 
     renderData.value = out;

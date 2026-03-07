@@ -41,3 +41,6 @@ export function getScreenMetrics(screenWidth: number, screenHeight: number) {
   const visibleHeight = screenHeight / scale;
   return { scale, visibleHeight };
 }
+
+export const MAX_PARTICLES = 64;
+export const MAX_SCORE_POPUPS = 16;

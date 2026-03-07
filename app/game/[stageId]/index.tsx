@@ -15,6 +15,7 @@ import { getScreenMetrics } from '@/constants/dimensions';
 import { JUST_TF_WINDOW } from '@/constants/balance';
 import type { GameEntities } from '@/types/entities';
 import type { MechaFormId } from '@/types/forms';
+import { onEXBurst } from '@/engine/effects';
 
 // Systems
 import { scrollSystem } from '@/engine/systems/ScrollSystem';
@@ -31,6 +32,8 @@ import { awakenedSystem } from '@/engine/systems/AwakenedSystem';
 import { exBurstSystem } from '@/engine/systems/EXBurstSystem';
 import { createBossSystem } from '@/engine/systems/BossSystem';
 import { gameOverSystem } from '@/engine/systems/GameOverSystem';
+import { particleSystem } from '@/engine/systems/ParticleSystem';
+import { screenShakeSystem } from '@/engine/systems/ScreenShakeSystem';
 import { createSyncRenderSystem } from '@/engine/systems/SyncRenderSystem';
 
 export default function GameScreen() {
@@ -99,6 +102,8 @@ export default function GameScreen() {
     iframeSystem,
     createBossSystem(),
     gameOverSystem,
+    particleSystem,
+    screenShakeSystem,
     createSyncRenderSystem(renderData),
   ]);
 
@@ -177,6 +182,8 @@ export default function GameScreen() {
 
   const handleEXBurst = useCallback(() => {
     useGameSessionStore.getState().activateEXBurst();
+    const p = entitiesRef.current.player;
+    onEXBurst(entitiesRef.current, p.x + p.width / 2, p.y);
   }, []);
 
   const handleTransform = useCallback(() => {

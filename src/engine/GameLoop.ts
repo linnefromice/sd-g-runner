@@ -46,8 +46,16 @@ export function useGameLoop<E extends Entities>(
       const systems = systemsRef.current;
       const entities = entitiesRef.current;
       if (systems && entities) {
-        for (let i = 0; i < systems.length; i++) {
-          systems[i](entities, { time });
+        // Hit stop: skip systems, only decrement timer
+        const hitStopTimer = (entities as unknown as { hitStopTimer?: number }).hitStopTimer;
+        if (hitStopTimer != null && hitStopTimer > 0) {
+          (entities as unknown as { hitStopTimer: number }).hitStopTimer = Math.max(0, hitStopTimer - delta);
+          // Still run the last system (SyncRenderSystem) to keep rendering
+          systems[systems.length - 1](entities, { time });
+        } else {
+          for (let i = 0; i < systems.length; i++) {
+            systems[i](entities, { time });
+          }
         }
       }
 

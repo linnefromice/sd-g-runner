@@ -113,3 +113,35 @@ export const JUST_TF_SHOCKWAVE_DAMAGE = 30;
 export const JUST_TF_SCORE = 300;
 export const JUST_TF_EX_GAIN = 15;
 export const SHOCKWAVE_EFFECT_DURATION = 200;
+
+/** Hit Stop */
+export const HIT_STOP_ENEMY_KILL = 50;
+export const HIT_STOP_PLAYER_HIT = 50;
+export const HIT_STOP_PARRY = 50;
+export const HIT_STOP_BOSS_KILL = 150;
+
+/** Screen Shake */
+export const SHAKE_ENEMY_KILL_INTENSITY = 2;
+export const SHAKE_ENEMY_KILL_DURATION = 100;
+export const SHAKE_PLAYER_HIT_INTENSITY = 4;
+export const SHAKE_PLAYER_HIT_DURATION = 150;
+export const SHAKE_PARRY_INTENSITY = 4;
+export const SHAKE_PARRY_DURATION = 150;
+export const SHAKE_BOSS_KILL_INTENSITY = 8;
+export const SHAKE_BOSS_KILL_DURATION = 300;
+
+/** Particles */
+export const PARTICLE_ENEMY_KILL_COUNT = 7;
+export const PARTICLE_PLAYER_HIT_COUNT = 5;
+export const PARTICLE_GATE_PASS_COUNT = 4;
+export const PARTICLE_EX_BURST_COUNT = 9;
+export const PARTICLE_PARRY_COUNT = 8;
+export const PARTICLE_BOSS_KILL_COUNT = 16;
+export const PARTICLE_DEFAULT_LIFE = 400;
+export const PARTICLE_DEFAULT_SPEED = 80;
+export const PARTICLE_DEFAULT_SIZE = 4;
+export const PARTICLE_BOSS_SIZE = 8;
+
+/** Score Popup */
+export const SCORE_POPUP_SPEED = 40;
+export const SCORE_POPUP_LIFE = 800;

@@ -86,6 +86,29 @@ export interface DebrisEntity extends BaseEntity {
   maxHp: number;
 }
 
+export interface ParticleEntity {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  color: string;
+  size: number;
+  active: boolean;
+}
+
+export interface ScorePopupEntity {
+  x: number;
+  y: number;
+  vy: number;
+  text: string;
+  life: number;
+  maxLife: number;
+  color: string;
+  active: boolean;
+}
+
 export type GameEntity =
   | PlayerEntity
   | EnemyEntity
@@ -125,4 +148,18 @@ export interface GameEntities {
   scrollY: number;
   /** Screen dimensions for boundary checks */
   screen: { width: number; height: number; scale: number; visibleHeight: number };
+  /** Hit stop freeze timer (ms) */
+  hitStopTimer: number;
+  /** Screen shake timer (ms) */
+  shakeTimer: number;
+  /** Screen shake intensity (px in logical coords) */
+  shakeIntensity: number;
+  /** Current frame shake offset X (logical coords) */
+  shakeOffsetX: number;
+  /** Current frame shake offset Y (logical coords) */
+  shakeOffsetY: number;
+  /** Particle pool */
+  particles: ParticleEntity[];
+  /** Score popup pool */
+  scorePopups: ScorePopupEntity[];
 }
