@@ -3,7 +3,7 @@ import type { GameEntities } from '@/types/entities';
 import type { RenderEntity } from '@/types/rendering';
 import type { SharedValue } from 'react-native-reanimated';
 import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS } from '@/constants/balance';
-import { GATE_COLORS } from '@/constants/colors';
+import { COLORS, GATE_COLORS } from '@/constants/colors';
 
 export type PopupRenderData = {
   x: number;
@@ -54,7 +54,7 @@ export function createSyncRenderSystem(
         y: p.y,
         width: p.width,
         height: p.height,
-        color: '#4488FF',
+        color: COLORS.entityPlayer,
         opacity,
       });
     }
@@ -68,7 +68,7 @@ export function createSyncRenderSystem(
         y: e.y,
         width: e.width,
         height: e.height,
-        color: '#FF4444',
+        color: COLORS.entityEnemy,
         opacity: 1.0,
       });
     }
@@ -82,7 +82,7 @@ export function createSyncRenderSystem(
         y: d.y,
         width: d.width,
         height: d.height,
-        color: '#8B7355',
+        color: COLORS.entityDebris,
         opacity: 1.0,
       });
     }
@@ -96,7 +96,7 @@ export function createSyncRenderSystem(
         y: b.y,
         width: b.width,
         height: b.height,
-        color: '#00D4FF',
+        color: COLORS.entityPlayerBullet,
         opacity: 1.0,
       });
     }
@@ -110,7 +110,7 @@ export function createSyncRenderSystem(
         y: b.y,
         width: b.width,
         height: b.height,
-        color: '#FF006E',
+        color: COLORS.entityEnemyBullet,
         opacity: 1.0,
       });
     }
@@ -138,7 +138,7 @@ export function createSyncRenderSystem(
         y: entities.boss.y,
         width: entities.boss.width,
         height: entities.boss.height,
-        color: '#CC0000',
+        color: COLORS.entityBoss,
         opacity: 1.0,
       });
     }
