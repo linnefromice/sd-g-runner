@@ -7,6 +7,7 @@ export type MechaFormId =
 export type SpecialAbilityType =
   | 'explosion_radius'
   | 'pierce'
+  | 'shield_pierce'
   | 'homing_invincible'
   | 'none';
 

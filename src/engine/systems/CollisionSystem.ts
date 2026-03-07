@@ -22,6 +22,20 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
       // Pierce: skip enemies already hit by this bullet
       if (bullet.specialAbility === 'pierce' && bullet.piercedEnemyIds?.has(enemy.id)) continue;
       if (checkAABBOverlap(bullet, enemy)) {
+        // Phalanx shield: upper half blocks normal bullets
+        if (enemy.enemyType === 'phalanx') {
+          const bulletCenterY = bullet.y + bullet.height / 2;
+          const enemyCenterY = enemy.y + enemy.height / 2;
+          if (bulletCenterY < enemyCenterY) {
+            // Shield hit — only explosion, pierce, and shield_pierce bypass
+            const ability = bullet.specialAbility;
+            if (ability !== 'explosion_radius' && ability !== 'pierce' && ability !== 'shield_pierce') {
+              deactivateBullet(bullet);
+              break;
+            }
+          }
+        }
+
         enemy.hp -= bullet.damage;
 
         if (bullet.specialAbility === 'pierce') {
