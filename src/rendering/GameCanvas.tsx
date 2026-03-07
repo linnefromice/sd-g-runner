@@ -2,7 +2,6 @@ import React from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import {
   Canvas,
-  Group,
   matchFont,
   Path,
   Rect,
@@ -10,7 +9,6 @@ import {
   Shadow,
   Text as SkiaText,
 } from '@shopify/react-native-skia';
-import { getEntityPath } from '@/rendering/shapes';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { COLORS } from '@/constants/colors';
 import type { RenderEntity } from '@/types/rendering';
@@ -109,14 +107,10 @@ function EntitySlot({
   const width = useDerivedValue(() => (renderData.value[index]?.width ?? 0) * scale);
   const height = useDerivedValue(() => (renderData.value[index]?.height ?? 0) * scale);
   const color = useDerivedValue(() => renderData.value[index]?.color ?? 'transparent');
-  const type = useDerivedValue(() => renderData.value[index]?.type ?? '');
 
-  // SVG path string — empty for rect-based types (gate, boostLane)
-  const pathStr = useDerivedValue(() => {
-    const e = renderData.value[index];
-    if (!e) return '';
-    return getEntityPath(e.type, e.x * scale, e.y * scale, e.width * scale, e.height * scale) ?? '';
-  });
+  // Pre-computed SVG path string (already in screen coords from SyncRenderSystem)
+  const pathStr = useDerivedValue(() => renderData.value[index]?.path ?? '');
+  const type = useDerivedValue(() => renderData.value[index]?.type ?? '');
 
   // Opacity split: fill vs stroke (shockwave is stroke-only ring)
   const fillOpacity = useDerivedValue(() =>
@@ -140,7 +134,7 @@ function EntitySlot({
   const labelY = useDerivedValue(() => y.value + height.value / 2 + 3);
 
   return (
-    <Group>
+    <>
       {/* Path: filled shape (all path-based entities except shockwave) */}
       <Path path={pathStr} color={color} opacity={fillOpacity}>
         <Shadow dx={0} dy={0} blur={4} color={color} inner />
@@ -156,7 +150,7 @@ function EntitySlot({
       </RoundedRect>
       {/* Gate label text */}
       <SkiaText x={labelX} y={labelY} text={label} font={gateLabelFont} color="#FFFFFF" opacity={rectOpacity} />
-    </Group>
+    </>
   );
 }
 

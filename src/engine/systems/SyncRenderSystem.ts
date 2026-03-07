@@ -4,6 +4,7 @@ import type { RenderEntity } from '@/types/rendering';
 import type { SharedValue } from 'react-native-reanimated';
 import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS } from '@/constants/balance';
 import { COLORS, GATE_COLORS } from '@/constants/colors';
+import { getEntityPath } from '@/rendering/shapes';
 
 export type PopupRenderData = {
   x: number;
@@ -19,6 +20,7 @@ export type PopupSyncTarget = SharedValue<PopupRenderData[]>;
 export function createSyncRenderSystem(
   renderData: RenderSyncTarget,
   popupData: PopupSyncTarget,
+  scale: number = 1,
 ): GameSystem<GameEntities> {
   const out: RenderEntity[] = [];
   const popups: PopupRenderData[] = [];
@@ -27,7 +29,7 @@ export function createSyncRenderSystem(
     out.length = 0;
     popups.length = 0;
 
-    // Boost Lane (background overlay)
+    // Boost Lane (background overlay) — no path, rect-based
     if (entities.boostLane?.active) {
       out.push({
         type: 'boostLane',
@@ -43,7 +45,6 @@ export function createSyncRenderSystem(
     // Player
     const p = entities.player;
     if (p.active) {
-      // i-frame blink effect
       let opacity = 1.0;
       if (p.isInvincible) {
         opacity = Math.floor(p.invincibleTimer / IFRAME_BLINK_INTERVAL) % 2 === 0 ? 0.3 : 1.0;
@@ -56,6 +57,7 @@ export function createSyncRenderSystem(
         height: p.height,
         color: COLORS.entityPlayer,
         opacity,
+        path: getEntityPath('player', p.x * scale, p.y * scale, p.width * scale, p.height * scale) ?? undefined,
       });
     }
 
@@ -70,6 +72,7 @@ export function createSyncRenderSystem(
         height: e.height,
         color: COLORS.entityEnemy,
         opacity: 1.0,
+        path: getEntityPath('enemy', e.x * scale, e.y * scale, e.width * scale, e.height * scale) ?? undefined,
       });
     }
 
@@ -84,6 +87,7 @@ export function createSyncRenderSystem(
         height: d.height,
         color: COLORS.entityDebris,
         opacity: 1.0,
+        path: getEntityPath('debris', d.x * scale, d.y * scale, d.width * scale, d.height * scale) ?? undefined,
       });
     }
 
@@ -98,6 +102,7 @@ export function createSyncRenderSystem(
         height: b.height,
         color: COLORS.entityPlayerBullet,
         opacity: 1.0,
+        path: getEntityPath('playerBullet', b.x * scale, b.y * scale, b.width * scale, b.height * scale) ?? undefined,
       });
     }
 
@@ -112,10 +117,11 @@ export function createSyncRenderSystem(
         height: b.height,
         color: COLORS.entityEnemyBullet,
         opacity: 1.0,
+        path: getEntityPath('enemyBullet', b.x * scale, b.y * scale, b.width * scale, b.height * scale) ?? undefined,
       });
     }
 
-    // Gates
+    // Gates — no path, rect-based
     for (const g of entities.gates) {
       if (!g.active) continue;
       out.push({
@@ -132,31 +138,37 @@ export function createSyncRenderSystem(
 
     // Boss
     if (entities.boss?.active) {
+      const b = entities.boss;
       out.push({
         type: 'boss',
-        x: entities.boss.x,
-        y: entities.boss.y,
-        width: entities.boss.width,
-        height: entities.boss.height,
+        x: b.x,
+        y: b.y,
+        width: b.width,
+        height: b.height,
         color: COLORS.entityBoss,
         opacity: 1.0,
+        path: getEntityPath('boss', b.x * scale, b.y * scale, b.width * scale, b.height * scale) ?? undefined,
       });
     }
 
-    // Shockwave effect (#10)
+    // Shockwave effect
     if (entities.shockwaveTimer > 0) {
       const pcx = entities.player.x + entities.player.width / 2;
       const pcy = entities.player.y + entities.player.height / 2;
       const radius = JUST_TF_SHOCKWAVE_RADIUS;
       const opacity = entities.shockwaveTimer / SHOCKWAVE_EFFECT_DURATION;
+      const swX = pcx - radius;
+      const swY = pcy - radius;
+      const swSize = radius * 2;
       out.push({
         type: 'shockwave',
-        x: pcx - radius,
-        y: pcy - radius,
-        width: radius * 2,
-        height: radius * 2,
-        color: '#FFFFFF',
+        x: swX,
+        y: swY,
+        width: swSize,
+        height: swSize,
+        color: COLORS.white,
         opacity: opacity * 0.5,
+        path: getEntityPath('shockwave', swX * scale, swY * scale, swSize * scale, swSize * scale) ?? undefined,
       });
     }
 
@@ -164,14 +176,17 @@ export function createSyncRenderSystem(
     for (const pt of entities.particles) {
       if (!pt.active) continue;
       const opacity = pt.life / pt.maxLife;
+      const px = pt.x - pt.size / 2;
+      const py = pt.y - pt.size / 2;
       out.push({
         type: 'particle',
-        x: pt.x - pt.size / 2,
-        y: pt.y - pt.size / 2,
+        x: px,
+        y: py,
         width: pt.size,
         height: pt.size,
         color: pt.color,
         opacity,
+        path: getEntityPath('particle', px * scale, py * scale, pt.size * scale, pt.size * scale) ?? undefined,
       });
     }
 

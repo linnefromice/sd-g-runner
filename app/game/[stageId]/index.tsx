@@ -106,7 +106,7 @@ export default function GameScreen() {
     gameOverSystem,
     particleSystem,
     screenShakeSystem,
-    createSyncRenderSystem(renderData, popupData),
+    createSyncRenderSystem(renderData, popupData, scale),
   ]);
 
   useGameLoop(systemsRef, entitiesRef, running);
