@@ -1,7 +1,7 @@
 import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import type { SharedValue } from 'react-native-reanimated';
-import { IFRAME_BLINK_INTERVAL } from '@/constants/balance';
+import { IFRAME_BLINK_INTERVAL, JUST_TF_SHOCKWAVE_RADIUS } from '@/constants/balance';
 
 export type RenderEntity = {
   type: string;
@@ -139,6 +139,22 @@ export function createSyncRenderSystem(
         height: entities.boss.height,
         color: '#CC0000',
         opacity: 1.0,
+      });
+    }
+
+    // Shockwave effect (placeholder: semi-transparent square)
+    if (entities.shockwaveTimer > 0) {
+      const p = entities.player;
+      const size = JUST_TF_SHOCKWAVE_RADIUS * 2;
+      const opacity = entities.shockwaveTimer / 200; // fade out
+      out.push({
+        type: 'shockwave',
+        x: p.x + p.width / 2 - size / 2,
+        y: p.y + p.height / 2 - size / 2,
+        width: size,
+        height: size,
+        color: '#FFFFFF88',
+        opacity,
       });
     }
 

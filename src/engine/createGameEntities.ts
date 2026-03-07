@@ -67,6 +67,8 @@ export function createGameEntities(
     boss: null,
     boostLane: null,
     isPlayerBoosted: false,
+    justTFTimer: 0,
+    shockwaveTimer: 0,
     stageTime: 0,
     stageDuration: 0,
     isBossStage: false,

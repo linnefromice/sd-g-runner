@@ -2,7 +2,7 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import { checkAABBOverlap, getPlayerHitbox, getPlayerVisualHitbox } from '@/engine/collision';
 import { deactivateBullet } from '@/engine/entities/Bullet';
-import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, DEBRIS_DESTROY_SCORE, GROWTH_GATE_INITIAL_RATIO, GROWTH_GATE_PER_HIT } from '@/constants/balance';
+import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, DEBRIS_DESTROY_SCORE, GROWTH_GATE_INITIAL_RATIO, GROWTH_GATE_PER_HIT, JUST_TF_SHOCKWAVE_RADIUS, JUST_TF_SHOCKWAVE_DAMAGE, JUST_TF_SCORE, JUST_TF_EX_GAIN } from '@/constants/balance';
 import { generateGateLabel } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
@@ -209,9 +209,46 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
   for (const bullet of entities.enemyBullets) {
     if (!bullet.active) continue;
     if (checkAABBOverlap(playerHB, bullet)) {
+      // Just TF Parry check
+      if (entities.justTFTimer > 0) {
+        deactivateBullet(bullet);
+        entities.justTFTimer = 0; // consume parry window
+
+        // Shockwave: damage enemies in radius
+        const pcx = player.x + player.width / 2;
+        const pcy = player.y + player.height / 2;
+        for (const enemy of entities.enemies) {
+          if (!enemy.active) continue;
+          const ecx = enemy.x + enemy.width / 2;
+          const ecy = enemy.y + enemy.height / 2;
+          const dist = Math.sqrt((pcx - ecx) ** 2 + (pcy - ecy) ** 2);
+          if (dist <= JUST_TF_SHOCKWAVE_RADIUS) {
+            enemy.hp -= JUST_TF_SHOCKWAVE_DAMAGE;
+            if (enemy.hp <= 0) applyEnemyKillReward(enemy);
+          }
+        }
+
+        // Shockwave: destroy enemy bullets in radius
+        for (const b of entities.enemyBullets) {
+          if (!b.active) continue;
+          const bcx = b.x + b.width / 2;
+          const bcy = b.y + b.height / 2;
+          const dist = Math.sqrt((pcx - bcx) ** 2 + (pcy - bcy) ** 2);
+          if (dist <= JUST_TF_SHOCKWAVE_RADIUS) {
+            deactivateBullet(b);
+          }
+        }
+
+        // Rewards
+        store.addScore(JUST_TF_SCORE);
+        if (!store.isEXBurstActive) store.addExGauge(JUST_TF_EX_GAIN);
+        entities.shockwaveTimer = 200; // visual effect
+        return; // No damage taken
+      }
+
       deactivateBullet(bullet);
       applyDamage(player, bullet.damage, store);
-      return; // Only one hit per frame
+      return;
     }
   }
 
@@ -239,6 +276,33 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
 
   // Boss collision → Player (skip if awakened)
   if (!isAwakenedInvincible && entities.boss?.active && checkAABBOverlap(playerHB, entities.boss)) {
+    // Just TF Parry check for boss contact
+    if (entities.justTFTimer > 0) {
+      entities.justTFTimer = 0;
+      const pcx = player.x + player.width / 2;
+      const pcy = player.y + player.height / 2;
+      for (const enemy of entities.enemies) {
+        if (!enemy.active) continue;
+        const ecx = enemy.x + enemy.width / 2;
+        const ecy = enemy.y + enemy.height / 2;
+        if (Math.sqrt((pcx - ecx) ** 2 + (pcy - ecy) ** 2) <= JUST_TF_SHOCKWAVE_RADIUS) {
+          enemy.hp -= JUST_TF_SHOCKWAVE_DAMAGE;
+          if (enemy.hp <= 0) applyEnemyKillReward(enemy);
+        }
+      }
+      for (const b of entities.enemyBullets) {
+        if (!b.active) continue;
+        const bcx = b.x + b.width / 2;
+        const bcy = b.y + b.height / 2;
+        if (Math.sqrt((pcx - bcx) ** 2 + (pcy - bcy) ** 2) <= JUST_TF_SHOCKWAVE_RADIUS) {
+          deactivateBullet(b);
+        }
+      }
+      store.addScore(JUST_TF_SCORE);
+      if (!store.isEXBurstActive) store.addExGauge(JUST_TF_EX_GAIN);
+      entities.shockwaveTimer = 200;
+      return;
+    }
     applyDamage(player, 50, store); // §6.2 boss collision
   }
 };

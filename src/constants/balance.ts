@@ -105,3 +105,10 @@ export const ROULETTE_INTERVAL = 500;
 /** Boost Lane */
 export const BOOST_LANE_SCORE_MULTIPLIER = 1.5;
 export const BOOST_LANE_SCROLL_MULTIPLIER = 1.3;
+
+/** Just TF / Parry */
+export const JUST_TF_WINDOW = 200;
+export const JUST_TF_SHOCKWAVE_RADIUS = 60;
+export const JUST_TF_SHOCKWAVE_DAMAGE = 30;
+export const JUST_TF_SCORE = 300;
+export const JUST_TF_EX_GAIN = 15;

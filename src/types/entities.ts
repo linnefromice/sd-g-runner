@@ -117,6 +117,10 @@ export interface GameEntities {
   boostLane: { x: number; width: number; active: boolean } | null;
   /** Whether the player is currently inside the boost lane */
   isPlayerBoosted: boolean;
+  /** Just TF parry window timer (ms) */
+  justTFTimer: number;
+  /** Shockwave visual effect timer (ms) */
+  shockwaveTimer: number;
   /** Background scroll offset */
   scrollY: number;
   /** Screen dimensions for boundary checks */
