@@ -2,12 +2,15 @@ import React from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import {
   Canvas,
+  Group,
   matchFont,
+  Path,
   Rect,
   RoundedRect,
   Shadow,
   Text as SkiaText,
 } from '@shopify/react-native-skia';
+import { getEntityPath } from '@/rendering/shapes';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { COLORS } from '@/constants/colors';
 import type { RenderEntity } from '@/types/rendering';
@@ -30,6 +33,12 @@ const popupFontFamily = Platform.select({ ios: 'Helvetica', default: 'serif' });
 const popupFont = matchFont({
   fontFamily: popupFontFamily,
   fontSize: SCORE_POPUP_FONT_SIZE,
+  fontWeight: 'bold',
+} as const);
+
+const gateLabelFont = matchFont({
+  fontFamily: popupFontFamily,
+  fontSize: 8,
   fontWeight: 'bold',
 } as const);
 
@@ -94,25 +103,59 @@ function EntitySlot({
   index: number;
   scale: number;
 }) {
+  // Base properties
   const x = useDerivedValue(() => (renderData.value[index]?.x ?? -200) * scale);
   const y = useDerivedValue(() => (renderData.value[index]?.y ?? -200) * scale);
   const width = useDerivedValue(() => (renderData.value[index]?.width ?? 0) * scale);
   const height = useDerivedValue(() => (renderData.value[index]?.height ?? 0) * scale);
   const color = useDerivedValue(() => renderData.value[index]?.color ?? 'transparent');
-  const opacity = useDerivedValue(() => renderData.value[index]?.opacity ?? 0);
+  const type = useDerivedValue(() => renderData.value[index]?.type ?? '');
+
+  // SVG path string — empty for rect-based types (gate, boostLane)
+  const pathStr = useDerivedValue(() => {
+    const e = renderData.value[index];
+    if (!e) return '';
+    return getEntityPath(e.type, e.x * scale, e.y * scale, e.width * scale, e.height * scale) ?? '';
+  });
+
+  // Opacity split: fill vs stroke (shockwave is stroke-only ring)
+  const fillOpacity = useDerivedValue(() =>
+    type.value === 'shockwave' ? 0 : (renderData.value[index]?.opacity ?? 0)
+  );
+  const strokeOpacity = useDerivedValue(() =>
+    type.value === 'shockwave' ? (renderData.value[index]?.opacity ?? 0) : 0
+  );
+
+  // Rect fallback opacity — only visible when pathStr is empty (gate, boostLane)
+  const rectOpacity = useDerivedValue(() => {
+    const e = renderData.value[index];
+    if (!e) return 0;
+    return getEntityPath(e.type, 0, 0, 1, 1) === null ? (e.opacity ?? 0) : 0;
+  });
+
+  // Gate label
+  const label = useDerivedValue(() => renderData.value[index]?.label ?? '');
+  const labelX = useDerivedValue(() => x.value + 4);
+  const labelY = useDerivedValue(() => y.value + height.value / 2 + 3);
 
   return (
-    <RoundedRect
-      x={x}
-      y={y}
-      width={width}
-      height={height}
-      r={2}
-      color={color}
-      opacity={opacity}
-    >
-      <Shadow dx={0} dy={0} blur={6} color={color} />
-    </RoundedRect>
+    <Group>
+      {/* Path: filled shape (all path-based entities except shockwave) */}
+      <Path path={pathStr} color={color} opacity={fillOpacity}>
+        <Shadow dx={0} dy={0} blur={4} color={color} inner />
+        <Shadow dx={0} dy={0} blur={10} color={color} />
+      </Path>
+      {/* Path: stroke ring (shockwave only) */}
+      <Path path={pathStr} color={color} opacity={strokeOpacity} style="stroke" strokeWidth={2}>
+        <Shadow dx={0} dy={0} blur={12} color={color} />
+      </Path>
+      {/* Rect fallback (gate, boostLane) */}
+      <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={rectOpacity}>
+        <Shadow dx={0} dy={0} blur={6} color={color} />
+      </RoundedRect>
+      {/* Gate label text */}
+      <SkiaText x={labelX} y={labelY} text={label} font={gateLabelFont} color="#FFFFFF" opacity={rectOpacity} />
+    </Group>
   );
 }
 
