@@ -32,6 +32,8 @@ import { awakenedSystem } from '@/engine/systems/AwakenedSystem';
 import { exBurstSystem } from '@/engine/systems/EXBurstSystem';
 import { createBossSystem } from '@/engine/systems/BossSystem';
 import { gameOverSystem } from '@/engine/systems/GameOverSystem';
+import { particleSystem } from '@/engine/systems/ParticleSystem';
+import { screenShakeSystem } from '@/engine/systems/ScreenShakeSystem';
 import { createSyncRenderSystem } from '@/engine/systems/SyncRenderSystem';
 
 export default function GameScreen() {
@@ -100,6 +102,8 @@ export default function GameScreen() {
     iframeSystem,
     createBossSystem(),
     gameOverSystem,
+    particleSystem,
+    screenShakeSystem,
     createSyncRenderSystem(renderData),
   ]);
 
