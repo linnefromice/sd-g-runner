@@ -1,12 +1,12 @@
 import { getStage, getAvailableStageIds } from '@/game/stages';
 
 describe('Stage data', () => {
-  test('all 5 stages are registered', () => {
+  test('all 10 stages are registered', () => {
     const ids = getAvailableStageIds();
-    expect(ids).toEqual([1, 2, 3, 4, 5]);
+    expect(ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   });
 
-  test.each([1, 2, 3, 4, 5])('stage %i has valid structure', (id) => {
+  test.each([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])('stage %i has valid structure', (id) => {
     const stage = getStage(id);
     expect(stage.id).toBe(id);
     expect(stage.name).toBeTruthy();
@@ -15,15 +15,15 @@ describe('Stage data', () => {
     expect(stage.difficulty.enemyHpMultiplier).toBeGreaterThanOrEqual(1.0);
   });
 
-  test('stage 5 is a boss stage', () => {
-    const stage = getStage(5);
+  test.each([5, 10])('stage %i is a boss stage', (id) => {
+    const stage = getStage(id);
     expect(stage.isBossStage).toBe(true);
     const bossEvents = stage.timeline.filter((e) => e.type === 'boss_spawn');
     expect(bossEvents.length).toBe(1);
   });
 
   test('timeline events are ordered by time', () => {
-    for (let id = 1; id <= 5; id++) {
+    for (let id = 1; id <= 10; id++) {
       const stage = getStage(id);
       for (let i = 1; i < stage.timeline.length; i++) {
         expect(stage.timeline[i].time).toBeGreaterThanOrEqual(
@@ -33,8 +33,8 @@ describe('Stage data', () => {
     }
   });
 
-  test('stages 2-4 are not boss stages', () => {
-    for (let id = 2; id <= 4; id++) {
+  test('non-boss stages are correctly marked', () => {
+    for (const id of [1, 2, 3, 4, 6, 7, 8, 9]) {
       const stage = getStage(id);
       expect(stage.isBossStage).toBe(false);
     }

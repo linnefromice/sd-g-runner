@@ -6,6 +6,7 @@ import {
   BOSS_Y_POSITION,
   BOSS_SPREAD_COUNT,
   BOSS_DRONE_COUNT,
+  BOSS_DRONE_COUNTS,
   BOSS_LASER_WARNING_DURATION,
   BOSS_LASER_FIRE_DURATION,
   BOSS_LASER_WIDTH,
@@ -132,10 +133,11 @@ function fireSpreadShot(entities: GameEntities, boss: NonNullable<GameEntities['
 }
 
 function spawnDrones(entities: GameEntities, boss: NonNullable<GameEntities['boss']>) {
-  for (let i = 0; i < BOSS_DRONE_COUNT; i++) {
+  const droneCount = BOSS_DRONE_COUNTS[boss.bossIndex] ?? BOSS_DRONE_COUNT;
+  for (let i = 0; i < droneCount; i++) {
     const slot = entities.enemies.find((e) => !e.active);
     if (!slot) break;
-    const x = boss.x + (i + 1) * (boss.width / (BOSS_DRONE_COUNT + 1));
+    const x = boss.x + (i + 1) * (boss.width / (droneCount + 1));
     const drone = createEnemy('stationary', x, boss.y + boss.height + 20, 0.5);
     Object.assign(slot, drone);
     slot.active = true;

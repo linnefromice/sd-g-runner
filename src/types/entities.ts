@@ -56,6 +56,7 @@ export interface GateEntity extends BaseEntity {
 
 export interface BossEntity extends BaseEntity {
   type: 'boss';
+  bossIndex: number;
   hp: number;
   maxHp: number;
   phase: 'spread' | 'laser' | 'all';

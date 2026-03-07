@@ -9,6 +9,7 @@ export function createBoss(bossIndex: number): BossEntity {
   return {
     id: `boss_${nextId++}`,
     type: 'boss',
+    bossIndex,
     x: (LOGICAL_WIDTH - HITBOX.boss.width) / 2,
     y: -HITBOX.boss.height, // starts off-screen, slides in
     width: HITBOX.boss.width,
