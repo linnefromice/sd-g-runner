@@ -144,7 +144,9 @@ export const PARTICLE_BOSS_SIZE = 8;
 
 export const PARTICLE_BULLET_IMPACT_COUNT = 3;
 export const PARTICLE_BULLET_IMPACT_LIFE = 200;
+export const PARTICLE_DEBRIS_DESTROY_COUNT = 4;
 
 /** Score Popup */
 export const SCORE_POPUP_SPEED = 40;
 export const SCORE_POPUP_LIFE = 800;
+export const SCORE_POPUP_FONT_SIZE = 12;

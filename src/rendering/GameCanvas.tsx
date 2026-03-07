@@ -11,6 +11,7 @@ import {
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { COLORS } from '@/constants/colors';
 import type { RenderEntity } from '@/types/rendering';
+import { SCORE_POPUP_FONT_SIZE } from '@/constants/balance';
 export type { RenderEntity };
 
 type GameCanvasProps = {
@@ -26,7 +27,7 @@ const MAX_SCORE_POPUPS = 16;
 const popupFontFamily = Platform.select({ ios: 'Helvetica', default: 'serif' });
 const popupFont = matchFont({
   fontFamily: popupFontFamily,
-  fontSize: 12,
+  fontSize: SCORE_POPUP_FONT_SIZE,
   fontWeight: 'bold',
 } as const);
 

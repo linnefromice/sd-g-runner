@@ -12,6 +12,7 @@ import {
   PARTICLE_BOSS_KILL_COUNT,
   PARTICLE_BULLET_IMPACT_COUNT,
   PARTICLE_BULLET_IMPACT_LIFE,
+  PARTICLE_DEBRIS_DESTROY_COUNT,
   SCORE_POPUP_SPEED,
   SCORE_POPUP_LIFE,
   HIT_STOP_ENEMY_KILL,
@@ -160,6 +161,6 @@ export function onGraze(entities: GameEntities, x: number, y: number) {
 }
 
 export function onDebrisDestroy(entities: GameEntities, x: number, y: number) {
-  spawnParticles(entities, x, y, 4, '#8B7355');
+  spawnParticles(entities, x, y, PARTICLE_DEBRIS_DESTROY_COUNT, '#8B7355');
   spawnScorePopup(entities, x, y, `+${DEBRIS_DESTROY_SCORE}`, '#00FF88');
 }

@@ -2,7 +2,7 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import type { RenderEntity } from '@/types/rendering';
 import type { SharedValue } from 'react-native-reanimated';
-import { IFRAME_BLINK_INTERVAL } from '@/constants/balance';
+import { IFRAME_BLINK_INTERVAL, SCORE_POPUP_FONT_SIZE } from '@/constants/balance';
 import { GATE_COLORS } from '@/constants/colors';
 
 export type RenderSyncTarget = SharedValue<RenderEntity[]>;
@@ -10,8 +10,10 @@ export type RenderSyncTarget = SharedValue<RenderEntity[]>;
 export function createSyncRenderSystem(
   renderData: RenderSyncTarget
 ): GameSystem<GameEntities> {
+  const out: RenderEntity[] = [];
+
   return (entities) => {
-    const out: RenderEntity[] = [];
+    out.length = 0;
 
     // Boost Lane (background overlay)
     if (entities.boostLane?.active) {
@@ -158,7 +160,7 @@ export function createSyncRenderSystem(
         color: popup.color,
         opacity,
         text: popup.text,
-        fontSize: 12,
+        fontSize: SCORE_POPUP_FONT_SIZE,
       });
     }
 

@@ -69,7 +69,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
         // Kill check for the directly-hit enemy
         if (enemy.hp <= 0) {
           applyEnemyKillReward(enemy, entities);
-        } else {
+        } else if (bullet.specialAbility !== 'pierce') {
           onBulletImpact(entities, hitX, hitY);
         }
 
