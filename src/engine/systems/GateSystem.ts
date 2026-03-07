@@ -77,15 +77,17 @@ export const gateSystem: GameSystem<GameEntities> = (entities, { time }) => {
         break;
     }
 
-    // Deactivate after short delay (visual feedback)
-    deactivateGate(gate);
-
-    // Visual effect
+    // Visual effect (capture position BEFORE deactivation moves gate off-screen)
     const gateColor = gate.gateType === 'enhance' ? '#00FF88' :
                       gate.gateType === 'refit' ? '#00D4FF' :
                       gate.gateType === 'tradeoff' ? '#FFD600' :
                       gate.gateType === 'growth' ? '#66FF66' :
                       gate.gateType === 'roulette' ? '#FF8800' : '#FF69B4';
-    onGatePass(entities, gate.x + gate.width / 2, gate.y + gate.height / 2, gateColor);
+    const cx = gate.x + gate.width / 2;
+    const cy = gate.y + gate.height / 2;
+    onGatePass(entities, cx, cy, gateColor);
+
+    // Deactivate after visual effect capture
+    deactivateGate(gate);
   }
 };
