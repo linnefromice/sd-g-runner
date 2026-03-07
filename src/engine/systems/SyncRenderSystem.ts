@@ -199,7 +199,8 @@ export function createSyncRenderSystem(
       });
     }
 
-    renderData.value = out;
-    popupData.value = popups;
+    // Reanimated freezes objects assigned to SharedValue — pass copies to keep out/popups mutable
+    renderData.value = out.slice();
+    popupData.value = popups.slice();
   };
 }
