@@ -21,6 +21,13 @@ export const COLORS = {
   gateGrowth: '#66FF66',
   gateRoulette: '#FF8800',
 
+  entityPlayer: '#00D4FF',
+  entityEnemy: '#FF3366',
+  entityBoss: '#FF0044',
+  entityPlayerBullet: '#00FFCC',
+  entityEnemyBullet: '#FF006E',
+  entityDebris: '#886644',
+
   scoreYellow: '#FFEA00',
   hpHealthy: '#00E5FF',
   hpCritical: '#FF4081',

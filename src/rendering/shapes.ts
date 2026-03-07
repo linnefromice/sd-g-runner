@@ -1,7 +1,6 @@
-// src/rendering/shapes.ts
-
 /** Forward-pointing arrow / chevron for player */
 export function playerPath(x: number, y: number, w: number, h: number): string {
+  'worklet';
   const cx = x + w / 2;
   const bottom = y + h;
   const notch = y + h * 0.7;
@@ -10,12 +9,14 @@ export function playerPath(x: number, y: number, w: number, h: number): string {
 
 /** Inverted triangle for enemies */
 export function enemyPath(x: number, y: number, w: number, h: number): string {
+  'worklet';
   const cx = x + w / 2;
   return `M ${x} ${y} L ${x + w} ${y} L ${cx} ${y + h} Z`;
 }
 
 /** Hexagon for boss */
 export function bossPath(x: number, y: number, w: number, h: number): string {
+  'worklet';
   const cx = x + w / 2;
   const cy = y + h / 2;
   const ry = h / 2;
@@ -24,6 +25,7 @@ export function bossPath(x: number, y: number, w: number, h: number): string {
 
 /** Vertically elongated diamond for bullets */
 export function diamondPath(x: number, y: number, w: number, h: number): string {
+  'worklet';
   const cx = x + w / 2;
   const cy = y + h / 2;
   return `M ${cx} ${y} L ${x + w} ${cy} L ${cx} ${y + h} L ${x} ${cy} Z`;
@@ -31,11 +33,13 @@ export function diamondPath(x: number, y: number, w: number, h: number): string 
 
 /** Irregular pentagon for debris */
 export function debrisPath(x: number, y: number, w: number, h: number): string {
+  'worklet';
   return `M ${x + w * 0.2} ${y} L ${x + w * 0.8} ${y + h * 0.1} L ${x + w} ${y + h * 0.6} L ${x + w * 0.5} ${y + h} L ${x} ${y + h * 0.5} Z`;
 }
 
 /** Circle via cubic Bezier approximation */
 export function circlePath(x: number, y: number, w: number, h: number): string {
+  'worklet';
   const cx = x + w / 2;
   const cy = y + h / 2;
   const rx = w / 2;
@@ -54,6 +58,7 @@ export function getEntityPath(
   w: number,
   h: number,
 ): string | null {
+  'worklet';
   switch (type) {
     case 'player':
       return playerPath(x, y, w, h);
