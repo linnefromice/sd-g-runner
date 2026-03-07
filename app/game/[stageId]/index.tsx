@@ -5,6 +5,7 @@ import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { useSharedValue } from 'react-native-reanimated';
 import { useGameLoop, type GameSystem } from '@/engine/GameLoop';
 import { GameCanvas, type RenderEntity } from '@/rendering/GameCanvas';
+import type { PopupRenderData } from '@/engine/systems/SyncRenderSystem';
 import { HUD } from '@/ui/HUD';
 import { PauseMenu } from '@/ui/PauseMenu';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
@@ -57,6 +58,7 @@ export default function GameScreen() {
 
   // SharedValue for Skia rendering
   const renderData = useSharedValue<RenderEntity[]>([]);
+  const popupData = useSharedValue<PopupRenderData[]>([]);
   const scrollYShared = useSharedValue(0);
 
   // Reset session store
@@ -104,7 +106,7 @@ export default function GameScreen() {
     gameOverSystem,
     particleSystem,
     screenShakeSystem,
-    createSyncRenderSystem(renderData),
+    createSyncRenderSystem(renderData, popupData),
   ]);
 
   useGameLoop(systemsRef, entitiesRef, running);
@@ -197,7 +199,7 @@ export default function GameScreen() {
     <GestureDetector gesture={gesture}>
       <Animated.View style={styles.container}>
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <GameCanvas renderData={renderData} scrollY={scrollYShared} scale={scale} />
+          <GameCanvas renderData={renderData} popupData={popupData} scrollY={scrollYShared} scale={scale} />
         </View>
         <HUD
           onPause={handlePause}

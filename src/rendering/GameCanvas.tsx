@@ -11,11 +11,13 @@ import {
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { COLORS } from '@/constants/colors';
 import type { RenderEntity } from '@/types/rendering';
+import type { PopupRenderData } from '@/engine/systems/SyncRenderSystem';
 import { SCORE_POPUP_FONT_SIZE } from '@/constants/balance';
 export type { RenderEntity };
 
 type GameCanvasProps = {
   renderData: ReturnType<typeof useSharedValue<RenderEntity[]>>;
+  popupData: ReturnType<typeof useSharedValue<PopupRenderData[]>>;
   scrollY: ReturnType<typeof useSharedValue<number>>;
   scale: number;
 };
@@ -32,24 +34,22 @@ const popupFont = matchFont({
 } as const);
 
 function ScorePopupSlot({
-  textEntries,
+  popupData,
   index,
+  scale,
 }: {
-  textEntries: ReturnType<
-    typeof useDerivedValue<
-      { x: number; y: number; text: string; color: string; opacity: number }[]
-    >
-  >;
+  popupData: GameCanvasProps['popupData'];
   index: number;
+  scale: number;
 }) {
-  const x = useDerivedValue(() => textEntries.value[index]?.x ?? -200);
-  const y = useDerivedValue(() => textEntries.value[index]?.y ?? -200);
-  const text = useDerivedValue(() => textEntries.value[index]?.text ?? '');
+  const x = useDerivedValue(() => (popupData.value[index]?.x ?? -200) * scale);
+  const y = useDerivedValue(() => (popupData.value[index]?.y ?? -200) * scale);
+  const text = useDerivedValue(() => popupData.value[index]?.text ?? '');
   const color = useDerivedValue(
-    () => textEntries.value[index]?.color ?? 'transparent'
+    () => popupData.value[index]?.color ?? 'transparent'
   );
   const opacity = useDerivedValue(
-    () => textEntries.value[index]?.opacity ?? 0
+    () => popupData.value[index]?.opacity ?? 0
   );
 
   return (
@@ -65,34 +65,12 @@ function ScorePopupSlot({
 }
 
 function ScorePopups({
-  renderData,
+  popupData,
   scale,
 }: {
-  renderData: GameCanvasProps['renderData'];
+  popupData: GameCanvasProps['popupData'];
   scale: number;
 }) {
-  const textEntries = useDerivedValue(() => {
-    const entries: {
-      x: number;
-      y: number;
-      text: string;
-      color: string;
-      opacity: number;
-    }[] = [];
-    for (const e of renderData.value) {
-      if (e.text) {
-        entries.push({
-          x: e.x * scale,
-          y: e.y * scale,
-          text: e.text,
-          color: e.color,
-          opacity: e.opacity,
-        });
-      }
-    }
-    return entries;
-  });
-
   const slots = React.useMemo(
     () => Array.from({ length: MAX_SCORE_POPUPS }, (_, i) => i),
     []
@@ -101,7 +79,7 @@ function ScorePopups({
   return (
     <>
       {slots.map((i) => (
-        <ScorePopupSlot key={i} textEntries={textEntries} index={i} />
+        <ScorePopupSlot key={i} popupData={popupData} index={i} scale={scale} />
       ))}
     </>
   );
@@ -138,7 +116,7 @@ function EntitySlot({
   );
 }
 
-function GameCanvasInner({ renderData, scrollY, scale }: GameCanvasProps) {
+function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasProps) {
   const { width, height } = useWindowDimensions();
 
   const entitySlots = React.useMemo(
@@ -164,7 +142,7 @@ function GameCanvasInner({ renderData, scrollY, scale }: GameCanvasProps) {
       ))}
 
       {/* Score popup text rendering */}
-      <ScorePopups renderData={renderData} scale={scale} />
+      <ScorePopups popupData={popupData} scale={scale} />
     </Canvas>
   );
 }

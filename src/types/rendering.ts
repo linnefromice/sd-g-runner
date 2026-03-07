@@ -7,6 +7,4 @@ export type RenderEntity = {
   color: string;
   opacity: number;
   label?: string;
-  text?: string;
-  fontSize?: number;
 };
