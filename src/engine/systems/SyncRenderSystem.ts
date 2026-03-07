@@ -2,18 +2,30 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import type { RenderEntity } from '@/types/rendering';
 import type { SharedValue } from 'react-native-reanimated';
-import { IFRAME_BLINK_INTERVAL, SCORE_POPUP_FONT_SIZE } from '@/constants/balance';
+import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS } from '@/constants/balance';
 import { GATE_COLORS } from '@/constants/colors';
 
+export type PopupRenderData = {
+  x: number;
+  y: number;
+  text: string;
+  color: string;
+  opacity: number;
+};
+
 export type RenderSyncTarget = SharedValue<RenderEntity[]>;
+export type PopupSyncTarget = SharedValue<PopupRenderData[]>;
 
 export function createSyncRenderSystem(
-  renderData: RenderSyncTarget
+  renderData: RenderSyncTarget,
+  popupData: PopupSyncTarget,
 ): GameSystem<GameEntities> {
   const out: RenderEntity[] = [];
+  const popups: PopupRenderData[] = [];
 
   return (entities) => {
     out.length = 0;
+    popups.length = 0;
 
     // Boost Lane (background overlay)
     if (entities.boostLane?.active) {
@@ -131,36 +143,35 @@ export function createSyncRenderSystem(
       });
     }
 
-    // Particles
-    for (const p of entities.particles) {
-      if (!p.active) continue;
-      const opacity = p.life / p.maxLife;
+    // Shockwave effect (#10)
+    if (entities.shockwaveTimer > 0) {
+      const pcx = entities.player.x + entities.player.width / 2;
+      const pcy = entities.player.y + entities.player.height / 2;
+      const radius = JUST_TF_SHOCKWAVE_RADIUS;
+      const opacity = entities.shockwaveTimer / SHOCKWAVE_EFFECT_DURATION;
       out.push({
-        type: 'particle',
-        x: p.x - p.size / 2,
-        y: p.y - p.size / 2,
-        width: p.size,
-        height: p.size,
-        color: p.color,
-        opacity,
+        type: 'shockwave',
+        x: pcx - radius,
+        y: pcy - radius,
+        width: radius * 2,
+        height: radius * 2,
+        color: '#FFFFFF',
+        opacity: opacity * 0.5,
       });
     }
 
-    // Score Popups
-    for (const popup of entities.scorePopups) {
-      if (!popup.active) continue;
-      const lifeRatio = popup.life / popup.maxLife;
-      const opacity = lifeRatio > 0.5 ? 1.0 : lifeRatio * 2;
+    // Particles
+    for (const pt of entities.particles) {
+      if (!pt.active) continue;
+      const opacity = pt.life / pt.maxLife;
       out.push({
-        type: 'scorePopup',
-        x: popup.x,
-        y: popup.y,
-        width: 0,
-        height: 0,
-        color: popup.color,
+        type: 'particle',
+        x: pt.x - pt.size / 2,
+        y: pt.y - pt.size / 2,
+        width: pt.size,
+        height: pt.size,
+        color: pt.color,
         opacity,
-        text: popup.text,
-        fontSize: SCORE_POPUP_FONT_SIZE,
       });
     }
 
@@ -174,6 +185,21 @@ export function createSyncRenderSystem(
       }
     }
 
+    // Score Popups (separate SharedValue — no UI thread filtering needed)
+    for (const popup of entities.scorePopups) {
+      if (!popup.active) continue;
+      const lifeRatio = popup.life / popup.maxLife;
+      const opacity = lifeRatio > 0.5 ? 1.0 : lifeRatio * 2;
+      popups.push({
+        x: popup.x + shakeX,
+        y: popup.y + shakeY,
+        text: popup.text,
+        color: popup.color,
+        opacity,
+      });
+    }
+
     renderData.value = out;
+    popupData.value = popups;
   };
 }
