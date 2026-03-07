@@ -10,6 +10,8 @@ import {
   PARTICLE_EX_BURST_COUNT,
   PARTICLE_PARRY_COUNT,
   PARTICLE_BOSS_KILL_COUNT,
+  PARTICLE_BULLET_IMPACT_COUNT,
+  PARTICLE_BULLET_IMPACT_LIFE,
   SCORE_POPUP_SPEED,
   SCORE_POPUP_LIFE,
   HIT_STOP_ENEMY_KILL,
@@ -147,6 +149,10 @@ export function onBossKill(entities: GameEntities, x: number, y: number) {
   triggerShake(entities, SHAKE_BOSS_KILL_INTENSITY, SHAKE_BOSS_KILL_DURATION);
   spawnParticles(entities, x, y, PARTICLE_BOSS_KILL_COUNT, '#FF4444', 600, PARTICLE_DEFAULT_SPEED * 1.5, PARTICLE_BOSS_SIZE);
   spawnParticles(entities, x, y, PARTICLE_BOSS_KILL_COUNT, '#FF8800', 600, PARTICLE_DEFAULT_SPEED, PARTICLE_BOSS_SIZE);
+}
+
+export function onBulletImpact(entities: GameEntities, x: number, y: number) {
+  spawnParticles(entities, x, y, PARTICLE_BULLET_IMPACT_COUNT, '#00D4FF', PARTICLE_BULLET_IMPACT_LIFE);
 }
 
 export function onGraze(entities: GameEntities, x: number, y: number) {
