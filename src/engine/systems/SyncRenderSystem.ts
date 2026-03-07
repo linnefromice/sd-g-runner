@@ -12,6 +12,8 @@ export type RenderEntity = {
   color: string;
   opacity: number;
   label?: string;
+  text?: string;
+  fontSize?: number;
 };
 
 export type RenderSyncTarget = SharedValue<RenderEntity[]>;
@@ -156,6 +158,49 @@ export function createSyncRenderSystem(
         color: '#FFFFFF88',
         opacity,
       });
+    }
+
+    // Particles
+    for (const p of entities.particles) {
+      if (!p.active) continue;
+      const opacity = p.life / p.maxLife;
+      out.push({
+        type: 'particle',
+        x: p.x - p.size / 2,
+        y: p.y - p.size / 2,
+        width: p.size,
+        height: p.size,
+        color: p.color,
+        opacity,
+      });
+    }
+
+    // Score Popups
+    for (const popup of entities.scorePopups) {
+      if (!popup.active) continue;
+      const lifeRatio = popup.life / popup.maxLife;
+      const opacity = lifeRatio > 0.5 ? 1.0 : lifeRatio * 2;
+      out.push({
+        type: 'scorePopup',
+        x: popup.x,
+        y: popup.y,
+        width: 0,
+        height: 0,
+        color: popup.color,
+        opacity,
+        text: popup.text,
+        fontSize: 12,
+      });
+    }
+
+    // Apply screen shake offset to all entities
+    const shakeX = entities.shakeOffsetX;
+    const shakeY = entities.shakeOffsetY;
+    if (shakeX !== 0 || shakeY !== 0) {
+      for (const e of out) {
+        e.x += shakeX;
+        e.y += shakeY;
+      }
     }
 
     renderData.value = out;
