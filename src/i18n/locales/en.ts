@@ -105,6 +105,8 @@ export const en = {
     SD_Standard: 'Standard',
     SD_HeavyArtillery: 'Heavy Artillery',
     SD_HighSpeed: 'High Speed',
+    SD_Sniper: 'Sniper',
+    SD_Scatter: 'Scatter',
     SD_Awakened: 'Awakened',
   },
   abilities: {

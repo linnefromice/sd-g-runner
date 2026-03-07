@@ -105,6 +105,8 @@ export const ja: Translations = {
     SD_Standard: 'Standard',
     SD_HeavyArtillery: 'Heavy Artillery',
     SD_HighSpeed: 'High Speed',
+    SD_Sniper: 'スナイパー',
+    SD_Scatter: 'スキャッター',
     SD_Awakened: 'Awakened',
   },
   abilities: {

@@ -2,6 +2,8 @@ export type MechaFormId =
   | 'SD_Standard'
   | 'SD_HeavyArtillery'
   | 'SD_HighSpeed'
+  | 'SD_Sniper'
+  | 'SD_Scatter'
   | 'SD_Awakened';
 
 export type SpecialAbilityType =
