@@ -1,8 +1,8 @@
 import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
-import { checkAABBOverlap, getPlayerHitbox } from '@/engine/collision';
+import { checkAABBOverlap, getPlayerHitbox, getPlayerVisualHitbox } from '@/engine/collision';
 import { deactivateBullet } from '@/engine/entities/Bullet';
-import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS } from '@/constants/balance';
+import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE } from '@/constants/balance';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
 import { applyEnemyKillReward } from '@/engine/systems/enemyKillReward';
@@ -115,6 +115,22 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
           store.setFinalStageTime(entities.stageTime);
           store.setStageClear(true);
         }
+      }
+    }
+  }
+
+  // Graze detection: near-miss between visual hitbox and actual hitbox
+  if (!player.isInvincible && !store.isAwakened) {
+    const playerVisualHB = getPlayerVisualHitbox(player);
+    for (const bullet of entities.enemyBullets) {
+      if (!bullet.active || bullet.grazed) continue;
+      const overlapVisual = checkAABBOverlap(playerVisualHB, bullet);
+      const overlapActual = checkAABBOverlap(playerHB, bullet);
+      if (overlapVisual && !overlapActual) {
+        bullet.grazed = true;
+        store.addScore(GRAZE_SCORE);
+        if (!store.isEXBurstActive) store.addExGauge(GRAZE_EX_GAIN);
+        store.addTransformGauge(GRAZE_TF_GAIN);
       }
     }
   }

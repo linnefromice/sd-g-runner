@@ -26,3 +26,17 @@ export function getPlayerHitbox(player: { x: number; y: number; width: number; h
     height: hb.height,
   };
 }
+
+/**
+ * Get the player's visual hitbox (full sprite bounds).
+ * Used for graze detection — near-miss zone between visual and actual hitbox.
+ */
+export function getPlayerVisualHitbox(player: { x: number; y: number; width: number; height: number }) {
+  const hb = HITBOX.playerVisual;
+  return {
+    x: player.x + (player.width - hb.width) / 2,
+    y: player.y + (player.height - hb.height) / 2,
+    width: hb.width,
+    height: hb.height,
+  };
+}

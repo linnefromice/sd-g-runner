@@ -83,3 +83,8 @@ export const TRANSFORM_GAIN_PER_SECOND = 2;
 
 /** Explosion bullet */
 export const EXPLOSION_RADIUS = 40;
+
+/** Graze (near-miss) */
+export const GRAZE_EX_GAIN = 3;
+export const GRAZE_TF_GAIN = 2;
+export const GRAZE_SCORE = 20;

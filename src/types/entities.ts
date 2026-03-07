@@ -44,6 +44,7 @@ export interface BulletEntity extends BaseEntity {
   homing: boolean;
   specialAbility?: import('./forms').SpecialAbilityType;
   piercedEnemyIds?: Set<string>;
+  grazed?: boolean;
 }
 
 export interface GateEntity extends BaseEntity {
