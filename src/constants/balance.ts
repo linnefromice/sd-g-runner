@@ -59,15 +59,28 @@ export const BOSS_BASE_HP = 500;
 export const BOSS_HOVER_AMPLITUDE = 30;
 export const BOSS_HOVER_PERIOD = 3000;
 export const BOSS_Y_POSITION = 40;
+export const BOSS_SLIDE_SPEED = 30;
 export const BOSS_SPREAD_COUNT = 5;
+export const BOSS_SPREAD_ANGLE = 15;
+export const BOSS_SPREAD_DAMAGE = 15;
+export const BOSS_ATTACK_INTERVAL = 2.0;
+export const BOSS_COLLISION_DAMAGE = 50;
 export const BOSS_DRONE_COUNT = 3;
 export const BOSS_DRONE_COUNTS = { 1: 3, 2: 4 } as const;
+export const BOSS_DRONE_HP_THRESHOLD = 0.25;
+export const BOSS_DRONE_OFFSET_Y = 20;
+export const BOSS_DRONE_HP_MULTIPLIER = 0.5;
 export const BOSS_LASER_WARNING_DURATION = 1000;
 export const BOSS_LASER_FIRE_DURATION = 1500;
 export const BOSS_LASER_WIDTH = 30;
 export const BOSS_LASER_DAMAGE = 20;
 export const BOSS_LASER_TICK_INTERVAL = 300;
 export const BOSS_LASER_COOLDOWN = 4000;
+
+/** Enemy AI movement (logical units/sec) */
+export const PATROL_SPEED = 60;
+export const PHALANX_SPEED = 40;
+export const JUGGERNAUT_SCROLL_FACTOR = 0.3;
 
 /** Movement speeds (logical units/sec) */
 export const PLAYER_BULLET_SPEED = 400;

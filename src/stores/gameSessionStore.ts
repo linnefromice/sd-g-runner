@@ -23,9 +23,6 @@ interface GameSessionState {
   speed: number;
   fireRate: number;
 
-  // Invincibility
-  isInvincible: boolean;
-
   // Combo
   comboCount: number;
   isAwakened: boolean;
@@ -96,7 +93,6 @@ const INITIAL_STATE = {
   atk: PLAYER_INITIAL_ATK,
   speed: PLAYER_INITIAL_SPEED,
   fireRate: PLAYER_INITIAL_FIRE_RATE,
-  isInvincible: false,
   comboCount: 0,
   isAwakened: false,
   awakenedWarning: false,
@@ -126,7 +122,7 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
 
   takeDamage: (damage) => {
     const newHp = Math.max(0, get().hp - damage);
-    set((s) => ({ hp: newHp, isInvincible: true, damageTaken: s.damageTaken + damage }));
+    set((s) => ({ hp: newHp, damageTaken: s.damageTaken + damage }));
   },
 
   heal: (amount) => set((s) => ({ hp: Math.max(0, Math.min(s.maxHp, s.hp + amount)) })),

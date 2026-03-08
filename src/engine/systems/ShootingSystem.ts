@@ -3,6 +3,7 @@ import type { GameEntities } from '@/types/entities';
 import type { MechaFormDefinition } from '@/types/forms';
 import { BASE_FIRE_INTERVAL } from '@/constants/balance';
 import { createPlayerBullet } from '@/engine/entities/Bullet';
+import { acquireFromPool } from '@/engine/pool';
 
 const SPREAD_ANGLE = 15; // degrees between spread bullets
 
@@ -29,8 +30,6 @@ export function createShootingSystem(getForm: () => MechaFormDefinition): GameSy
 
     if (count <= 1) {
       // Single bullet (original behavior)
-      const slot = entities.playerBullets.find((b) => !b.active);
-      if (!slot) return;
       const bullet = createPlayerBullet(centerX, p.y, damage, {
         width: bulletConfig.width,
         height: bulletConfig.height,
@@ -38,14 +37,11 @@ export function createShootingSystem(getForm: () => MechaFormDefinition): GameSy
         homing: isHoming,
         specialAbility,
       });
-      Object.assign(slot, bullet);
-      slot.active = true;
+      acquireFromPool(entities.playerBullets, bullet);
     } else {
       // Multi-bullet spread
       const halfSpread = ((count - 1) * SPREAD_ANGLE) / 2;
       for (let i = 0; i < count; i++) {
-        const slot = entities.playerBullets.find((b) => !b.active);
-        if (!slot) break;
         const angleDeg = -halfSpread + i * SPREAD_ANGLE;
         const offsetX = Math.tan((angleDeg * Math.PI) / 180) * 20;
         const bullet = createPlayerBullet(centerX + offsetX, p.y, damage, {
@@ -55,8 +51,7 @@ export function createShootingSystem(getForm: () => MechaFormDefinition): GameSy
           homing: isHoming,
           specialAbility,
         });
-        Object.assign(slot, bullet);
-        slot.active = true;
+        if (!acquireFromPool(entities.playerBullets, bullet)) break;
       }
     }
   };

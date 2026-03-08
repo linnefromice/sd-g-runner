@@ -4,9 +4,16 @@ import {
   BOSS_HOVER_AMPLITUDE,
   BOSS_HOVER_PERIOD,
   BOSS_Y_POSITION,
+  BOSS_SLIDE_SPEED,
   BOSS_SPREAD_COUNT,
+  BOSS_SPREAD_ANGLE,
+  BOSS_SPREAD_DAMAGE,
+  BOSS_ATTACK_INTERVAL,
   BOSS_DRONE_COUNT,
   BOSS_DRONE_COUNTS,
+  BOSS_DRONE_HP_THRESHOLD,
+  BOSS_DRONE_OFFSET_Y,
+  BOSS_DRONE_HP_MULTIPLIER,
   BOSS_LASER_WARNING_DURATION,
   BOSS_LASER_FIRE_DURATION,
   BOSS_LASER_WIDTH,
@@ -18,6 +25,7 @@ import {
 import { LOGICAL_WIDTH } from '@/constants/dimensions';
 import { createEnemyBullet } from '@/engine/entities/Bullet';
 import { createEnemy } from '@/engine/entities/Enemy';
+import { acquireFromPool } from '@/engine/pool';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { onPlayerHit } from '@/engine/effects';
 
@@ -81,7 +89,7 @@ export function createBossSystem(): GameSystem<GameEntities> {
 
     // Slide in from top
     if (boss.y < BOSS_Y_POSITION) {
-      boss.y += 30 * dt;
+      boss.y += BOSS_SLIDE_SPEED * dt;
       if (boss.y > BOSS_Y_POSITION) boss.y = BOSS_Y_POSITION;
       return;
     }
@@ -102,7 +110,7 @@ export function createBossSystem(): GameSystem<GameEntities> {
       boss.attackTimer += dt;
       const shouldSpread = boss.phase === 'spread' || useSpread;
 
-      if (shouldSpread && boss.attackTimer >= 2.0) {
+      if (shouldSpread && boss.attackTimer >= BOSS_ATTACK_INTERVAL) {
         fireSpreadShot(entities, boss);
         boss.attackTimer = 0;
         if (boss.phase !== 'spread') useSpread = false;
@@ -110,7 +118,7 @@ export function createBossSystem(): GameSystem<GameEntities> {
     }
 
     // Drone summon (HP 25%~)
-    if (boss.hp / boss.maxHp <= 0.25 && boss.drones.length === 0) {
+    if (boss.hp / boss.maxHp <= BOSS_DRONE_HP_THRESHOLD && boss.drones.length === 0) {
       spawnDrones(entities, boss);
     }
   };
@@ -120,12 +128,9 @@ function fireSpreadShot(entities: GameEntities, boss: NonNullable<GameEntities['
   const bCenterX = boss.x + boss.width / 2;
   const startY = boss.y + boss.height;
   for (let i = 0; i < BOSS_SPREAD_COUNT; i++) {
-    const slot = entities.enemyBullets.find((b) => !b.active);
-    if (!slot) break;
-    const angle = ((i - Math.floor(BOSS_SPREAD_COUNT / 2)) * 15 * Math.PI) / 180;
-    const bullet = createEnemyBullet(bCenterX + Math.sin(angle) * 20, startY, 15);
-    Object.assign(slot, bullet);
-    slot.active = true;
+    const angle = ((i - Math.floor(BOSS_SPREAD_COUNT / 2)) * BOSS_SPREAD_ANGLE * Math.PI) / 180;
+    const bullet = createEnemyBullet(bCenterX + Math.sin(angle) * 20, startY, BOSS_SPREAD_DAMAGE);
+    if (!acquireFromPool(entities.enemyBullets, bullet)) break;
   }
 }
 
@@ -145,12 +150,10 @@ function applyLaserDamage(
 function spawnDrones(entities: GameEntities, boss: NonNullable<GameEntities['boss']>) {
   const droneCount = BOSS_DRONE_COUNTS[boss.bossIndex as keyof typeof BOSS_DRONE_COUNTS] ?? BOSS_DRONE_COUNT;
   for (let i = 0; i < droneCount; i++) {
-    const slot = entities.enemies.find((e) => !e.active);
-    if (!slot) break;
     const x = boss.x + (i + 1) * (boss.width / (droneCount + 1));
-    const drone = createEnemy('stationary', x, boss.y + boss.height + 20, 0.5);
-    Object.assign(slot, drone);
-    slot.active = true;
+    const drone = createEnemy('stationary', x, boss.y + boss.height + BOSS_DRONE_OFFSET_Y, BOSS_DRONE_HP_MULTIPLIER);
+    const slot = acquireFromPool(entities.enemies, drone);
+    if (!slot) break;
     boss.drones.push(drone.id);
   }
 }

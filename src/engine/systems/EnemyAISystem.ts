@@ -1,7 +1,8 @@
 import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
-import { ENEMY_STATS, BASE_SCROLL_SPEED } from '@/constants/balance';
+import { ENEMY_STATS, BASE_SCROLL_SPEED, PATROL_SPEED, PHALANX_SPEED, JUGGERNAUT_SCROLL_FACTOR } from '@/constants/balance';
 import { createEnemyBullet } from '@/engine/entities/Bullet';
+import { acquireFromPool } from '@/engine/pool';
 
 export const enemyAISystem: GameSystem<GameEntities> = (entities, { time }) => {
   const dt = time.delta / 1000;
@@ -14,8 +15,7 @@ export const enemyAISystem: GameSystem<GameEntities> = (entities, { time }) => {
     // Movement
     switch (enemy.enemyType) {
       case 'patrol': {
-        const speed = 60;
-        enemy.x += enemy.moveDirection * speed * dt;
+        enemy.x += enemy.moveDirection * PATROL_SPEED * dt;
 
         // Reverse at bounds
         if (enemy.x < 16 || enemy.x + enemy.width > 304) {
@@ -30,8 +30,7 @@ export const enemyAISystem: GameSystem<GameEntities> = (entities, { time }) => {
         break;
       }
       case 'phalanx': {
-        const speed = 40;
-        enemy.x += enemy.moveDirection * speed * dt;
+        enemy.x += enemy.moveDirection * PHALANX_SPEED * dt;
 
         // Reverse at bounds
         if (enemy.x < 16 || enemy.x + enemy.width > 304) {
@@ -40,7 +39,7 @@ export const enemyAISystem: GameSystem<GameEntities> = (entities, { time }) => {
         break;
       }
       case 'juggernaut': {
-        enemy.y += BASE_SCROLL_SPEED * 0.3 * dt;
+        enemy.y += BASE_SCROLL_SPEED * JUGGERNAUT_SCROLL_FACTOR * dt;
         enemy.x += Math.sin(enemy.moveTimer * 1.5) * 20 * dt;
         enemy.moveTimer += dt;
         break;
@@ -69,16 +68,12 @@ export const enemyAISystem: GameSystem<GameEntities> = (entities, { time }) => {
       }
 
       // Fire a bullet downward
-      const slot = entities.enemyBullets.find((b) => !b.active);
-      if (slot) {
-        const bullet = createEnemyBullet(
-          fireX,
-          enemy.y + enemy.height,
-          stats.attackDamage
-        );
-        Object.assign(slot, bullet);
-        slot.active = true;
-      }
+      const bullet = createEnemyBullet(
+        fireX,
+        enemy.y + enemy.height,
+        stats.attackDamage
+      );
+      acquireFromPool(entities.enemyBullets, bullet);
     }
   }
 };

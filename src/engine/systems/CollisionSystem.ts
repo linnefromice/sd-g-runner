@@ -2,14 +2,14 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import { checkAABBOverlap, getPlayerHitbox, getPlayerVisualHitbox, getCenter, getDistance } from '@/engine/collision';
 import { deactivateBullet } from '@/engine/entities/Bullet';
-import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, DEBRIS_DESTROY_SCORE, GROWTH_GATE_INITIAL_RATIO, GROWTH_GATE_PER_HIT, JUST_TF_SHOCKWAVE_RADIUS, JUST_TF_SHOCKWAVE_DAMAGE, JUST_TF_SCORE, JUST_TF_EX_GAIN, SHOCKWAVE_EFFECT_DURATION } from '@/constants/balance';
+import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, GROWTH_GATE_INITIAL_RATIO, GROWTH_GATE_PER_HIT, JUST_TF_SHOCKWAVE_RADIUS, JUST_TF_SHOCKWAVE_DAMAGE, JUST_TF_SCORE, JUST_TF_EX_GAIN, SHOCKWAVE_EFFECT_DURATION, BOSS_COLLISION_DAMAGE } from '@/constants/balance';
 import { generateGateLabel } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
 import { applyEnemyKillReward } from '@/engine/systems/enemyKillReward';
 import { applyBossKill } from '@/engine/systems/bossKill';
-import { deactivateDebris } from '@/engine/entities/Debris';
-import { onPlayerHit, onParry, onGraze, onDebrisDestroy, onBulletImpact } from '@/engine/effects';
+import { applyDebrisDestroyReward } from '@/engine/systems/debrisDestroyReward';
+import { onPlayerHit, onParry, onGraze, onBulletImpact } from '@/engine/effects';
 
 type Store = ReturnType<typeof useGameSessionStore.getState>;
 
@@ -96,10 +96,7 @@ function checkPlayerBulletsVsDebris(entities: GameEntities, store: Store) {
         deactivateBullet(bullet);
         applyExplosionAoE(entities, impact.x, impact.y, bullet.damage);
         if (debris.hp <= 0) {
-          const dc = getCenter(debris);
-          deactivateDebris(debris);
-          store.addScore(DEBRIS_DESTROY_SCORE);
-          onDebrisDestroy(entities, dc.x, dc.y);
+          applyDebrisDestroyReward(debris, entities);
         }
         break;
       }
@@ -250,7 +247,7 @@ function checkDamageToPlayer(
       applyParryShockwave(entities, store);
       return;
     }
-    applyDamage(entities, player, 50, store); // §6.2 boss collision
+    applyDamage(entities, player, BOSS_COLLISION_DAMAGE, store);
   }
 }
 

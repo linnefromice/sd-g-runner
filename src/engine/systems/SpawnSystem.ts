@@ -6,6 +6,7 @@ import { createGatePair } from '@/engine/entities/Gate';
 import { createBoss } from '@/engine/entities/Boss';
 import { createDebris } from '@/engine/entities/Debris';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
+import { acquireFromPool } from '@/engine/pool';
 
 export function createSpawnSystem(stage: StageDefinition): GameSystem<GameEntities> {
   return (entities) => {
@@ -24,16 +25,13 @@ export function createSpawnSystem(stage: StageDefinition): GameSystem<GameEntiti
           const count = event.count ?? 1;
           let spawned = 0;
           for (let i = 0; i < count; i++) {
-            const slot = entities.enemies.find((e) => !e.active);
-            if (!slot) break;
             const enemy = createEnemy(
               event.enemyType,
               event.x + i * 40, // offset for multiple spawns
               -30, // spawn above screen
               stage.difficulty.enemyHpMultiplier
             );
-            Object.assign(slot, enemy);
-            slot.active = true;
+            if (!acquireFromPool(entities.enemies, enemy)) break;
             spawned++;
           }
           if (spawned > 0) {
@@ -55,14 +53,11 @@ export function createSpawnSystem(stage: StageDefinition): GameSystem<GameEntiti
         case 'debris_spawn': {
           const debrisCount = event.count ?? 1;
           for (let i = 0; i < debrisCount; i++) {
-            const slot = entities.debris.find((d) => !d.active);
-            if (!slot) break;
             const debris = createDebris(
               event.x + i * 50, // offset for multiple spawns
               -30 // spawn above screen
             );
-            Object.assign(slot, debris);
-            slot.active = true;
+            if (!acquireFromPool(entities.debris, debris)) break;
           }
           break;
         }
