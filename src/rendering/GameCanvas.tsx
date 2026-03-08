@@ -151,14 +151,24 @@ function EntitySlot({
     return 1.0;
   });
 
-  // Gate label
+  // Gate label — centered horizontally using approximate character width
   const label = useDerivedValue(() => renderData.value[index]?.label ?? '');
   const GATE_ACCENT_W = 3 * scale;
-  const labelX = useDerivedValue(() => x.value + GATE_ACCENT_W + 6 * scale);
-  const labelY = useDerivedValue(() => y.value + height.value / 2 + 4 * scale);
+  // Average character width for fontSize 10 bold Helvetica ≈ 6px
+  const GATE_CHAR_WIDTH = 6;
+  const labelX = useDerivedValue(() => {
+    const text = renderData.value[index]?.label ?? '';
+    const textW = text.length * GATE_CHAR_WIDTH;
+    return x.value + width.value / 2 - textW / 2;
+  });
+  // Baseline offset: fontSize 10 cap-height ≈ 7px, half = 3.5 ≈ 4
+  const labelY = useDerivedValue(() => y.value + height.value / 2 + 4);
 
   // Gate border positions
   const gateBorderBottomY = useDerivedValue(() => y.value + height.value - 1 * scale);
+
+  // Gate right accent bar position
+  const gateRightAccentX = useDerivedValue(() => x.value + width.value - GATE_ACCENT_W);
 
   // Growth gate progress bar
   const gateProgressW = useDerivedValue(() => {
@@ -197,18 +207,20 @@ function EntitySlot({
       {/* Non-gate rect types (boostLane, beams) */}
       <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={rectOpacity} />
 
-      {/* === Gate rendering: translucent fill + neon border lines + accent bar === */}
+      {/* === Gate rendering: translucent fill + neon border lines + symmetric accent bars === */}
       {/* Gate fill — translucent neon glow */}
       <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={gateFillOpacity} />
       {/* Gate top border line */}
       <Rect x={x} y={y} width={width} height={1} color={color} opacity={gateBorderOpacity} />
       {/* Gate bottom border line */}
       <Rect x={x} y={gateBorderBottomY} width={width} height={1} color={color} opacity={gateBorderOpacity} />
-      {/* Gate left accent bar — full brightness type indicator */}
+      {/* Gate left accent bar */}
       <Rect x={x} y={y} width={GATE_ACCENT_W} height={height} color={color} opacity={gateAccentOpacity} />
+      {/* Gate right accent bar */}
+      <Rect x={gateRightAccentX} y={y} width={GATE_ACCENT_W} height={height} color={color} opacity={gateAccentOpacity} />
       {/* Growth gate progress fill (behind label) */}
       <Rect x={x} y={y} width={gateProgressW} height={height} color={color} opacity={gateProgressOpacity} />
-      {/* Gate label text — larger, offset after accent bar */}
+      {/* Gate label text — centered */}
       <SkiaText x={labelX} y={labelY} text={label} font={gateLabelFont} color="#FFFFFF" opacity={gateLabelOpacity} />
 
       {/* HP bar: track (dark) + fill (colored) — only visible when damaged */}
