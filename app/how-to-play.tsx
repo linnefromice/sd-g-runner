@@ -74,6 +74,7 @@ export default function HowToPlayScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>{t.howToPlay.title}</Text>
       </View>
+      <View style={styles.headerLine} />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {sections.map((section) => (
@@ -123,12 +124,20 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
+    marginBottom: 12,
+  },
+  headerLine: {
+    height: 1,
+    backgroundColor: COLORS.neonBlue + '33',
+    marginHorizontal: 24,
     marginBottom: 16,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: COLORS.neonBlue,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
   scroll: { flex: 1 },
   scrollContent: {
@@ -136,14 +145,15 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   section: {
-    marginBottom: 28,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
     color: COLORS.neonBlue,
     letterSpacing: 2,
     marginBottom: 4,
+    textTransform: 'uppercase',
   },
   sectionDesc: {
     fontSize: 13,
@@ -152,10 +162,12 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   item: {
-    backgroundColor: '#ffffff08',
-    borderRadius: 8,
+    backgroundColor: '#ffffff06',
+    borderRadius: 2,
     padding: 12,
-    marginTop: 8,
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: '#ffffff0D',
   },
   itemHeader: {
     flexDirection: 'row',
@@ -163,15 +175,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   swatch: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 1,
     marginRight: 8,
   },
   itemLabel: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: COLORS.white,
+    letterSpacing: 0.5,
   },
   itemDesc: {
     fontSize: 13,
@@ -187,14 +200,17 @@ const styles = StyleSheet.create({
   backButton: {
     marginHorizontal: 24,
     marginBottom: 24,
-    backgroundColor: '#ffffff22',
+    backgroundColor: '#ffffff08',
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 2,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ffffff22',
   },
   backButtonText: {
-    fontSize: 16,
-    color: COLORS.white,
+    fontSize: 15,
+    color: COLORS.lightGray,
     fontWeight: '600',
+    letterSpacing: 1,
   },
 });

@@ -68,30 +68,36 @@ export default function ResultScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        {isStageClear ? t.result.stageClear : t.result.gameOver}
-      </Text>
+      <View style={styles.titleBorder}>
+        <Text style={[styles.title, !isStageClear && styles.titleGameOver]}>
+          {isStageClear ? t.result.stageClear : t.result.gameOver}
+        </Text>
+      </View>
 
-      <View style={styles.stats}>
-        <Text style={styles.label}>{t.result.score}</Text>
-        <Text style={styles.value}>{finalScore.toLocaleString()}</Text>
-
-        <Text style={styles.label}>{t.result.creditsEarned}</Text>
-        <Text style={styles.value}>{finalCredits} Cr</Text>
+      <View style={styles.statsCard}>
+        <View style={styles.statRow}>
+          <Text style={styles.label}>{t.result.score}</Text>
+          <Text style={styles.value}>{finalScore.toLocaleString()}</Text>
+        </View>
+        <View style={styles.divider} />
+        <View style={styles.statRow}>
+          <Text style={styles.label}>{t.result.creditsEarned}</Text>
+          <Text style={styles.creditValue}>{finalCredits} Cr</Text>
+        </View>
         {clearBonus > 0 && (
           <Text style={styles.bonusText}>{t.result.clearBonus(clearBonus)}</Text>
         )}
       </View>
 
       {bonuses.length > 0 && (
-        <View style={styles.bonusSection}>
+        <View style={styles.bonusCard}>
           <Text style={styles.bonusTitle}>{t.result.bonusTitle}</Text>
           {bonuses.map((b) => (
             <View key={b.key} style={styles.bonusRow}>
               <Text style={styles.bonusLabel}>
                 {String(t.result[BONUS_LABELS[b.key]])}
               </Text>
-              {b.points > 0 && <Text style={styles.bonusValue}>+{b.points}</Text>}
+              {b.points > 0 && <Text style={styles.bonusPoints}>+{b.points}</Text>}
             </View>
           ))}
           {bonuses.some((b) => b.key === 'noDamage') && (
@@ -120,10 +126,10 @@ export default function ResultScreen() {
 
         {isStageClear && (
           <TouchableOpacity
-            style={[styles.button, styles.nextButton]}
+            style={styles.nextButton}
             onPress={() => router.replace(`/game/${stageIdNum + 1}`)}
           >
-            <Text style={styles.buttonText}>{t.result.nextStage}</Text>
+            <Text style={styles.nextButtonText}>{t.result.nextStage}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -134,44 +140,140 @@ export default function ResultScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a14',
+    backgroundColor: COLORS.bgDark,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
   },
+  titleBorder: {
+    borderWidth: 1,
+    borderColor: COLORS.neonBlue + '55',
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderRadius: 2,
+    marginBottom: 32,
+  },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     color: COLORS.neonBlue,
-    marginBottom: 40,
+    letterSpacing: 3,
   },
-  stats: {
+  titleGameOver: {
+    color: COLORS.neonRed,
+  },
+  statsCard: {
+    width: '100%',
+    maxWidth: 280,
+    backgroundColor: '#ffffff08',
+    borderWidth: 1,
+    borderColor: COLORS.neonBlue + '33',
+    borderRadius: 2,
+    padding: 20,
+    marginBottom: 20,
+  },
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 40,
-    gap: 8,
   },
-  label: { fontSize: 14, color: COLORS.lightGray },
+  divider: {
+    height: 1,
+    backgroundColor: '#ffffff11',
+    marginVertical: 12,
+  },
+  label: {
+    fontSize: 13,
+    color: COLORS.lightGray,
+    letterSpacing: 1,
+  },
   value: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     color: COLORS.white,
     fontVariant: ['tabular-nums'],
+  },
+  creditValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.scoreYellow,
+    fontVariant: ['tabular-nums'],
+  },
+  bonusText: {
+    fontSize: 11,
+    color: COLORS.neonGreen,
+    textAlign: 'right',
+    marginTop: 4,
+  },
+  bonusCard: {
+    width: '100%',
+    maxWidth: 280,
+    backgroundColor: '#ffffff06',
+    borderWidth: 1,
+    borderColor: COLORS.scoreYellow + '33',
+    borderRadius: 2,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 24,
+    gap: 4,
+  },
+  bonusTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.scoreYellow,
+    letterSpacing: 2,
     marginBottom: 8,
   },
-  buttons: { gap: 12, width: '100%', maxWidth: 240 },
-  button: {
-    backgroundColor: '#ffffff22',
-    paddingVertical: 14,
-    borderRadius: 8,
+  bonusRow: {
+    flexDirection: 'row',
+    gap: 12,
     alignItems: 'center',
   },
-  nextButton: { backgroundColor: COLORS.neonBlue + '44' },
-  buttonText: { fontSize: 16, color: COLORS.white, fontWeight: '600' },
-  bonusText: { fontSize: 12, color: COLORS.neonGreen, marginTop: -4 },
-  bonusSection: { alignItems: 'center' as const, marginBottom: 24, gap: 4 },
-  bonusTitle: { fontSize: 16, fontWeight: 'bold' as const, color: '#FFD700', marginBottom: 8 },
-  bonusRow: { flexDirection: 'row' as const, gap: 12, alignItems: 'center' as const },
-  bonusLabel: { fontSize: 14, color: '#AAAACC' },
-  bonusValue: { fontSize: 14, color: '#00FF88', fontWeight: '600' as const },
-  bonusMultiplier: { fontSize: 12, color: '#FFD700', marginTop: 4 },
+  bonusLabel: {
+    fontSize: 13,
+    color: COLORS.lightGray,
+  },
+  bonusPoints: {
+    fontSize: 13,
+    color: COLORS.neonGreen,
+    fontWeight: '600',
+  },
+  bonusMultiplier: {
+    fontSize: 11,
+    color: COLORS.scoreYellow,
+    marginTop: 4,
+  },
+  buttons: {
+    gap: 10,
+    width: '100%',
+    maxWidth: 240,
+  },
+  button: {
+    backgroundColor: '#ffffff08',
+    paddingVertical: 14,
+    borderRadius: 2,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ffffff22',
+  },
+  buttonText: {
+    fontSize: 15,
+    color: COLORS.lightGray,
+    fontWeight: '600',
+    letterSpacing: 1,
+  },
+  nextButton: {
+    backgroundColor: COLORS.neonBlue + '22',
+    paddingVertical: 14,
+    borderRadius: 2,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.neonBlue + '66',
+  },
+  nextButtonText: {
+    fontSize: 15,
+    color: COLORS.neonBlue,
+    fontWeight: '600',
+    letterSpacing: 1,
+  },
 });

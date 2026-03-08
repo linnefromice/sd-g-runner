@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSaveDataStore } from '@/stores/saveDataStore';
 import { useTranslation, type LocaleSetting } from '@/i18n';
 import { COLORS } from '@/constants/colors';
@@ -14,6 +15,7 @@ const LOCALE_OPTIONS: { value: LocaleSetting; labelKey: 'localeSystem' | 'locale
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const t = useTranslation();
   const bgmVolume = useSaveDataStore((s) => s.settings.bgmVolume);
   const seVolume = useSaveDataStore((s) => s.settings.seVolume);
@@ -22,6 +24,7 @@ export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{t.settings.title}</Text>
+      <View style={styles.titleLine} />
 
       <VolumeControl
         label={t.settings.bgmVolume}
@@ -35,18 +38,18 @@ export default function SettingsScreen() {
         onChange={(v) => useSaveDataStore.getState().setVolume('se', v)}
       />
 
-      <View style={styles.volumeSection}>
-        <View style={styles.volumeHeader}>
-          <Text style={styles.volumeLabel}>{t.settings.language}</Text>
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionLabel}>{t.settings.language}</Text>
         </View>
-        <View style={styles.volumeSteps}>
+        <View style={styles.steps}>
           {LOCALE_OPTIONS.map((opt) => (
             <TouchableOpacity
               key={opt.value}
-              style={[styles.volumeStep, locale === opt.value && styles.volumeStepActive]}
+              style={[styles.step, locale === opt.value && styles.stepActive]}
               onPress={() => useSaveDataStore.getState().setLocale(opt.value)}
             >
-              <Text style={[styles.volumeStepText, locale === opt.value && styles.volumeStepTextActive]}>
+              <Text style={[styles.stepText, locale === opt.value && styles.stepTextActive]}>
                 {t.settings[opt.labelKey]}
               </Text>
             </TouchableOpacity>
@@ -54,7 +57,10 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/')}>
+      <TouchableOpacity
+        style={[styles.backButton, { marginBottom: Math.max(insets.bottom, 24) }]}
+        onPress={() => router.push('/')}
+      >
         <Text style={styles.backButtonText}>{t.settings.backToTitle}</Text>
       </TouchableOpacity>
     </View>
@@ -71,19 +77,19 @@ function VolumeControl({
   onChange: (v: number) => void;
 }) {
   return (
-    <View style={styles.volumeSection}>
-      <View style={styles.volumeHeader}>
-        <Text style={styles.volumeLabel}>{label}</Text>
-        <Text style={styles.volumeValue}>{Math.round(value * 100)}%</Text>
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionLabel}>{label}</Text>
+        <Text style={styles.sectionValue}>{Math.round(value * 100)}%</Text>
       </View>
-      <View style={styles.volumeSteps}>
+      <View style={styles.steps}>
         {VOLUME_STEPS.map((step) => (
           <TouchableOpacity
             key={step}
-            style={[styles.volumeStep, value === step && styles.volumeStepActive]}
+            style={[styles.step, value === step && styles.stepActive]}
             onPress={() => onChange(step)}
           >
-            <Text style={[styles.volumeStepText, value === step && styles.volumeStepTextActive]}>
+            <Text style={[styles.stepText, value === step && styles.stepTextActive]}>
               {Math.round(step * 100)}%
             </Text>
           </TouchableOpacity>
@@ -101,64 +107,75 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: COLORS.neonBlue,
-    marginBottom: 40,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
-  volumeSection: { marginBottom: 32 },
-  volumeHeader: {
+  titleLine: {
+    height: 1,
+    backgroundColor: COLORS.neonBlue + '33',
+    marginTop: 12,
+    marginBottom: 32,
+  },
+  section: { marginBottom: 28 },
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
-  volumeLabel: {
-    fontSize: 16,
+  sectionLabel: {
+    fontSize: 15,
     color: COLORS.white,
     fontWeight: '600',
+    letterSpacing: 1,
   },
-  volumeValue: {
+  sectionValue: {
     fontSize: 14,
     color: COLORS.neonBlue,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
   },
-  volumeSteps: {
+  steps: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
   },
-  volumeStep: {
+  step: {
     flex: 1,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 2,
     alignItems: 'center',
-    backgroundColor: '#ffffff11',
+    backgroundColor: '#ffffff08',
     borderWidth: 1,
-    borderColor: '#ffffff22',
+    borderColor: '#ffffff18',
   },
-  volumeStepActive: {
-    backgroundColor: COLORS.neonBlue + '33',
+  stepActive: {
+    backgroundColor: COLORS.neonBlue + '22',
     borderColor: COLORS.neonBlue,
   },
-  volumeStepText: {
+  stepText: {
     fontSize: 12,
-    color: COLORS.lightGray,
+    color: '#666666',
     fontWeight: '600',
   },
-  volumeStepTextActive: {
+  stepTextActive: {
     color: COLORS.neonBlue,
   },
   backButton: {
     marginTop: 24,
-    backgroundColor: '#ffffff22',
+    backgroundColor: '#ffffff08',
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 2,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ffffff22',
   },
   backButtonText: {
-    fontSize: 16,
-    color: COLORS.white,
+    fontSize: 15,
+    color: COLORS.lightGray,
     fontWeight: '600',
+    letterSpacing: 1,
   },
 });
