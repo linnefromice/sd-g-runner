@@ -5,7 +5,7 @@ import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { deactivateBullet } from '@/engine/entities/Bullet';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
 import { applyEnemyKillReward } from '@/engine/systems/enemyKillReward';
-import { onBossKill } from '@/engine/effects';
+import { applyBossKill } from '@/engine/systems/bossKill';
 
 export const exBurstSystem: GameSystem<GameEntities> = (entities, { time }) => {
   const store = useGameSessionStore.getState();
@@ -53,12 +53,7 @@ export const exBurstSystem: GameSystem<GameEntities> = (entities, { time }) => {
       entities.boss.hp -= EX_BURST_DAMAGE;
       updateBossPhase(entities.boss);
       if (entities.boss.hp <= 0) {
-        const bcx = entities.boss.x + entities.boss.width / 2;
-        const bcy = entities.boss.y + entities.boss.height / 2;
-        entities.boss.active = false;
-        store.setFinalStageTime(entities.stageTime);
-        store.setStageClear(true);
-        onBossKill(entities, bcx, bcy);
+        applyBossKill(entities);
       }
     }
   }

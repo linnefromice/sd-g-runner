@@ -106,7 +106,7 @@ export default function GameScreen() {
     gameOverSystem,
     particleSystem,
     screenShakeSystem,
-    createSyncRenderSystem(renderData, popupData, scale),
+    createSyncRenderSystem(renderData, popupData, scrollYShared, scale),
   ]);
 
   useGameLoop(systemsRef, entitiesRef, running);
@@ -124,14 +124,6 @@ export default function GameScreen() {
     });
     return () => sub.remove();
   }, []);
-
-  // Sync scroll SharedValue for background
-  useEffect(() => {
-    const interval = setInterval(() => {
-      scrollYShared.value = entitiesRef.current?.scrollY ?? 0;
-    }, 16);
-    return () => clearInterval(interval);
-  }, [scrollYShared]);
 
   // Gesture: drag to move player directly, tap to slide toward position
   // runOnJS(true) is required — without it, RNGH v2 runs callbacks as Reanimated
