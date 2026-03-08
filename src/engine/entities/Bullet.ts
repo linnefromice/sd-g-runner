@@ -32,7 +32,7 @@ export function createEnemyBullet(
   x: number,
   y: number,
   damage: number,
-  speed?: number
+  config?: { speed?: number; vx?: number; vy?: number }
 ): BulletEntity {
   return {
     id: `eb_${nextId++}`,
@@ -43,8 +43,10 @@ export function createEnemyBullet(
     height: HITBOX.enemyBullet.height,
     active: true,
     damage,
-    speed: speed ?? ENEMY_BULLET_SPEED,
+    speed: config?.speed ?? ENEMY_BULLET_SPEED,
     homing: false,
+    vx: config?.vx,
+    vy: config?.vy,
   };
 }
 

@@ -23,7 +23,7 @@ import { scrollSystem } from '@/engine/systems/ScrollSystem';
 import { boostLaneSystem } from '@/engine/systems/BoostLaneSystem';
 import { createMovementSystem } from '@/engine/systems/MovementSystem';
 import { createShootingSystem } from '@/engine/systems/ShootingSystem';
-import { enemyAISystem } from '@/engine/systems/EnemyAISystem';
+import { createEnemyAISystem } from '@/engine/systems/EnemyAISystem';
 import { createSpawnSystem } from '@/engine/systems/SpawnSystem';
 import { collisionSystem } from '@/engine/systems/CollisionSystem';
 import { gateSystem } from '@/engine/systems/GateSystem';
@@ -94,7 +94,7 @@ export default function GameScreen() {
     boostLaneSystem,
     createMovementSystem(getForm),
     createShootingSystem(getForm),
-    enemyAISystem,
+    createEnemyAISystem(stage.difficulty),
     createSpawnSystem(stage),
     transformGaugeSystem,
     awakenedSystem,

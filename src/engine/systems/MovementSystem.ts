@@ -63,11 +63,18 @@ export function createMovementSystem(
     if (b.y + b.height < 0 || b.y > visibleHeight) deactivateBullet(b);
   }
 
-  // Move enemy bullets downward
+  // Move enemy bullets (directional or straight down)
   for (const b of entities.enemyBullets) {
     if (!b.active) continue;
-    b.y += b.speed * dt;
-    if (b.y > visibleHeight) deactivateBullet(b);
+    if (b.vx != null && b.vy != null) {
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+    } else {
+      b.y += b.speed * dt;
+    }
+    if (b.y > visibleHeight || b.y < -20 || b.x < -20 || b.x > entities.screen.width + 20) {
+      deactivateBullet(b);
+    }
   }
 
   // Move enemies (scroll down + deactivate off-screen)

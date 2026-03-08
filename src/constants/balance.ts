@@ -8,7 +8,7 @@ export const PLAYER_INITIAL_FIRE_RATE = 1.0;
 export const BASE_FIRE_INTERVAL = 200;
 
 /** i-frame (§6.3) */
-export const IFRAME_DURATION = 1500;
+export const IFRAME_DURATION = 1200;
 export const IFRAME_BLINK_INTERVAL = 100;
 
 /** Enemy base stats (§13.1) */
@@ -84,7 +84,7 @@ export const JUGGERNAUT_SCROLL_FACTOR = 0.3;
 
 /** Movement speeds (logical units/sec) */
 export const PLAYER_BULLET_SPEED = 400;
-export const ENEMY_BULLET_SPEED = 150;
+export const ENEMY_BULLET_SPEED = 180;
 export const PLAYER_MOVE_SPEED = 200;
 export const BASE_SCROLL_SPEED = 80;
 

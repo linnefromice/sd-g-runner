@@ -48,6 +48,10 @@ export interface BulletEntity extends BaseEntity {
   specialAbility?: import('./forms').SpecialAbilityType;
   piercedEnemyIds?: Set<string>;
   grazed?: boolean;
+  /** Directional velocity X (logical units/sec). When set, overrides straight-line movement. */
+  vx?: number;
+  /** Directional velocity Y (logical units/sec). When set, overrides straight-line movement. */
+  vy?: number;
 }
 
 export interface GateEntity extends BaseEntity {

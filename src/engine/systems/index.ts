@@ -1,7 +1,7 @@
 export { scrollSystem } from './ScrollSystem';
 export { createMovementSystem } from './MovementSystem';
 export { createShootingSystem } from './ShootingSystem';
-export { enemyAISystem } from './EnemyAISystem';
+export { createEnemyAISystem } from './EnemyAISystem';
 export { createSpawnSystem } from './SpawnSystem';
 export { collisionSystem } from './CollisionSystem';
 export { gateSystem } from './GateSystem';

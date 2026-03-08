@@ -7,6 +7,8 @@ export interface DifficultyParams {
   enemyHpMultiplier: number;
   enemyAtkMultiplier: number;
   maxConcurrentEnemies: number;
+  /** Multiplier applied to enemy bullet speed (default 1.0) */
+  bulletSpeedMultiplier: number;
 }
 
 export type StageEvent =
