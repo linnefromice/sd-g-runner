@@ -17,7 +17,7 @@ function createInactiveEnemy(): EnemyEntity {
     id: '', type: 'enemy', enemyType: 'stationary',
     x: -100, y: -100, width: 0, height: 0,
     active: false, hp: 0, maxHp: 0,
-    shootTimer: 0, moveTimer: 0, moveDirection: 1,
+    shootTimer: 0, moveTimer: 0, moveDirection: 1, flashTimer: 0,
   };
 }
 

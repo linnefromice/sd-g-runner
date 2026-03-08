@@ -10,6 +10,9 @@ export const enemyAISystem: GameSystem<GameEntities> = (entities, { time }) => {
   for (const enemy of entities.enemies) {
     if (!enemy.active) continue;
 
+    // Tick flash timer
+    if (enemy.flashTimer > 0) enemy.flashTimer = Math.max(0, enemy.flashTimer - time.delta);
+
     const stats = ENEMY_STATS[enemy.enemyType];
 
     // Movement

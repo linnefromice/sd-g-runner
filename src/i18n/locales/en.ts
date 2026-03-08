@@ -70,6 +70,7 @@ export const en = {
     resume: 'Resume',
     gateHelp: 'Gate Help',
     exitStage: 'Exit Stage',
+    boss: 'BOSS',
   },
   gateHelp: {
     title: 'GATE TYPES',
