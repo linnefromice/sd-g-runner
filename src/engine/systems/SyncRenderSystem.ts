@@ -70,7 +70,7 @@ export function createSyncRenderSystem(
     for (const e of entities.enemies) {
       if (!e.active) continue;
       const enemyRenderType = `enemy_${e.enemyType}`;
-      const enemyColor = e.flashTimer > 0 ? COLORS.white : COLORS.entityEnemy;
+      const enemyColor = e.flashTimer > 0 ? '#FF6644' : COLORS.entityEnemy;
       out.push({
         type: enemyRenderType,
         x: e.x,

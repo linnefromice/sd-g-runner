@@ -113,6 +113,16 @@ function EntitySlot({
   const pathStr = useDerivedValue(() => renderData.value[index]?.path ?? '');
   const type = useDerivedValue(() => renderData.value[index]?.type ?? '');
 
+  // Type-specific glow intensity
+  const glowBlur = useDerivedValue(() => {
+    const t = type.value;
+    if (t === 'player') return 12;
+    if (t === 'playerBullet') return 16;
+    if (t.startsWith('enemy_')) return 4;
+    if (t === 'shockwave') return 6;
+    return 8;
+  });
+
   // Opacity split: fill vs stroke (shockwave is stroke-only ring)
   const fillOpacity = useDerivedValue(() =>
     type.value === 'shockwave' ? 0 : (renderData.value[index]?.opacity ?? 0)
@@ -195,25 +205,34 @@ function EntitySlot({
   const hpBarFillOpacity = useDerivedValue(() =>
     hpRatio.value >= 0 && hpRatio.value < 1 ? 0.8 : 0
   );
+  // HP bar color: green → yellow → red based on remaining HP
+  const hpBarColor = useDerivedValue(() => {
+    const r = hpRatio.value;
+    if (r > 0.6) return '#00FF88';
+    if (r > 0.3) return '#FFD600';
+    return '#FF3366';
+  });
 
   return (
     <>
       {/* Path: filled shape (all path-based entities except shockwave) */}
       <Path path={pathStr} color={color} opacity={fillOpacity}>
-        <Shadow dx={0} dy={0} blur={8} color={color} />
+        <Shadow dx={0} dy={0} blur={glowBlur} color={color} />
       </Path>
       {/* Path: stroke ring (shockwave only) */}
-      <Path path={pathStr} color={color} opacity={strokeOpacity} style="stroke" strokeWidth={2} />
+      <Path path={pathStr} color={color} opacity={strokeOpacity} style="stroke" strokeWidth={2}>
+        <Shadow dx={0} dy={0} blur={6} color={color} />
+      </Path>
       {/* Non-gate rect types (boostLane, beams) */}
       <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={rectOpacity} />
 
       {/* === Gate rendering: translucent fill + neon border lines + symmetric accent bars === */}
       {/* Gate fill — translucent neon glow */}
       <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={gateFillOpacity} />
-      {/* Gate top border line */}
-      <Rect x={x} y={y} width={width} height={1} color={color} opacity={gateBorderOpacity} />
-      {/* Gate bottom border line */}
-      <Rect x={x} y={gateBorderBottomY} width={width} height={1} color={color} opacity={gateBorderOpacity} />
+      {/* Gate top border line — white for contrast */}
+      <Rect x={x} y={y} width={width} height={1} color="#FFFFFF" opacity={gateBorderOpacity} />
+      {/* Gate bottom border line — white for contrast */}
+      <Rect x={x} y={gateBorderBottomY} width={width} height={1} color="#FFFFFF" opacity={gateBorderOpacity} />
       {/* Gate left accent bar */}
       <Rect x={x} y={y} width={GATE_ACCENT_W} height={height} color={color} opacity={gateAccentOpacity} />
       {/* Gate right accent bar */}
@@ -225,14 +244,15 @@ function EntitySlot({
 
       {/* HP bar: track (dark) + fill (colored) — only visible when damaged */}
       <Rect x={x} y={hpBarY} width={width} height={HP_BAR_H} color="#333333" opacity={hpBarTrackOpacity} />
-      <Rect x={x} y={hpBarY} width={hpBarFillW} height={HP_BAR_H} color={color} opacity={hpBarFillOpacity} />
+      <Rect x={x} y={hpBarY} width={hpBarFillW} height={HP_BAR_H} color={hpBarColor} opacity={hpBarFillOpacity} />
     </>
   );
 }
 
 // Star field — fixed positions with parallax scroll
 const STAR_COUNT = 24;
-type Star = { x: number; baseY: number; size: number; speed: number; opacity: number };
+const STAR_LAYER_COLORS = ['#8888FF', '#AACCFF', '#FFFFFF'] as const;
+type Star = { x: number; baseY: number; size: number; speed: number; opacity: number; color: string };
 function generateStars(width: number, height: number, scale: number): Star[] {
   // Deterministic pseudo-random based on index
   const stars: Star[] = [];
@@ -245,7 +265,8 @@ function generateStars(width: number, height: number, scale: number): Star[] {
       baseY: (seed2 / 991) * height,
       size: (layer + 1) * scale,
       speed: 0.15 + layer * 0.15, // far=0.15, mid=0.3, near=0.45
-      opacity: 0.15 + layer * 0.15, // far=0.15, mid=0.3, near=0.45
+      opacity: 0.12 + layer * 0.19, // far=0.12, mid=0.31, near=0.50
+      color: STAR_LAYER_COLORS[layer],
     });
   }
   return stars;
@@ -276,7 +297,7 @@ function StarDot({ star, scrollY, height }: { star: Star; scrollY: GameCanvasPro
   const y = useDerivedValue(
     () => ((star.baseY + scrollY.value * star.speed) % (height + star.size * 2)) - star.size
   );
-  return <Rect x={star.x} y={y} width={star.size} height={star.size} color="#FFFFFF" opacity={star.opacity} />;
+  return <Rect x={star.x} y={y} width={star.size} height={star.size} color={star.color} opacity={star.opacity} />;
 }
 
 function GridHLine({
@@ -297,7 +318,12 @@ function GridHLine({
   const y = useDerivedValue(
     () => ((scrollY.value * scale + index * spacing) % (spacing * (Math.ceil(height / spacing) + 1))) - spacing
   );
-  return <Rect x={0} y={y} width={width} height={1} color="#1a1a2e" opacity={0.4} />;
+  // Perspective: lines brighter toward the bottom of the screen
+  const gridOpacity = useDerivedValue(() => {
+    const ratio = Math.max(0, Math.min(1, y.value / height));
+    return 0.15 + ratio * 0.4;
+  });
+  return <Rect x={0} y={y} width={width} height={1} color="#2a2a4e" opacity={gridOpacity} />;
 }
 
 function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasProps) {
@@ -331,7 +357,7 @@ function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasPr
       <StarField scrollY={scrollY} scale={scale} width={width} height={height} />
       {/* Grid: vertical lines (fixed) */}
       {gridVSlots.map((i) => (
-        <Rect key={`gv${i}`} x={i * GRID_V_SPACING} y={0} width={1} height={height} color="#1a1a2e" opacity={0.4} />
+        <Rect key={`gv${i}`} x={i * GRID_V_SPACING} y={0} width={1} height={height} color="#2a2a4e" opacity={0.3} />
       ))}
       {/* Grid: horizontal lines (scroll with background) */}
       {gridHSlots.map((i) => (
