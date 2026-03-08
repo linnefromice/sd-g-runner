@@ -5,6 +5,7 @@ import type { SharedValue } from 'react-native-reanimated';
 import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS, EX_BURST_WIDTH, BOSS_LASER_WIDTH } from '@/constants/balance';
 import { COLORS, GATE_COLORS } from '@/constants/colors';
 import { getEntityPath } from '@/rendering/shapes';
+import { useGameSessionStore } from '@/stores/gameSessionStore';
 
 export type PopupRenderData = {
   x: number;
@@ -53,22 +54,23 @@ export function createSyncRenderSystem(
       });
     }
 
-    // Player
+    // Player — form-specific shape
     const p = entities.player;
     if (p.active) {
       let opacity = 1.0;
       if (p.isInvincible) {
         opacity = Math.floor(p.invincibleTimer / IFRAME_BLINK_INTERVAL) % 2 === 0 ? 0.3 : 1.0;
       }
+      const playerType = `player_${useGameSessionStore.getState().currentForm}`;
       out.push({
-        type: 'player',
+        type: playerType,
         x: p.x,
         y: p.y,
         width: p.width,
         height: p.height,
         color: COLORS.entityPlayer,
         opacity,
-        path: buildPath('player', p.x, p.y, p.width, p.height, scale),
+        path: buildPath(playerType, p.x, p.y, p.width, p.height, scale),
       });
     }
 

@@ -1,9 +1,44 @@
-/** Forward-pointing arrow / chevron for player */
+/** Forward-pointing arrow / chevron — Standard form (balanced) */
 export function playerPath(x: number, y: number, w: number, h: number): string {
   const cx = x + w / 2;
   const bottom = y + h;
   const notch = y + h * 0.7;
   return `M ${cx} ${y} L ${x + w} ${bottom} L ${cx} ${notch} L ${x} ${bottom} Z`;
+}
+
+/** Wide armored hull with side cannons — Heavy Artillery form */
+export function playerHeavyPath(x: number, y: number, w: number, h: number): string {
+  const cx = x + w / 2;
+  // Broad trapezoid body + protruding side weapon pods
+  return `M ${cx} ${y} L ${x + w * 0.85} ${y + h * 0.3} L ${x + w} ${y + h * 0.35} L ${x + w} ${y + h * 0.7} L ${x + w * 0.75} ${y + h} L ${x + w * 0.25} ${y + h} L ${x} ${y + h * 0.7} L ${x} ${y + h * 0.35} L ${x + w * 0.15} ${y + h * 0.3} Z`;
+}
+
+/** Narrow swept-back delta — High Speed form */
+export function playerSpeedPath(x: number, y: number, w: number, h: number): string {
+  const cx = x + w / 2;
+  // Sharp needle nose + swept fins
+  return `M ${cx} ${y} L ${x + w * 0.65} ${y + h * 0.6} L ${x + w} ${y + h * 0.85} L ${x + w * 0.6} ${y + h * 0.75} L ${cx} ${y + h} L ${x + w * 0.4} ${y + h * 0.75} L ${x} ${y + h * 0.85} L ${x + w * 0.35} ${y + h * 0.6} Z`;
+}
+
+/** Long tapered spear — Sniper form */
+export function playerSniperPath(x: number, y: number, w: number, h: number): string {
+  const cx = x + w / 2;
+  // Elongated arrow with narrow stabilizer fins
+  return `M ${cx} ${y} L ${x + w * 0.6} ${y + h * 0.55} L ${x + w * 0.85} ${y + h * 0.65} L ${x + w * 0.55} ${y + h * 0.7} L ${x + w * 0.55} ${y + h} L ${x + w * 0.45} ${y + h} L ${x + w * 0.45} ${y + h * 0.7} L ${x + w * 0.15} ${y + h * 0.65} L ${x + w * 0.4} ${y + h * 0.55} Z`;
+}
+
+/** Wide fan shape with spread nozzles — Scatter form */
+export function playerScatterPath(x: number, y: number, w: number, h: number): string {
+  const cx = x + w / 2;
+  // Broad V-wing with multi-barrel front
+  return `M ${cx} ${y} L ${x + w * 0.7} ${y + h * 0.25} L ${x + w} ${y + h * 0.2} L ${x + w * 0.85} ${y + h * 0.55} L ${x + w * 0.7} ${y + h} L ${x + w * 0.3} ${y + h} L ${x + w * 0.15} ${y + h * 0.55} L ${x} ${y + h * 0.2} L ${x + w * 0.3} ${y + h * 0.25} Z`;
+}
+
+/** Angular star / cross — Awakened form */
+export function playerAwakenedPath(x: number, y: number, w: number, h: number): string {
+  const cx = x + w / 2;
+  // 4-pointed star shape radiating power
+  return `M ${cx} ${y} L ${x + w * 0.6} ${y + h * 0.35} L ${x + w} ${y + h * 0.3} L ${x + w * 0.65} ${y + h * 0.5} L ${x + w} ${y + h * 0.7} L ${x + w * 0.6} ${y + h * 0.65} L ${cx} ${y + h} L ${x + w * 0.4} ${y + h * 0.65} L ${x} ${y + h * 0.7} L ${x + w * 0.35} ${y + h * 0.5} L ${x} ${y + h * 0.3} L ${x + w * 0.4} ${y + h * 0.35} Z`;
 }
 
 /** Inverted triangle for basic enemies (stationary, rush) */
@@ -80,7 +115,18 @@ export function getEntityPath(
 ): string | null {
   switch (type) {
     case 'player':
+    case 'player_SD_Standard':
       return playerPath(x, y, w, h);
+    case 'player_SD_HeavyArtillery':
+      return playerHeavyPath(x, y, w, h);
+    case 'player_SD_HighSpeed':
+      return playerSpeedPath(x, y, w, h);
+    case 'player_SD_Sniper':
+      return playerSniperPath(x, y, w, h);
+    case 'player_SD_Scatter':
+      return playerScatterPath(x, y, w, h);
+    case 'player_SD_Awakened':
+      return playerAwakenedPath(x, y, w, h);
     case 'enemy':
     case 'enemy_stationary':
     case 'enemy_rush':
