@@ -130,9 +130,15 @@ export function createSyncRenderSystem(
       });
     }
 
-    // Gates — no path, rect-based
+    // Gates — no path, rect-based with type-specific rendering
     for (const g of entities.gates) {
       if (!g.active) continue;
+      // Compute growth gate progress (0–1)
+      let gateProgress: number | undefined;
+      if (g.gateType === 'growth' && g.growthMax != null && g.baseEffectValue != null) {
+        const currentValue = g.effects[0]?.kind !== 'refit' ? Math.abs(g.effects[0]?.value ?? 0) : 0;
+        gateProgress = Math.min(1, currentValue / g.growthMax);
+      }
       out.push({
         type: 'gate',
         x: g.x,
@@ -142,6 +148,7 @@ export function createSyncRenderSystem(
         color: GATE_COLORS[g.gateType],
         opacity: 1.0,
         label: g.displayLabel,
+        gateProgress,
       });
     }
 

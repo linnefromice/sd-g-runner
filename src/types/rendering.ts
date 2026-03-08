@@ -11,4 +11,6 @@ export type RenderEntity = {
   path?: string;
   /** HP ratio 0–1 for entities with health bars (enemies, debris, boss) */
   hpRatio?: number;
+  /** Growth gate progress 0–1 (current value / max value) */
+  gateProgress?: number;
 };

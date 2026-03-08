@@ -36,7 +36,7 @@ const popupFont = matchFont({
 
 const gateLabelFont = matchFont({
   fontFamily: popupFontFamily,
-  fontSize: 8,
+  fontSize: 10,
   fontWeight: 'bold',
 } as const);
 
@@ -121,18 +121,56 @@ function EntitySlot({
     type.value === 'shockwave' ? (renderData.value[index]?.opacity ?? 0) : 0
   );
 
-  // Rect fallback opacity — only visible for rect-based types (gate, boostLane)
+  // Rect fallback opacity — non-gate rect types (boostLane, beams)
   const rectOpacity = useDerivedValue(() => {
     const e = renderData.value[index];
     if (!e) return 0;
     const t = e.type;
-    return (t === 'gate' || t === 'boostLane' || t === 'exBeam' || t === 'laserWarning' || t === 'laserBeam') ? (e.opacity ?? 0) : 0;
+    return (t === 'boostLane' || t === 'exBeam' || t === 'laserWarning' || t === 'laserBeam') ? (e.opacity ?? 0) : 0;
+  });
+
+  // Gate-specific opacities — translucent fill + bright borders
+  const gateFillOpacity = useDerivedValue(() => {
+    const e = renderData.value[index];
+    if (!e || e.type !== 'gate') return 0;
+    return (e.opacity ?? 0) * 0.12;
+  });
+  const gateBorderOpacity = useDerivedValue(() => {
+    const e = renderData.value[index];
+    if (!e || e.type !== 'gate') return 0;
+    return (e.opacity ?? 0) * 0.7;
+  });
+  const gateAccentOpacity = useDerivedValue(() => {
+    const e = renderData.value[index];
+    if (!e || e.type !== 'gate') return 0;
+    return e.opacity ?? 0;
+  });
+  const gateLabelOpacity = useDerivedValue(() => {
+    const e = renderData.value[index];
+    if (!e || e.type !== 'gate') return 0;
+    return 1.0;
   });
 
   // Gate label
   const label = useDerivedValue(() => renderData.value[index]?.label ?? '');
-  const labelX = useDerivedValue(() => x.value + 4);
-  const labelY = useDerivedValue(() => y.value + height.value / 2 + 3);
+  const GATE_ACCENT_W = 3 * scale;
+  const labelX = useDerivedValue(() => x.value + GATE_ACCENT_W + 6 * scale);
+  const labelY = useDerivedValue(() => y.value + height.value / 2 + 4 * scale);
+
+  // Gate border positions
+  const gateBorderBottomY = useDerivedValue(() => y.value + height.value - 1 * scale);
+
+  // Growth gate progress bar
+  const gateProgressW = useDerivedValue(() => {
+    const e = renderData.value[index];
+    if (!e || e.type !== 'gate' || e.gateProgress == null) return 0;
+    return width.value * e.gateProgress;
+  });
+  const gateProgressOpacity = useDerivedValue(() => {
+    const e = renderData.value[index];
+    if (!e || e.type !== 'gate' || e.gateProgress == null) return 0;
+    return 0.2;
+  });
 
   // HP bar (shown for enemies, debris — hpRatio >= 0 and < 1)
   const HP_BAR_H = 2 * scale;
@@ -156,10 +194,23 @@ function EntitySlot({
       </Path>
       {/* Path: stroke ring (shockwave only) */}
       <Path path={pathStr} color={color} opacity={strokeOpacity} style="stroke" strokeWidth={2} />
-      {/* Rect fallback (gate, boostLane) */}
+      {/* Non-gate rect types (boostLane, beams) */}
       <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={rectOpacity} />
-      {/* Gate label text */}
-      <SkiaText x={labelX} y={labelY} text={label} font={gateLabelFont} color="#FFFFFF" opacity={rectOpacity} />
+
+      {/* === Gate rendering: translucent fill + neon border lines + accent bar === */}
+      {/* Gate fill — translucent neon glow */}
+      <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={gateFillOpacity} />
+      {/* Gate top border line */}
+      <Rect x={x} y={y} width={width} height={1} color={color} opacity={gateBorderOpacity} />
+      {/* Gate bottom border line */}
+      <Rect x={x} y={gateBorderBottomY} width={width} height={1} color={color} opacity={gateBorderOpacity} />
+      {/* Gate left accent bar — full brightness type indicator */}
+      <Rect x={x} y={y} width={GATE_ACCENT_W} height={height} color={color} opacity={gateAccentOpacity} />
+      {/* Growth gate progress fill (behind label) */}
+      <Rect x={x} y={y} width={gateProgressW} height={height} color={color} opacity={gateProgressOpacity} />
+      {/* Gate label text — larger, offset after accent bar */}
+      <SkiaText x={labelX} y={labelY} text={label} font={gateLabelFont} color="#FFFFFF" opacity={gateLabelOpacity} />
+
       {/* HP bar: track (dark) + fill (colored) — only visible when damaged */}
       <Rect x={x} y={hpBarY} width={width} height={HP_BAR_H} color="#333333" opacity={hpBarTrackOpacity} />
       <Rect x={x} y={hpBarY} width={hpBarFillW} height={HP_BAR_H} color={color} opacity={hpBarFillOpacity} />
