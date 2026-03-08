@@ -17,6 +17,10 @@ export type PopupRenderData = {
 export type RenderSyncTarget = SharedValue<RenderEntity[]>;
 export type PopupSyncTarget = SharedValue<PopupRenderData[]>;
 
+function buildPath(type: string, x: number, y: number, w: number, h: number, scale: number): string | undefined {
+  return getEntityPath(type, x * scale, y * scale, w * scale, h * scale) ?? undefined;
+}
+
 export function createSyncRenderSystem(
   renderData: RenderSyncTarget,
   popupData: PopupSyncTarget,
@@ -58,7 +62,7 @@ export function createSyncRenderSystem(
         height: p.height,
         color: COLORS.entityPlayer,
         opacity,
-        path: getEntityPath('player', p.x * scale, p.y * scale, p.width * scale, p.height * scale) ?? undefined,
+        path: buildPath('player', p.x, p.y, p.width, p.height, scale),
       });
     }
 
@@ -73,7 +77,7 @@ export function createSyncRenderSystem(
         height: e.height,
         color: COLORS.entityEnemy,
         opacity: 1.0,
-        path: getEntityPath('enemy', e.x * scale, e.y * scale, e.width * scale, e.height * scale) ?? undefined,
+        path: buildPath('enemy', e.x, e.y, e.width, e.height, scale),
       });
     }
 
@@ -88,7 +92,7 @@ export function createSyncRenderSystem(
         height: d.height,
         color: COLORS.entityDebris,
         opacity: 1.0,
-        path: getEntityPath('debris', d.x * scale, d.y * scale, d.width * scale, d.height * scale) ?? undefined,
+        path: buildPath('debris', d.x, d.y, d.width, d.height, scale),
       });
     }
 
@@ -103,7 +107,7 @@ export function createSyncRenderSystem(
         height: b.height,
         color: COLORS.entityPlayerBullet,
         opacity: 1.0,
-        path: getEntityPath('playerBullet', b.x * scale, b.y * scale, b.width * scale, b.height * scale) ?? undefined,
+        path: buildPath('playerBullet', b.x, b.y, b.width, b.height, scale),
       });
     }
 
@@ -118,7 +122,7 @@ export function createSyncRenderSystem(
         height: b.height,
         color: COLORS.entityEnemyBullet,
         opacity: 1.0,
-        path: getEntityPath('enemyBullet', b.x * scale, b.y * scale, b.width * scale, b.height * scale) ?? undefined,
+        path: buildPath('enemyBullet', b.x, b.y, b.width, b.height, scale),
       });
     }
 
@@ -148,7 +152,7 @@ export function createSyncRenderSystem(
         height: b.height,
         color: COLORS.entityBoss,
         opacity: 1.0,
-        path: getEntityPath('boss', b.x * scale, b.y * scale, b.width * scale, b.height * scale) ?? undefined,
+        path: buildPath('boss', b.x, b.y, b.width, b.height, scale),
       });
     }
 
@@ -169,7 +173,7 @@ export function createSyncRenderSystem(
         height: swSize,
         color: COLORS.white,
         opacity: opacity * 0.5,
-        path: getEntityPath('shockwave', swX * scale, swY * scale, swSize * scale, swSize * scale) ?? undefined,
+        path: buildPath('shockwave', swX, swY, swSize, swSize, scale),
       });
     }
 
@@ -187,7 +191,7 @@ export function createSyncRenderSystem(
         height: pt.size,
         color: pt.color,
         opacity,
-        path: getEntityPath('particle', px * scale, py * scale, pt.size * scale, pt.size * scale) ?? undefined,
+        path: buildPath('particle', px, py, pt.size, pt.size, scale),
       });
     }
 
