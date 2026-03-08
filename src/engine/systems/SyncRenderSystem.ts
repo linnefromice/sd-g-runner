@@ -20,6 +20,7 @@ export type PopupSyncTarget = SharedValue<PopupRenderData[]>;
 export function createSyncRenderSystem(
   renderData: RenderSyncTarget,
   popupData: PopupSyncTarget,
+  scrollYShared: SharedValue<number>,
   scale: number = 1,
 ): GameSystem<GameEntities> {
   const out: RenderEntity[] = [];
@@ -217,5 +218,6 @@ export function createSyncRenderSystem(
     // Reanimated freezes objects assigned to SharedValue — pass copies to keep out/popups mutable
     renderData.value = out.slice();
     popupData.value = popups.slice();
+    scrollYShared.value = entities.scrollY;
   };
 }

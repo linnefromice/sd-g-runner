@@ -19,6 +19,7 @@ import { LOGICAL_WIDTH } from '@/constants/dimensions';
 import { createEnemyBullet } from '@/engine/entities/Bullet';
 import { createEnemy } from '@/engine/entities/Enemy';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
+import { onPlayerHit } from '@/engine/effects';
 
 export function createBossSystem(): GameSystem<GameEntities> {
   let laserCooldown = 0;
@@ -58,11 +59,7 @@ export function createBossSystem(): GameSystem<GameEntities> {
           if (player.active && !player.isInvincible) {
             const playerCenterX = player.x + player.width / 2;
             if (Math.abs(playerCenterX - boss.laserX) <= BOSS_LASER_WIDTH / 2) {
-              const store = useGameSessionStore.getState();
-              store.takeDamage(BOSS_LASER_DAMAGE);
-              player.isInvincible = true;
-              player.invincibleTimer = IFRAME_DURATION;
-              store.resetCombo();
+              applyLaserDamage(entities, player, BOSS_LASER_DAMAGE);
             }
           }
         }
@@ -130,6 +127,19 @@ function fireSpreadShot(entities: GameEntities, boss: NonNullable<GameEntities['
     Object.assign(slot, bullet);
     slot.active = true;
   }
+}
+
+function applyLaserDamage(
+  entities: GameEntities,
+  player: GameEntities['player'],
+  damage: number,
+) {
+  const store = useGameSessionStore.getState();
+  store.takeDamage(damage);
+  player.isInvincible = true;
+  player.invincibleTimer = IFRAME_DURATION;
+  store.resetCombo();
+  onPlayerHit(entities, player.x + player.width / 2, player.y + player.height / 2);
 }
 
 function spawnDrones(entities: GameEntities, boss: NonNullable<GameEntities['boss']>) {

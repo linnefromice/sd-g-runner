@@ -7,8 +7,9 @@ import { generateGateLabel } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
 import { applyEnemyKillReward } from '@/engine/systems/enemyKillReward';
+import { applyBossKill } from '@/engine/systems/bossKill';
 import { deactivateDebris } from '@/engine/entities/Debris';
-import { onPlayerHit, onParry, onGraze, onDebrisDestroy, onBossKill, onBulletImpact } from '@/engine/effects';
+import { onPlayerHit, onParry, onGraze, onDebrisDestroy, onBulletImpact } from '@/engine/effects';
 
 export const collisionSystem: GameSystem<GameEntities> = (entities) => {
   const player = entities.player;
@@ -184,12 +185,7 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
         updateBossPhase(entities.boss);
 
         if (entities.boss.hp <= 0) {
-          const bcx = entities.boss.x + entities.boss.width / 2;
-          const bcy = entities.boss.y + entities.boss.height / 2;
-          entities.boss.active = false;
-          store.setFinalStageTime(entities.stageTime);
-          store.setStageClear(true);
-          onBossKill(entities, bcx, bcy);
+          applyBossKill(entities);
         } else {
           onBulletImpact(entities, hitX, hitY);
         }
