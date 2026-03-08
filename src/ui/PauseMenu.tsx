@@ -23,6 +23,7 @@ function PauseMenuInner({ onResume, onExit }: PauseMenuProps) {
     <View style={[styles.overlay, { paddingBottom: Math.max(insets.bottom, 24) }]}>
       <View style={styles.card}>
         <Text style={styles.title}>{t.hud.paused}</Text>
+        <View style={styles.titleLine} />
 
         <TouchableOpacity style={styles.button} onPress={onResume}>
           <Text style={styles.buttonText}>{t.hud.resume}</Text>
@@ -45,43 +46,51 @@ export const PauseMenu = React.memo(PauseMenuInner);
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   card: {
-    backgroundColor: '#1a1a2eee',
-    borderRadius: 16,
+    backgroundColor: '#0a0a14ee',
+    borderRadius: 2,
     padding: 32,
     alignItems: 'center',
-    gap: 16,
-    minWidth: 220,
+    gap: 12,
+    minWidth: 240,
     borderWidth: 1,
     borderColor: COLORS.neonBlue + '44',
   },
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     color: COLORS.white,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+  },
+  titleLine: {
+    width: 60,
+    height: 1,
+    backgroundColor: COLORS.neonBlue + '44',
     marginBottom: 8,
   },
   button: {
     width: '100%',
     paddingVertical: 14,
-    borderRadius: 8,
-    backgroundColor: COLORS.neonBlue + '33',
+    borderRadius: 2,
+    backgroundColor: COLORS.neonBlue + '18',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.neonBlue + '66',
+    borderColor: COLORS.neonBlue + '55',
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: COLORS.white,
+    color: COLORS.neonBlue,
+    letterSpacing: 1,
   },
   exitButton: {
-    backgroundColor: '#ff336622',
-    borderColor: '#ff336666',
+    backgroundColor: '#ff336618',
+    borderColor: '#ff336655',
   },
   exitText: {
     color: COLORS.neonRed,

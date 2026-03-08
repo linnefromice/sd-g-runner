@@ -22,6 +22,7 @@ export default function StageSelectScreen() {
         <Text style={styles.title}>{t.stageSelect.title}</Text>
         <Text style={styles.credits}>{credits} Cr</Text>
       </View>
+      <View style={styles.headerLine} />
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
         {stageIds.map((id) => {
@@ -65,8 +66,8 @@ export default function StageSelectScreen() {
         <TouchableOpacity style={styles.footerButton} onPress={() => router.push('/upgrade')}>
           <Text style={styles.footerButtonText}>{t.stageSelect.upgrade}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => router.push('/')}>
-          <Text style={styles.footerButtonText}>{t.stageSelect.back}</Text>
+        <TouchableOpacity style={styles.footerButtonSecondary} onPress={() => router.push('/')}>
+          <Text style={styles.footerButtonSecondaryText}>{t.stageSelect.back}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -84,44 +85,53 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 24,
+    marginBottom: 12,
+  },
+  headerLine: {
+    height: 1,
+    backgroundColor: COLORS.neonBlue + '33',
+    marginHorizontal: 24,
     marginBottom: 16,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: COLORS.neonBlue,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
   credits: {
     fontSize: 16,
     color: COLORS.scoreYellow,
     fontWeight: '600',
+    fontVariant: ['tabular-nums'],
   },
   list: { flex: 1 },
   listContent: {
     paddingHorizontal: 24,
-    gap: 12,
+    gap: 10,
     paddingBottom: 16,
   },
   stageCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#ffffff11',
-    borderRadius: 12,
+    backgroundColor: '#ffffff08',
+    borderRadius: 2,
     padding: 16,
     borderWidth: 1,
-    borderColor: COLORS.neonBlue + '33',
+    borderColor: COLORS.neonBlue + '44',
   },
   stageCardLocked: {
-    backgroundColor: '#ffffff06',
+    backgroundColor: '#ffffff04',
     borderColor: '#ffffff11',
   },
   stageInfo: { flex: 1 },
   stageNumber: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.lightGray,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 2,
   },
   stageName: {
     fontSize: 18,
@@ -134,9 +144,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.neonRed,
     marginTop: 4,
-    letterSpacing: 1,
+    letterSpacing: 2,
   },
-  textLocked: { color: '#555555' },
+  textLocked: { color: '#444444' },
   stageScore: { alignItems: 'flex-end' },
   highScore: {
     fontSize: 14,
@@ -146,12 +156,13 @@ const styles = StyleSheet.create({
   },
   noScore: {
     fontSize: 14,
-    color: COLORS.lightGray,
+    color: '#555555',
   },
   lockIcon: {
     fontSize: 12,
-    color: '#555555',
+    color: '#444444',
     fontWeight: 'bold',
+    letterSpacing: 1,
   },
   footer: {
     flexDirection: 'row',
@@ -162,14 +173,32 @@ const styles = StyleSheet.create({
   },
   footerButton: {
     flex: 1,
-    backgroundColor: '#ffffff22',
+    backgroundColor: COLORS.neonBlue + '22',
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 2,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.neonBlue + '66',
   },
   footerButtonText: {
-    fontSize: 16,
-    color: COLORS.white,
+    fontSize: 15,
+    color: COLORS.neonBlue,
     fontWeight: '600',
+    letterSpacing: 1,
+  },
+  footerButtonSecondary: {
+    flex: 1,
+    backgroundColor: '#ffffff08',
+    paddingVertical: 14,
+    borderRadius: 2,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ffffff22',
+  },
+  footerButtonSecondaryText: {
+    fontSize: 15,
+    color: COLORS.lightGray,
+    fontWeight: '600',
+    letterSpacing: 1,
   },
 });

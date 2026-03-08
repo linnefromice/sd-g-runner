@@ -23,6 +23,7 @@ function GateHelpOverlayInner({ onClose }: GateHelpOverlayProps) {
     <View style={styles.overlay}>
       <View style={styles.card}>
         <Text style={styles.title}>{t.gateHelp.title}</Text>
+        <View style={styles.titleLine} />
 
         <ScrollView style={styles.list}>
           {GATE_KEYS.map((key) => {
@@ -65,8 +66,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   card: {
-    backgroundColor: '#1a1a2eee',
-    borderRadius: 16,
+    backgroundColor: '#0a0a14ee',
+    borderRadius: 2,
     padding: 24,
     alignItems: 'center',
     minWidth: 280,
@@ -75,11 +76,18 @@ const styles = StyleSheet.create({
     borderColor: COLORS.neonBlue + '44',
   },
   title: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.white,
-    marginBottom: 16,
     letterSpacing: 2,
+    textTransform: 'uppercase',
+  },
+  titleLine: {
+    width: 48,
+    height: 1,
+    backgroundColor: COLORS.neonBlue + '44',
+    marginTop: 8,
+    marginBottom: 16,
   },
   list: {
     width: '100%',
@@ -92,17 +100,18 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   swatch: {
-    width: 12,
+    width: 4,
     height: 40,
-    borderRadius: 4,
+    borderRadius: 1,
     marginTop: 2,
   },
   info: {
     flex: 1,
   },
   gateName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
+    letterSpacing: 1,
   },
   effect: {
     fontSize: 13,
@@ -121,8 +130,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   tipBox: {
-    backgroundColor: COLORS.neonBlue + '11',
-    borderRadius: 8,
+    backgroundColor: COLORS.neonBlue + '0A',
+    borderRadius: 2,
     padding: 10,
     borderWidth: 1,
     borderColor: COLORS.neonBlue + '33',
@@ -132,7 +141,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: 'bold',
     color: COLORS.neonBlue,
-    letterSpacing: 1,
+    letterSpacing: 2,
     marginBottom: 4,
   },
   tipText: {
@@ -144,14 +153,15 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingVertical: 12,
     paddingHorizontal: 32,
-    borderRadius: 8,
-    backgroundColor: COLORS.neonBlue + '33',
+    borderRadius: 2,
+    backgroundColor: COLORS.neonBlue + '18',
     borderWidth: 1,
-    borderColor: COLORS.neonBlue + '66',
+    borderColor: COLORS.neonBlue + '55',
   },
   closeText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: COLORS.white,
+    color: COLORS.neonBlue,
+    letterSpacing: 1,
   },
 });
