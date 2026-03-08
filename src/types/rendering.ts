@@ -13,4 +13,6 @@ export type RenderEntity = {
   hpRatio?: number;
   /** Growth gate progress 0–1 (current value / max value) */
   gateProgress?: number;
+  /** Pre-computed HP bar color (green/yellow/red based on hpRatio) */
+  hpBarColor?: string;
 };

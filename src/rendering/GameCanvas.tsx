@@ -113,16 +113,6 @@ function EntitySlot({
   const pathStr = useDerivedValue(() => renderData.value[index]?.path ?? '');
   const type = useDerivedValue(() => renderData.value[index]?.type ?? '');
 
-  // Type-specific glow intensity
-  const glowBlur = useDerivedValue(() => {
-    const t = type.value;
-    if (t === 'player') return 12;
-    if (t === 'playerBullet') return 16;
-    if (t.startsWith('enemy_')) return 4;
-    if (t === 'shockwave') return 6;
-    return 8;
-  });
-
   // Opacity split: fill vs stroke (shockwave is stroke-only ring)
   const fillOpacity = useDerivedValue(() =>
     type.value === 'shockwave' ? 0 : (renderData.value[index]?.opacity ?? 0)
@@ -205,24 +195,17 @@ function EntitySlot({
   const hpBarFillOpacity = useDerivedValue(() =>
     hpRatio.value >= 0 && hpRatio.value < 1 ? 0.8 : 0
   );
-  // HP bar color: green → yellow → red based on remaining HP
-  const hpBarColor = useDerivedValue(() => {
-    const r = hpRatio.value;
-    if (r > 0.6) return '#00FF88';
-    if (r > 0.3) return '#FFD600';
-    return '#FF3366';
-  });
+  // HP bar color: pre-computed in SyncRenderSystem (hpBarColor field)
+  const hpBarColor = useDerivedValue(() => renderData.value[index]?.hpBarColor ?? '#00FF88');
 
   return (
     <>
       {/* Path: filled shape (all path-based entities except shockwave) */}
       <Path path={pathStr} color={color} opacity={fillOpacity}>
-        <Shadow dx={0} dy={0} blur={glowBlur} color={color} />
+        <Shadow dx={0} dy={0} blur={10} color={color} />
       </Path>
       {/* Path: stroke ring (shockwave only) */}
-      <Path path={pathStr} color={color} opacity={strokeOpacity} style="stroke" strokeWidth={2}>
-        <Shadow dx={0} dy={0} blur={6} color={color} />
-      </Path>
+      <Path path={pathStr} color={color} opacity={strokeOpacity} style="stroke" strokeWidth={2} />
       {/* Non-gate rect types (boostLane, beams) */}
       <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={rectOpacity} />
 
@@ -318,10 +301,10 @@ function GridHLine({
   const y = useDerivedValue(
     () => ((scrollY.value * scale + index * spacing) % (spacing * (Math.ceil(height / spacing) + 1))) - spacing
   );
-  // Perspective: lines brighter toward the bottom of the screen
+  // Perspective: compute opacity inline from y position (avoids extra useDerivedValue)
   const gridOpacity = useDerivedValue(() => {
-    const ratio = Math.max(0, Math.min(1, y.value / height));
-    return 0.15 + ratio * 0.4;
+    const ratio = y.value / height;
+    return 0.15 + Math.max(0, Math.min(1, ratio)) * 0.4;
   });
   return <Rect x={0} y={y} width={width} height={1} color="#2a2a4e" opacity={gridOpacity} />;
 }

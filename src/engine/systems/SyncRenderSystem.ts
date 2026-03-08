@@ -21,6 +21,12 @@ function buildPath(type: string, x: number, y: number, w: number, h: number, sca
   return getEntityPath(type, x * scale, y * scale, w * scale, h * scale) ?? undefined;
 }
 
+function getHpBarColor(ratio: number): string {
+  if (ratio > 0.6) return '#00FF88';
+  if (ratio > 0.3) return '#FFD600';
+  return '#FF3366';
+}
+
 export function createSyncRenderSystem(
   renderData: RenderSyncTarget,
   popupData: PopupSyncTarget,
@@ -81,12 +87,14 @@ export function createSyncRenderSystem(
         opacity: 1.0,
         path: buildPath(enemyRenderType, e.x, e.y, e.width, e.height, scale),
         hpRatio: e.hp / e.maxHp,
+        hpBarColor: getHpBarColor(e.hp / e.maxHp),
       });
     }
 
     // Debris
     for (const d of entities.debris) {
       if (!d.active) continue;
+      const dRatio = d.hp / d.maxHp;
       out.push({
         type: 'debris',
         x: d.x,
@@ -96,7 +104,8 @@ export function createSyncRenderSystem(
         color: COLORS.entityDebris,
         opacity: 1.0,
         path: buildPath('debris', d.x, d.y, d.width, d.height, scale),
-        hpRatio: d.hp / d.maxHp,
+        hpRatio: dRatio,
+        hpBarColor: getHpBarColor(dRatio),
       });
     }
 
