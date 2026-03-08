@@ -127,6 +127,9 @@ export const JUST_TF_SCORE = 300;
 export const JUST_TF_EX_GAIN = 15;
 export const SHOCKWAVE_EFFECT_DURATION = 200;
 
+/** Hit Flash */
+export const HIT_FLASH_DURATION = 80;
+
 /** Hit Stop */
 export const HIT_STOP_ENEMY_KILL = 50;
 export const HIT_STOP_PLAYER_HIT = 50;

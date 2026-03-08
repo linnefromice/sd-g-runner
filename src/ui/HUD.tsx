@@ -183,6 +183,43 @@ function TransformButton({ onActivate }: { onActivate: () => void }) {
   );
 }
 
+function BossHPBar({
+  entitiesRef,
+}: {
+  entitiesRef: React.RefObject<GameEntities>;
+}) {
+  const [ratio, setRatio] = useState(-1);
+  const t = useTranslation();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const boss = entitiesRef.current?.boss;
+      if (boss?.active) {
+        setRatio(boss.hp / boss.maxHp);
+      } else {
+        setRatio(-1);
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [entitiesRef]);
+
+  if (ratio < 0) return null;
+
+  return (
+    <View style={styles.bossHpContainer}>
+      <Text style={styles.bossHpLabel}>{t.hud.boss ?? 'BOSS'}</Text>
+      <View style={styles.bossHpTrack}>
+        <View
+          style={[
+            styles.bossHpFill,
+            { width: `${Math.max(0, ratio * 100)}%` as `${number}%` },
+          ]}
+        />
+      </View>
+    </View>
+  );
+}
+
 function StageProgressBar({
   entitiesRef,
   stageDuration,
@@ -239,6 +276,8 @@ function HUDInner({ onPause, onEXBurst, onTransform, entitiesRef, stageDuration 
     >
       {/* Top section */}
       <View>
+        {/* Boss HP bar (only visible during boss fight) */}
+        <BossHPBar entitiesRef={entitiesRef} />
         {/* Stage progress bar */}
         <StageProgressBar entitiesRef={entitiesRef} stageDuration={stageDuration} />
         {/* Pause, HP, Score */}
@@ -419,4 +458,29 @@ const styles = StyleSheet.create({
   },
   transformButtonText: { fontSize: 14, fontWeight: 'bold', color: '#666' },
   transformButtonTextActive: { color: '#000' },
+  bossHpContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  bossHpLabel: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: COLORS.neonRed,
+  },
+  bossHpTrack: {
+    flex: 1,
+    height: 6,
+    backgroundColor: '#1a1a2e',
+    borderRadius: 3,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#FF004444',
+  },
+  bossHpFill: {
+    height: '100%',
+    backgroundColor: COLORS.neonRed,
+    borderRadius: 3,
+  },
 });

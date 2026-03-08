@@ -70,6 +70,7 @@ export const ja: Translations = {
     resume: '再開',
     gateHelp: 'ゲート説明',
     exitStage: 'ステージ終了',
+    boss: 'BOSS',
   },
   gateHelp: {
     title: 'ゲートタイプ',

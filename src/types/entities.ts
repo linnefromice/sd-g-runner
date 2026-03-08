@@ -36,6 +36,8 @@ export interface EnemyEntity extends BaseEntity {
   shootTimer: number;
   moveTimer: number;
   moveDirection: number; // -1 or 1, for patrol type
+  /** Hit flash timer (ms) — when > 0, entity renders white */
+  flashTimer: number;
 }
 
 export interface BulletEntity extends BaseEntity {

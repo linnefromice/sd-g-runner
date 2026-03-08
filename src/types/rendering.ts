@@ -9,4 +9,6 @@ export type RenderEntity = {
   label?: string;
   /** Pre-computed SVG path string (built on JS thread by SyncRenderSystem) */
   path?: string;
+  /** HP ratio 0–1 for entities with health bars (enemies, debris, boss) */
+  hpRatio?: number;
 };

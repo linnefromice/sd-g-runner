@@ -107,6 +107,7 @@ function EntitySlot({
   const width = useDerivedValue(() => (renderData.value[index]?.width ?? 0) * scale);
   const height = useDerivedValue(() => (renderData.value[index]?.height ?? 0) * scale);
   const color = useDerivedValue(() => renderData.value[index]?.color ?? 'transparent');
+  const hpRatio = useDerivedValue(() => renderData.value[index]?.hpRatio ?? -1);
 
   // Pre-computed SVG path string (already in screen coords from SyncRenderSystem)
   const pathStr = useDerivedValue(() => renderData.value[index]?.path ?? '');
@@ -125,13 +126,27 @@ function EntitySlot({
     const e = renderData.value[index];
     if (!e) return 0;
     const t = e.type;
-    return (t === 'gate' || t === 'boostLane') ? (e.opacity ?? 0) : 0;
+    return (t === 'gate' || t === 'boostLane' || t === 'exBeam' || t === 'laserWarning' || t === 'laserBeam') ? (e.opacity ?? 0) : 0;
   });
 
   // Gate label
   const label = useDerivedValue(() => renderData.value[index]?.label ?? '');
   const labelX = useDerivedValue(() => x.value + 4);
   const labelY = useDerivedValue(() => y.value + height.value / 2 + 3);
+
+  // HP bar (shown for enemies, debris — hpRatio >= 0 and < 1)
+  const HP_BAR_H = 2 * scale;
+  const HP_BAR_OFFSET = 4 * scale;
+  const hpBarY = useDerivedValue(() => y.value - HP_BAR_OFFSET);
+  const hpBarFillW = useDerivedValue(() =>
+    hpRatio.value >= 0 && hpRatio.value < 1 ? width.value * hpRatio.value : 0
+  );
+  const hpBarTrackOpacity = useDerivedValue(() =>
+    hpRatio.value >= 0 && hpRatio.value < 1 ? 0.4 : 0
+  );
+  const hpBarFillOpacity = useDerivedValue(() =>
+    hpRatio.value >= 0 && hpRatio.value < 1 ? 0.8 : 0
+  );
 
   return (
     <>
@@ -145,8 +160,81 @@ function EntitySlot({
       <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={rectOpacity} />
       {/* Gate label text */}
       <SkiaText x={labelX} y={labelY} text={label} font={gateLabelFont} color="#FFFFFF" opacity={rectOpacity} />
+      {/* HP bar: track (dark) + fill (colored) — only visible when damaged */}
+      <Rect x={x} y={hpBarY} width={width} height={HP_BAR_H} color="#333333" opacity={hpBarTrackOpacity} />
+      <Rect x={x} y={hpBarY} width={hpBarFillW} height={HP_BAR_H} color={color} opacity={hpBarFillOpacity} />
     </>
   );
+}
+
+// Star field — fixed positions with parallax scroll
+const STAR_COUNT = 24;
+type Star = { x: number; baseY: number; size: number; speed: number; opacity: number };
+function generateStars(width: number, height: number, scale: number): Star[] {
+  // Deterministic pseudo-random based on index
+  const stars: Star[] = [];
+  for (let i = 0; i < STAR_COUNT; i++) {
+    const seed = (i * 7919 + 1) % 997;
+    const seed2 = (i * 6271 + 3) % 991;
+    const layer = i % 3; // 0=far, 1=mid, 2=near
+    stars.push({
+      x: (seed / 997) * width,
+      baseY: (seed2 / 991) * height,
+      size: (layer + 1) * scale,
+      speed: 0.15 + layer * 0.15, // far=0.15, mid=0.3, near=0.45
+      opacity: 0.15 + layer * 0.15, // far=0.15, mid=0.3, near=0.45
+    });
+  }
+  return stars;
+}
+
+function StarField({
+  scrollY,
+  scale,
+  width,
+  height,
+}: {
+  scrollY: GameCanvasProps['scrollY'];
+  scale: number;
+  width: number;
+  height: number;
+}) {
+  const stars = React.useMemo(() => generateStars(width, height, scale), [width, height, scale]);
+  return (
+    <>
+      {stars.map((star, i) => (
+        <StarDot key={i} star={star} scrollY={scrollY} height={height} />
+      ))}
+    </>
+  );
+}
+
+function StarDot({ star, scrollY, height }: { star: Star; scrollY: GameCanvasProps['scrollY']; height: number }) {
+  const y = useDerivedValue(
+    () => ((star.baseY + scrollY.value * star.speed) % (height + star.size * 2)) - star.size
+  );
+  return <Rect x={star.x} y={y} width={star.size} height={star.size} color="#FFFFFF" opacity={star.opacity} />;
+}
+
+function GridHLine({
+  index,
+  spacing,
+  scrollY,
+  scale,
+  width,
+  height,
+}: {
+  index: number;
+  spacing: number;
+  scrollY: GameCanvasProps['scrollY'];
+  scale: number;
+  width: number;
+  height: number;
+}) {
+  const y = useDerivedValue(
+    () => ((scrollY.value * scale + index * spacing) % (spacing * (Math.ceil(height / spacing) + 1))) - spacing
+  );
+  return <Rect x={0} y={y} width={width} height={1} color="#1a1a2e" opacity={0.4} />;
 }
 
 function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasProps) {
@@ -157,17 +245,35 @@ function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasPr
     []
   );
 
-  // Background scroll lines for visual feedback
-  const bgLineY1 = useDerivedValue(() => (scrollY.value * scale) % (height + 100) - 100);
-  const bgLineY2 = useDerivedValue(() => ((scrollY.value * scale) + height / 2) % (height + 100) - 100);
+  // Grid lines — horizontal lines scroll with the background, vertical lines are fixed
+  const GRID_H_SPACING = 80 * scale;
+  const GRID_V_SPACING = 80 * scale;
+  const GRID_H_COUNT = Math.ceil(height / GRID_H_SPACING) + 1;
+  const GRID_V_COUNT = Math.ceil(width / GRID_V_SPACING) + 1;
+
+  const gridHSlots = React.useMemo(
+    () => Array.from({ length: GRID_H_COUNT }, (_, i) => i),
+    [GRID_H_COUNT]
+  );
+  const gridVSlots = React.useMemo(
+    () => Array.from({ length: GRID_V_COUNT }, (_, i) => i),
+    [GRID_V_COUNT]
+  );
 
   return (
     <Canvas style={{ width, height }}>
       {/* Background */}
       <Rect x={0} y={0} width={width} height={height} color={COLORS.bgDark} />
-      {/* Scroll indicator lines */}
-      <Rect x={0} y={bgLineY1} width={width} height={1} color="#1a1a2e" opacity={0.5} />
-      <Rect x={0} y={bgLineY2} width={width} height={1} color="#1a1a2e" opacity={0.5} />
+      {/* Star field (parallax) */}
+      <StarField scrollY={scrollY} scale={scale} width={width} height={height} />
+      {/* Grid: vertical lines (fixed) */}
+      {gridVSlots.map((i) => (
+        <Rect key={`gv${i}`} x={i * GRID_V_SPACING} y={0} width={1} height={height} color="#1a1a2e" opacity={0.4} />
+      ))}
+      {/* Grid: horizontal lines (scroll with background) */}
+      {gridHSlots.map((i) => (
+        <GridHLine key={`gh${i}`} index={i} spacing={GRID_H_SPACING} scrollY={scrollY} scale={scale} width={width} height={height} />
+      ))}
 
       {/* All entities via pre-allocated slots */}
       {entitySlots.map((index) => (

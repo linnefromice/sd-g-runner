@@ -2,7 +2,7 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import type { RenderEntity } from '@/types/rendering';
 import type { SharedValue } from 'react-native-reanimated';
-import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS } from '@/constants/balance';
+import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS, EX_BURST_WIDTH, BOSS_LASER_WIDTH } from '@/constants/balance';
 import { COLORS, GATE_COLORS } from '@/constants/colors';
 import { getEntityPath } from '@/rendering/shapes';
 
@@ -69,15 +69,18 @@ export function createSyncRenderSystem(
     // Enemies
     for (const e of entities.enemies) {
       if (!e.active) continue;
+      const enemyRenderType = `enemy_${e.enemyType}`;
+      const enemyColor = e.flashTimer > 0 ? COLORS.white : COLORS.entityEnemy;
       out.push({
-        type: 'enemy',
+        type: enemyRenderType,
         x: e.x,
         y: e.y,
         width: e.width,
         height: e.height,
-        color: COLORS.entityEnemy,
+        color: enemyColor,
         opacity: 1.0,
-        path: buildPath('enemy', e.x, e.y, e.width, e.height, scale),
+        path: buildPath(enemyRenderType, e.x, e.y, e.width, e.height, scale),
+        hpRatio: e.hp / e.maxHp,
       });
     }
 
@@ -93,6 +96,7 @@ export function createSyncRenderSystem(
         color: COLORS.entityDebris,
         opacity: 1.0,
         path: buildPath('debris', d.x, d.y, d.width, d.height, scale),
+        hpRatio: d.hp / d.maxHp,
       });
     }
 
@@ -154,6 +158,46 @@ export function createSyncRenderSystem(
         opacity: 1.0,
         path: buildPath('boss', b.x, b.y, b.width, b.height, scale),
       });
+    }
+
+    // EX Burst beam (vertical beam above player)
+    if (entities.exBurstTimer > 0 && p.active) {
+      const beamX = p.x + p.width / 2 - EX_BURST_WIDTH / 2;
+      out.push({
+        type: 'exBeam',
+        x: beamX,
+        y: 0,
+        width: EX_BURST_WIDTH,
+        height: p.y,
+        color: '#00E5FF',
+        opacity: 0.35,
+      });
+    }
+
+    // Boss laser beam
+    if (entities.boss?.active) {
+      const boss = entities.boss;
+      if (boss.laserState === 'warning') {
+        out.push({
+          type: 'laserWarning',
+          x: boss.laserX - BOSS_LASER_WIDTH / 2,
+          y: boss.y + boss.height,
+          width: BOSS_LASER_WIDTH,
+          height: entities.screen.visibleHeight,
+          color: '#FF004488',
+          opacity: 0.3,
+        });
+      } else if (boss.laserState === 'firing') {
+        out.push({
+          type: 'laserBeam',
+          x: boss.laserX - BOSS_LASER_WIDTH / 2,
+          y: boss.y + boss.height,
+          width: BOSS_LASER_WIDTH,
+          height: entities.screen.visibleHeight,
+          color: '#FF0044',
+          opacity: 0.7,
+        });
+      }
     }
 
     // Shockwave effect
