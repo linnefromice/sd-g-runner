@@ -7,7 +7,7 @@ beforeEach(() => {
     unlockedForms: ['SD_Standard'],
     unlockedStages: [1],
     credits: 0,
-    upgrades: { baseAtk: 0, baseHp: 0, baseSpeed: 0 },
+    upgrades: { baseAtk: 0, baseHp: 0, baseSpeed: 0, baseDef: 0, baseCreditBoost: 0 },
     settings: { bgmVolume: 0.7, seVolume: 1.0, locale: 'system' as const },
     isLoaded: false,
   });
@@ -47,7 +47,7 @@ describe('saveDataStore', () => {
     test('returns false at max level', () => {
       useSaveDataStore.setState({
         credits: 100000,
-        upgrades: { baseAtk: 10, baseHp: 0, baseSpeed: 0 },
+        upgrades: { baseAtk: 10, baseHp: 0, baseSpeed: 0, baseDef: 0, baseCreditBoost: 0 },
       });
       const result = useSaveDataStore.getState().upgradeAtk();
       expect(result).toBe(false);
@@ -74,7 +74,7 @@ describe('saveDataStore', () => {
     test('has max level 5', () => {
       useSaveDataStore.setState({
         credits: 100000,
-        upgrades: { baseAtk: 0, baseHp: 0, baseSpeed: 5 },
+        upgrades: { baseAtk: 0, baseHp: 0, baseSpeed: 5, baseDef: 0, baseCreditBoost: 0 },
       });
       const result = useSaveDataStore.getState().upgradeSpeed();
       expect(result).toBe(false);
