@@ -235,7 +235,12 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
       currentForm: 'SD_Awakened',
       comboCount: 0,
       awakenedCount: s.awakenedCount + 1,
+      slowMotionFactor: 0.3,
     }));
+    // Reset slow-motion after 300ms
+    setTimeout(() => {
+      useGameSessionStore.getState().setSlowMotionFactor(1.0);
+    }, 300);
   },
 
   deactivateAwakened: () =>

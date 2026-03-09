@@ -141,20 +141,27 @@ function EntitySlot({
   });
 
   // Gate-specific opacities — translucent fill + bright borders
+  // Forced gates pulse more aggressively using a sine wave derived from timestamp
   const gateFillOpacity = useDerivedValue(() => {
     const e = renderData.value[index];
     if (!e || e.type !== 'gate') return 0;
-    return (e.opacity ?? 0) * 0.12;
+    const base = (e.opacity ?? 0) * 0.12;
+    if (e.forced) return base * (1.5 + Math.sin(Date.now() * 0.008) * 0.5);
+    return base;
   });
   const gateBorderOpacity = useDerivedValue(() => {
     const e = renderData.value[index];
     if (!e || e.type !== 'gate') return 0;
-    return (e.opacity ?? 0) * 0.7;
+    const base = (e.opacity ?? 0) * 0.7;
+    if (e.forced) return Math.min(1.0, base * (1.2 + Math.sin(Date.now() * 0.008) * 0.3));
+    return base;
   });
   const gateAccentOpacity = useDerivedValue(() => {
     const e = renderData.value[index];
     if (!e || e.type !== 'gate') return 0;
-    return e.opacity ?? 0;
+    const base = e.opacity ?? 0;
+    if (e.forced) return Math.min(1.0, base * (1.2 + Math.sin(Date.now() * 0.008) * 0.3));
+    return base;
   });
   const gateLabelOpacity = useDerivedValue(() => {
     const e = renderData.value[index];
@@ -433,6 +440,10 @@ function GameCanvasInner({ renderData, popupData, scrollY, overlayState, scale }
       <Rect x={0} y={0} width={width} height={height} color="#00E5FF"
         opacity={useDerivedValue(() => overlayState.value.exFlashOpacity)}
         blendMode="screen"
+      />
+      {/* Boss entrance overlay — dramatic dark flash */}
+      <Rect x={0} y={0} width={width} height={height} color="#000000"
+        opacity={useDerivedValue(() => overlayState.value.bossEntranceOpacity)}
       />
       {/* Low HP danger overlay: red edges pulsing (C2) */}
       <Rect x={0} y={0} width={width} height={height} opacity={useDerivedValue(() => overlayState.value.dangerOpacity)}>

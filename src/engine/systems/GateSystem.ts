@@ -4,7 +4,7 @@ import { checkAABBOverlap, getPlayerHitbox } from '@/engine/collision';
 import { deactivateGate, generateGateLabel } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { SCORE, EX_GAIN, TRANSFORM_GAIN_GATE_PASS, ROULETTE_INTERVAL, FORM_XP_GATE_ENHANCE, COMBO_THRESHOLD, GATE_FLASH_DURATION } from '@/constants/balance';
-import { onGatePass, onComboMax } from '@/engine/effects';
+import { onGatePass, onComboMax, onAwaken } from '@/engine/effects';
 import { GATE_COLORS } from '@/constants/colors';
 import { AudioManager } from '@/audio/AudioManager';
 import { HapticsManager } from '@/audio/HapticsManager';
@@ -105,6 +105,10 @@ export const gateSystem: GameSystem<GameEntities> = (entities, { time }) => {
     // B2: combo max particles (gold burst when combo threshold reached)
     if (willReachComboMax && (gate.gateType === 'enhance' || gate.gateType === 'growth' || gate.gateType === 'roulette')) {
       onComboMax(entities, player.x + player.width / 2, player.y + player.height / 2);
+      // Awakened burst: dramatic particle explosion + slow-mo (triggered via store)
+      if (useGameSessionStore.getState().isAwakened) {
+        onAwaken(entities, player.x + player.width / 2, player.y + player.height / 2);
+      }
     }
 
     // Deactivate after visual effect capture
