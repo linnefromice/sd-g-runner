@@ -56,6 +56,7 @@ export const STAGE_8: StageDefinition = {
     // Wave 4: juggernaut + phalanx combo + debris
     { time: 49, type: 'debris_spawn', x: 200, count: 2 },
     { time: 50, type: 'enemy_spawn', enemyType: 'juggernaut', x: 100 },
+    { time: 50, type: 'enemy_spawn', enemyType: 'sentinel', x: 160 },
     { time: 52, type: 'enemy_spawn', enemyType: 'phalanx', x: 220 },
     { time: 54, type: 'enemy_spawn', enemyType: 'patrol', x: 160 },
     // Tradeoff gate (extreme)

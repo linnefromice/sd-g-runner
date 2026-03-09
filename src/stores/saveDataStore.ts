@@ -2,12 +2,17 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { MechaFormId } from '@/types/forms';
 import type { LocaleSetting } from '@/i18n';
+import type { AchievementId } from '@/types/achievements';
+import { getAchievement } from '@/game/achievements';
 
 interface SaveData {
   highScores: Record<number, number>;
   unlockedForms: MechaFormId[];
   unlockedStages: number[];
   credits: number;
+  achievements: AchievementId[];
+  endlessBestTime: number;
+  endlessBestScore: number;
   upgrades: {
     baseAtk: number;
     baseHp: number;
@@ -19,6 +24,7 @@ interface SaveData {
     bgmVolume: number;
     seVolume: number;
     locale: LocaleSetting;
+    hapticsEnabled: boolean;
   };
 }
 
@@ -38,6 +44,9 @@ interface SaveDataState extends SaveData {
   upgradeCreditBoost: () => boolean;
   setVolume: (type: 'bgm' | 'se', value: number) => void;
   setLocale: (locale: LocaleSetting) => void;
+  unlockAchievement: (id: AchievementId) => boolean;
+  updateEndlessRecord: (time: number, score: number) => void;
+  setHapticsEnabled: (enabled: boolean) => void;
 }
 
 const STORAGE_KEY = 'g_runner_save';
@@ -47,8 +56,11 @@ const INITIAL_SAVE: SaveData = {
   unlockedForms: ['SD_Standard'],
   unlockedStages: [1],
   credits: 0,
+  achievements: [],
+  endlessBestTime: 0,
+  endlessBestScore: 0,
   upgrades: { baseAtk: 0, baseHp: 0, baseSpeed: 0, baseDef: 0, baseCreditBoost: 0 },
-  settings: { bgmVolume: 0.7, seVolume: 1.0, locale: 'system' as LocaleSetting },
+  settings: { bgmVolume: 0.7, seVolume: 1.0, locale: 'system' as LocaleSetting, hapticsEnabled: true },
 };
 
 export const useSaveDataStore = create<SaveDataState>((set, get) => ({
@@ -62,7 +74,11 @@ export const useSaveDataStore = create<SaveDataState>((set, get) => ({
         const data = JSON.parse(raw) as SaveData;
         set({
           ...data,
+          upgrades: { ...INITIAL_SAVE.upgrades, ...data.upgrades },
           settings: { ...INITIAL_SAVE.settings, ...data.settings },
+          achievements: data.achievements ?? [],
+          endlessBestTime: data.endlessBestTime ?? 0,
+          endlessBestScore: data.endlessBestScore ?? 0,
           isLoaded: true,
         });
       } else {
@@ -80,6 +96,9 @@ export const useSaveDataStore = create<SaveDataState>((set, get) => ({
         unlockedForms: get().unlockedForms,
         unlockedStages: get().unlockedStages,
         credits: get().credits,
+        achievements: get().achievements,
+        endlessBestTime: get().endlessBestTime,
+        endlessBestScore: get().endlessBestScore,
         upgrades: get().upgrades,
         settings: get().settings,
       }));
@@ -187,6 +206,31 @@ export const useSaveDataStore = create<SaveDataState>((set, get) => ({
 
   setLocale: (locale) => {
     set((s) => ({ settings: { ...s.settings, locale } }));
+    get().save();
+  },
+
+  unlockAchievement: (id) => {
+    const { achievements } = get();
+    if (achievements.includes(id)) return false;
+    const def = getAchievement(id);
+    set((s) => ({
+      achievements: [...s.achievements, id],
+      credits: s.credits + def.reward,
+    }));
+    get().save();
+    return true;
+  },
+
+  updateEndlessRecord: (time, score) => {
+    set((s) => ({
+      endlessBestTime: Math.max(s.endlessBestTime, time),
+      endlessBestScore: Math.max(s.endlessBestScore, score),
+    }));
+    get().save();
+  },
+
+  setHapticsEnabled: (enabled) => {
+    set((s) => ({ settings: { ...s.settings, hapticsEnabled: enabled } }));
     get().save();
   },
 }));

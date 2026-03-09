@@ -27,7 +27,13 @@ export default function StageSelectScreen() {
   const highScores = useSaveDataStore((s) => s.highScores);
   const credits = useSaveDataStore((s) => s.credits);
 
+  const endlessBestTime = useSaveDataStore((s) => s.endlessBestTime);
+  const endlessBestScore = useSaveDataStore((s) => s.endlessBestScore);
+
   const stageIds = getAvailableStageIds();
+  const allNormalStagesUnlocked = Array.from({ length: 15 }, (_, i) => i + 1).every((id) =>
+    unlockedStages.includes(id)
+  );
 
   return (
     <View style={[styles.container, { paddingTop: Math.max(insets.top, 20) + 40 }]}>
@@ -107,12 +113,44 @@ export default function StageSelectScreen() {
             </TouchableOpacity>
           );
         })}
+
+        {allNormalStagesUnlocked && (
+          <TouchableOpacity
+            style={styles.endlessCard}
+            activeOpacity={0.7}
+            onPress={() => router.push('/stages/99/select-form')}
+          >
+            <View style={[styles.leftAccent, { backgroundColor: '#BB66FF' }]} />
+            <CornerBrackets color={'#BB66FF88'} size={8} />
+            <View style={styles.stageContent}>
+              <View style={styles.stageInfo}>
+                <Text style={styles.endlessLabel}>{t.stageSelect.endless}</Text>
+                <Text style={styles.endlessName}>ENDLESS MODE</Text>
+              </View>
+              <View style={styles.stageScore}>
+                {endlessBestScore > 0 ? (
+                  <>
+                    <Text style={styles.endlessBestLabel}>{t.stageSelect.endlessBest}</Text>
+                    <Text style={styles.endlessBestScore}>{endlessBestScore.toLocaleString()} pt</Text>
+                    <Text style={styles.endlessBestTime}>{Math.floor(endlessBestTime)}s</Text>
+                  </>
+                ) : (
+                  <Text style={styles.noScore}>---</Text>
+                )}
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
         <TouchableOpacity style={styles.footerButton} activeOpacity={0.7} onPress={() => router.push('/upgrade')}>
           <CornerBrackets color={COLORS.neonBlue + '55'} size={6} />
           <Text style={styles.footerButtonText}>{t.stageSelect.upgrade}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} activeOpacity={0.7} onPress={() => router.push('/achievements')}>
+          <CornerBrackets color={COLORS.neonBlue + '55'} size={6} />
+          <Text style={styles.footerButtonText}>{t.stageSelect.achievementsButton}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.footerButtonSecondary} activeOpacity={0.7} onPress={() => router.push('/')}>
           <Text style={styles.footerButtonSecondaryText}>{t.stageSelect.back}</Text>
@@ -294,6 +332,55 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 2,
     textTransform: 'uppercase',
+  },
+  endlessCard: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    backgroundColor: '#BB66FF08',
+    borderRadius: 2,
+    borderWidth: 1,
+    borderColor: '#BB66FF55',
+    overflow: 'hidden',
+    marginTop: 8,
+    shadowColor: '#BB66FF',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 4,
+  },
+  endlessLabel: {
+    fontSize: 10,
+    color: '#BB66FF',
+    textTransform: 'uppercase',
+    letterSpacing: 3,
+  },
+  endlessName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#DDBBFF',
+    marginTop: 3,
+    letterSpacing: 1,
+    textShadowColor: '#BB66FF44',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
+  },
+  endlessBestLabel: {
+    fontSize: 9,
+    color: COLORS.lightGray,
+    letterSpacing: 2,
+    marginBottom: 2,
+  },
+  endlessBestScore: {
+    fontSize: 15,
+    color: COLORS.scoreYellow,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums' as const],
+  },
+  endlessBestTime: {
+    fontSize: 11,
+    color: COLORS.lightGray,
+    fontVariant: ['tabular-nums' as const],
+    marginTop: 2,
   },
   footerButtonSecondary: {
     flex: 1,

@@ -22,6 +22,7 @@ export type OverlayState = {
   gateFlashOpacity: number;
   gateFlashColor: string;
   exFlashOpacity: number;
+  bossEntranceOpacity: number;
 };
 
 export type RenderSyncTarget = SharedValue<RenderEntity[]>;
@@ -299,12 +300,14 @@ export function createSyncRenderSystem(
         label: g.displayLabel,
         gateProgress,
         depthScale: gds,
+        forced: g.forced ?? false,
       });
     }
 
-    // Boss — phase-specific base color (A2) + HP-based color shift (D1)
+    // Boss — phase-specific base color (A2) + HP-based color shift (D1) + bossIndex-based shape
     if (entities.boss?.active) {
       const b = entities.boss;
+      const bossType = b.bossIndex === 1 ? 'boss' : b.bossIndex === 2 ? 'boss_2' : 'boss_3';
       const bossHpRatio = b.hp / b.maxHp;
       const bossBaseColor = BOSS_PHASE_COLORS[b.phase] ?? COLORS.entityBoss;
       let bossColor: string = bossBaseColor;
@@ -313,17 +316,17 @@ export function createSyncRenderSystem(
         bossColor = lerpColor(bossBaseColor, '#FF8800', t);
       }
       out.push({
-        type: 'boss',
+        type: bossType,
         x: b.x,
         y: b.y,
         width: b.width,
         height: b.height,
         color: bossColor,
         opacity: 1.0,
-        path: buildPath('boss', b.x, b.y, b.width, b.height, scale),
-        glowPath: buildGlowPath('boss', b.x, b.y, b.width, b.height, scale),
+        path: buildPath(bossType, b.x, b.y, b.width, b.height, scale),
+        glowPath: buildGlowPath(bossType, b.x, b.y, b.width, b.height, scale),
         glowColor: toGlowColor(bossColor),
-        shadowPath: buildShadowPath('boss', b.x, b.y, b.width, b.height, scale),
+        shadowPath: buildShadowPath(bossType, b.x, b.y, b.width, b.height, scale),
       });
     }
 
@@ -478,10 +481,11 @@ export function createSyncRenderSystem(
     const awakenedOpacity = store.isAwakened ? 0.08 + Math.sin(entities.stageTime * 4) * 0.04 : 0;
     const gateFlashOpacity = entities.gateFlashTimer > 0 ? entities.gateFlashTimer / GATE_FLASH_DURATION * 0.25 : 0;
     const exFlashOpacity = exFlashTimer > 0 ? exFlashTimer / EX_FULL_FLASH_DURATION * 0.2 : 0;
+    const bossEntranceOpacity = store.bossEntrance ? 0.7 : 0;
     overlayState.value = {
       dangerOpacity, bossPhaseOpacity, awakenedOpacity,
       gateFlashOpacity, gateFlashColor: entities.gateFlashColor,
-      exFlashOpacity,
+      exFlashOpacity, bossEntranceOpacity,
     };
 
     // Reanimated freezes objects assigned to SharedValue — pass copies to keep out/popups mutable

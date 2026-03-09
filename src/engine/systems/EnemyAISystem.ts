@@ -1,7 +1,7 @@
 import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import type { DifficultyParams } from '@/types/stages';
-import { ENEMY_STATS, ENEMY_BULLET_SPEED, BASE_SCROLL_SPEED, PATROL_SPEED, PHALANX_SPEED, JUGGERNAUT_SCROLL_FACTOR, DODGER_DETECT_RADIUS, DODGER_SPEED, DODGER_COOLDOWN, SUMMONER_INTERVAL, SUMMONER_MAX_SPAWNS } from '@/constants/balance';
+import { ENEMY_STATS, ENEMY_BULLET_SPEED, BASE_SCROLL_SPEED, PATROL_SPEED, PHALANX_SPEED, JUGGERNAUT_SCROLL_FACTOR, DODGER_DETECT_RADIUS, DODGER_SPEED, DODGER_COOLDOWN, SUMMONER_INTERVAL, SUMMONER_MAX_SPAWNS, CARRIER_SPAWN_INTERVAL, CARRIER_SPAWN_COUNT } from '@/constants/balance';
 import { createEnemyBullet } from '@/engine/entities/Bullet';
 import { createEnemy } from '@/engine/entities/Enemy';
 import { acquireFromPool } from '@/engine/pool';
@@ -97,6 +97,29 @@ export function createEnemyAISystem(difficulty: DifficultyParams): GameSystem<Ga
           }
           break;
         }
+        case 'sentinel': {
+          // Static — no movement, turret-style
+          break;
+        }
+        case 'carrier': {
+          // Slow descent + patrol + spawn patrol enemies
+          enemy.y += BASE_SCROLL_SPEED * 0.5 * dt;
+          enemy.x += enemy.moveDirection * PATROL_SPEED * 0.6 * dt;
+          if (enemy.x < 16 || enemy.x + enemy.width > 304) {
+            enemy.moveDirection *= -1;
+          }
+          enemy.shootTimer += dt;
+          if (enemy.shootTimer >= CARRIER_SPAWN_INTERVAL) {
+            enemy.shootTimer = 0;
+            for (let i = 0; i < CARRIER_SPAWN_COUNT; i++) {
+              const spawnX = enemy.x + enemy.width / 2 + (i === 0 ? -25 : 25);
+              const p = createEnemy('patrol', spawnX, enemy.y + enemy.height, 1.0);
+              p.spawnTime = entities.stageTime;
+              acquireFromPool(entities.enemies, p);
+            }
+          }
+          break;
+        }
         default:
           break;
       }
@@ -172,6 +195,18 @@ export function createEnemyAISystem(difficulty: DifficultyParams): GameSystem<Ga
                 const bullet = createEnemyBullet(fireX, fireY, stats.attackDamage, { speed: baseSpeed, vx, vy });
                 acquireFromPool(entities.enemyBullets, bullet);
               }
+            }
+            break;
+          }
+          case 'sentinel': {
+            // 3-direction spread: center + left 30° + right 30°
+            const spreadAngle = Math.PI / 6;
+            for (let i = -1; i <= 1; i++) {
+              const angle = Math.PI / 2 + i * spreadAngle;
+              const vx = Math.cos(angle) * baseSpeed;
+              const vy = Math.sin(angle) * baseSpeed;
+              const bullet = createEnemyBullet(fireX, fireY, stats.attackDamage, { speed: baseSpeed, vx, vy });
+              acquireFromPool(entities.enemyBullets, bullet);
             }
             break;
           }

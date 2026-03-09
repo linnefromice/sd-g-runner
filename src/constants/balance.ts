@@ -22,6 +22,8 @@ export const ENEMY_STATS = {
   dodger:    { hp: 35, attackDamage: 12, attackInterval: 1.8, scoreValue: 250, creditValue: 3 },
   splitter:  { hp: 50, attackDamage: 8,  attackInterval: 2.0, scoreValue: 200, creditValue: 3 },
   summoner:  { hp: 80, attackDamage: 0,  attackInterval: 0,   scoreValue: 400, creditValue: 5 },
+  sentinel:  { hp: 120, attackDamage: 15, attackInterval: 2.0, scoreValue: 600, creditValue: 7 },
+  carrier:   { hp: 100, attackDamage: 0,  attackInterval: 0,   scoreValue: 500, creditValue: 6 },
 } as const;
 
 /** Scoring (§12.1) */
@@ -271,6 +273,13 @@ export const DODGER_COOLDOWN = 0.8;
 /** Summoner AI */
 export const SUMMONER_INTERVAL = 3.0;
 export const SUMMONER_MAX_SPAWNS = 6;
+
+/** Sentinel AI */
+export const SENTINEL_SHIELD_REDUCTION = 0.5;
+
+/** Carrier AI */
+export const CARRIER_SPAWN_INTERVAL = 5.0;
+export const CARRIER_SPAWN_COUNT = 2;
 
 /** Splitter spawn offsets */
 export const SPLITTER_SPAWN_OFFSETS = [-20, 0, 20];

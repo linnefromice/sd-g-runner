@@ -73,10 +73,11 @@ export function createGatePair(config: GatePairConfig, y: number): [GateEntity, 
     const gateWidth = HITBOX.gate.width;
     const leftX = 0;
     const rightX = LOGICAL_WIDTH - gateWidth;
-    return [
-      createSingleGate(config.left, leftX, y, gateWidth),
-      createSingleGate(config.right, rightX, y, gateWidth),
-    ];
+    const left = createSingleGate(config.left, leftX, y, gateWidth);
+    const right = createSingleGate(config.right, rightX, y, gateWidth);
+    left.forced = true;
+    right.forced = true;
+    return [left, right];
   } else {
     // Optional: narrower gates with gaps on sides and center
     const gateWidth = GATE_OPTIONAL_WIDTH;

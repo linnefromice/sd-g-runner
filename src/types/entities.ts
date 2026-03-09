@@ -70,6 +70,8 @@ export interface GateEntity extends BaseEntity {
   displayLabel: string;
   effects: import('./gates').GateEffect[];
   passed: boolean;
+  /** Whether this gate is part of a forced pair (no gap to dodge) */
+  forced?: boolean;
   // Growth gate fields
   growthHits?: number;
   growthMax?: number;

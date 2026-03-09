@@ -20,6 +20,7 @@ export default function SettingsScreen() {
   const bgmVolume = useSaveDataStore((s) => s.settings.bgmVolume);
   const seVolume = useSaveDataStore((s) => s.settings.seVolume);
   const locale = useSaveDataStore((s) => s.settings.locale);
+  const hapticsEnabled = useSaveDataStore((s) => s.settings.hapticsEnabled);
 
   return (
     <View style={styles.container}>
@@ -37,6 +38,30 @@ export default function SettingsScreen() {
         value={seVolume}
         onChange={(v) => useSaveDataStore.getState().setVolume('se', v)}
       />
+
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionLabel}>{t.settings.haptics}</Text>
+        </View>
+        <View style={styles.steps}>
+          <TouchableOpacity
+            style={[styles.step, hapticsEnabled && styles.stepActive]}
+            onPress={() => useSaveDataStore.getState().setHapticsEnabled(true)}
+          >
+            <Text style={[styles.stepText, hapticsEnabled && styles.stepTextActive]}>
+              {t.settings.hapticsOn}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.step, !hapticsEnabled && styles.stepActive]}
+            onPress={() => useSaveDataStore.getState().setHapticsEnabled(false)}
+          >
+            <Text style={[styles.stepText, !hapticsEnabled && styles.stepTextActive]}>
+              {t.settings.hapticsOff}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>

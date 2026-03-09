@@ -42,6 +42,7 @@ import {
   SCORE_POPUP_THRESHOLD_MEDIUM,
   SCORE_POPUP_THRESHOLD_LARGE,
   PARTICLE_COMBO_MAX_COUNT,
+  SHOCKWAVE_EFFECT_DURATION,
 } from '@/constants/balance';
 import { SCORE_POPUP_COLORS } from '@/constants/colors';
 
@@ -160,6 +161,10 @@ export function onGatePass(entities: GameEntities, x: number, y: number, color: 
 
 export function onEXBurst(entities: GameEntities, x: number, y: number) {
   spawnParticles(entities, x, y, PARTICLE_EX_BURST_COUNT, '#00E5FF', 500, PARTICLE_DEFAULT_SPEED, PARTICLE_DEFAULT_SIZE, 'upward');
+  // Shockwave ring effect
+  entities.shockwaveTimer = SHOCKWAVE_EFFECT_DURATION;
+  // Screen shake
+  triggerShake(entities, 4, 300);
 }
 
 export function onParry(entities: GameEntities, x: number, y: number) {
@@ -211,6 +216,14 @@ export function onGraze(entities: GameEntities, x: number, y: number, tier: Graz
 
 export function onComboMax(entities: GameEntities, x: number, y: number) {
   spawnParticles(entities, x, y, PARTICLE_COMBO_MAX_COUNT, '#FFD600', 300, PARTICLE_DEFAULT_SPEED * 0.8, PARTICLE_DEFAULT_SIZE, 'radial');
+}
+
+export function onAwaken(entities: GameEntities, x: number, y: number) {
+  // 20 golden radial particles for dramatic burst
+  spawnParticles(entities, x, y, 20, '#FFD600', 500, PARTICLE_DEFAULT_SPEED * 1.5, PARTICLE_DEFAULT_SIZE * 1.5, 'radial');
+  // Additional white flash particles
+  spawnParticles(entities, x, y, 10, '#FFFFFF', 300, PARTICLE_DEFAULT_SPEED, PARTICLE_KILL_FLASH_SIZE);
+  triggerShake(entities, 5, 400);
 }
 
 export function onDebrisDestroy(entities: GameEntities, x: number, y: number) {

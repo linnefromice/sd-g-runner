@@ -59,12 +59,24 @@ export default function ResultScreen() {
     if (hasSaved.current) return;
     hasSaved.current = true;
     const saveStore = useSaveDataStore.getState();
+    const session = useGameSessionStore.getState();
     saveStore.updateHighScore(stageIdNum, finalScore);
     saveStore.addCredits(finalCredits);
     if (isStageClear) {
       saveStore.unlockStage(stageIdNum + 1);
     }
-  }, [stageIdNum, finalScore, finalCredits, isStageClear]);
+
+    // Achievement checks
+    if (isStageClear && stageIdNum === 1) saveStore.unlockAchievement('first_clear');
+    if (isStageClear && stage.isBossStage) saveStore.unlockAchievement('boss_slayer');
+    if (isStageClear && session.damageTaken === 0) saveStore.unlockAchievement('no_damage_clear');
+    if (session.awakenedCount > 0) saveStore.unlockAchievement('combo_master');
+    if (isStageClear && session.currentForm === 'SD_Guardian') saveStore.unlockAchievement('guardian_angel');
+    if (saveStore.unlockedStages.length >= 15) saveStore.unlockAchievement('all_stages');
+    if (saveStore.unlockedForms.length >= 6) saveStore.unlockAchievement('all_forms');
+    if (saveStore.credits >= 5000) saveStore.unlockAchievement('credit_hoarder');
+    if (bonuses.some((b) => b.key === 'speedClear')) saveStore.unlockAchievement('speed_demon');
+  }, [stageIdNum, finalScore, finalCredits, isStageClear, stage.isBossStage, bonuses]);
 
   return (
     <View style={styles.container}>
@@ -112,7 +124,8 @@ export default function ResultScreen() {
       <View style={styles.buttons}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.replace(`/game/${stageIdNum}`)}
+          onPress={() => router.replace(`/stages/${stageIdNum}/select-form`)}
+          onLongPress={() => router.replace(`/game/${stageIdNum}`)}
         >
           <Text style={styles.buttonText}>{t.result.replay}</Text>
         </TouchableOpacity>

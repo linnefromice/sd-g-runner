@@ -81,6 +81,20 @@ export function bossPath(x: number, y: number, w: number, h: number): string {
   return `M ${cx} ${y} L ${x + w} ${cy - ry * 0.5} L ${x + w} ${cy + ry * 0.5} L ${cx} ${y + h} L ${x} ${cy + ry * 0.5} L ${x} ${cy - ry * 0.5} Z`;
 }
 
+/** Octagon with cardinal spike protrusions — Boss 2 (Omega Core) */
+export function boss2Path(x: number, y: number, w: number, h: number): string {
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  return `M ${cx} ${y - h * 0.1} L ${x + w * 0.7} ${y + h * 0.15} L ${x + w + w * 0.1} ${cy} L ${x + w * 0.7} ${y + h * 0.85} L ${cx} ${y + h + h * 0.1} L ${x + w * 0.3} ${y + h * 0.85} L ${x - w * 0.1} ${cy} L ${x + w * 0.3} ${y + h * 0.15} Z`;
+}
+
+/** Diamond with angular edges — Boss 3 (Terminus Core) */
+export function boss3Path(x: number, y: number, w: number, h: number): string {
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  return `M ${cx} ${y} L ${x + w * 0.75} ${y + h * 0.25} L ${x + w} ${cy} L ${x + w * 0.75} ${y + h * 0.75} L ${cx} ${y + h} L ${x + w * 0.25} ${y + h * 0.75} L ${x} ${cy} L ${x + w * 0.25} ${y + h * 0.25} Z`;
+}
+
 /** Vertically elongated diamond for bullets */
 export function diamondPath(x: number, y: number, w: number, h: number): string {
   const cx = x + w / 2;
@@ -141,6 +155,10 @@ export function getEntityPath(
       return patrolPath(x, y, w, h);
     case 'boss':
       return bossPath(x, y, w, h);
+    case 'boss_2':
+      return boss2Path(x, y, w, h);
+    case 'boss_3':
+      return boss3Path(x, y, w, h);
     case 'playerBullet':
       return diamondPath(x, y, w, h);
     case 'enemyBullet':
