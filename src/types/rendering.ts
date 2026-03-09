@@ -15,4 +15,10 @@ export type RenderEntity = {
   gateProgress?: number;
   /** Pre-computed HP bar color (green/yellow/red based on hpRatio) */
   hpBarColor?: string;
+  /** Enlarged SVG path for fake glow effect (drawn behind main shape at low opacity) */
+  glowPath?: string;
+  /** Pre-computed glow color with embedded alpha (e.g. '#00D4FF33') */
+  glowColor?: string;
+  /** Skia BlendMode name for additive blending (e.g. 'screen') */
+  blendMode?: string;
 };
