@@ -15,6 +15,7 @@ export function createDebris(x: number, y: number): DebrisEntity {
     active: true,
     hp: DEBRIS_HP,
     maxHp: DEBRIS_HP,
+    spawnTime: 0,
   };
 }
 

@@ -2,7 +2,7 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import type { RenderEntity } from '@/types/rendering';
 import type { SharedValue } from 'react-native-reanimated';
-import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS, EX_BURST_WIDTH, BOSS_LASER_WIDTH, TRAIL_HISTORY_SIZE, TRAIL_BASE_OPACITY, TRAIL_OPACITY_DECAY, GLOW_SCALE, DEPTH_SCALE_MIN, SHADOW_OFFSET_X, SHADOW_OFFSET_Y } from '@/constants/balance';
+import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS, EX_BURST_WIDTH, BOSS_LASER_WIDTH, TRAIL_HISTORY_SIZE, TRAIL_BASE_OPACITY, TRAIL_OPACITY_DECAY, GLOW_SCALE, DEPTH_SCALE_MIN, SHADOW_OFFSET_X, SHADOW_OFFSET_Y, SPAWN_FADE_DURATION, DANGER_HP_THRESHOLD, DANGER_PULSE_SPEED } from '@/constants/balance';
 import { COLORS, GATE_COLORS } from '@/constants/colors';
 import { getEntityPath } from '@/rendering/shapes';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
@@ -53,6 +53,7 @@ export function createSyncRenderSystem(
   renderData: RenderSyncTarget,
   popupData: PopupSyncTarget,
   scrollYShared: SharedValue<number>,
+  dangerOverlayOpacity: SharedValue<number>,
   scale: number = 1,
 ): GameSystem<GameEntities> {
   const out: RenderEntity[] = [];
@@ -142,7 +143,7 @@ export function createSyncRenderSystem(
         width: ew,
         height: eh,
         color: enemyColor,
-        opacity: 1.0,
+        opacity: Math.min(1.0, (entities.stageTime - e.spawnTime) / SPAWN_FADE_DURATION),
         path: buildPath(enemyRenderType, ex, ey, ew, eh, scale),
         glowPath: buildGlowPath(enemyRenderType, ex, ey, ew, eh, scale),
         glowColor: toGlowColor(enemyColor),
@@ -169,7 +170,7 @@ export function createSyncRenderSystem(
         width: dw,
         height: dh,
         color: COLORS.entityDebris,
-        opacity: 1.0,
+        opacity: Math.min(1.0, (entities.stageTime - d.spawnTime) / SPAWN_FADE_DURATION),
         path: buildPath('debris', dx, dy, dw, dh, scale),
         shadowPath: buildShadowPath('debris', dx, dy, dw, dh, scale, dds),
         hpRatio: dRatio,
@@ -380,6 +381,15 @@ export function createSyncRenderSystem(
         color: popup.color,
         opacity,
       });
+    }
+
+    // Low HP danger overlay — pulsing red when below threshold
+    const store = useGameSessionStore.getState();
+    const hpRatio = store.maxHp > 0 ? store.hp / store.maxHp : 1;
+    if (hpRatio < DANGER_HP_THRESHOLD && hpRatio > 0 && entities.player.active) {
+      dangerOverlayOpacity.value = 0.15 + Math.sin(entities.stageTime * DANGER_PULSE_SPEED) * 0.1;
+    } else {
+      dangerOverlayOpacity.value = 0;
     }
 
     // Reanimated freezes objects assigned to SharedValue — pass copies to keep out/popups mutable

@@ -17,7 +17,7 @@ function createInactiveEnemy(): EnemyEntity {
     id: '', type: 'enemy', enemyType: 'stationary',
     x: -100, y: -100, width: 0, height: 0,
     active: false, hp: 0, maxHp: 0,
-    shootTimer: 0, moveTimer: 0, moveDirection: 1, flashTimer: 0,
+    shootTimer: 0, moveTimer: 0, moveDirection: 1, flashTimer: 0, spawnTime: 0,
   };
 }
 
@@ -46,7 +46,7 @@ function createInactiveDebris(): DebrisEntity {
   return {
     id: '', type: 'debris',
     x: -100, y: -100, width: 0, height: 0,
-    active: false, hp: 0, maxHp: 0,
+    active: false, hp: 0, maxHp: 0, spawnTime: 0,
   };
 }
 

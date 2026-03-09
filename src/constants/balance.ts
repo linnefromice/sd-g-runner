@@ -218,3 +218,10 @@ export const SHADOW_OFFSET_X = 3;
 export const SHADOW_OFFSET_Y = 5;
 export const SHADOW_COLOR = '#00000040';
 
+/** Spawn fade-in (seconds) */
+export const SPAWN_FADE_DURATION = 0.3;
+
+/** Low HP danger overlay */
+export const DANGER_HP_THRESHOLD = 0.25;
+export const DANGER_PULSE_SPEED = 6;
+

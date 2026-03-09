@@ -61,6 +61,7 @@ export default function GameScreen() {
   const renderData = useSharedValue<RenderEntity[]>([]);
   const popupData = useSharedValue<PopupRenderData[]>([]);
   const scrollYShared = useSharedValue(0);
+  const dangerOverlayOpacity = useSharedValue(0);
 
   // Reset session store
   useEffect(() => {
@@ -107,7 +108,7 @@ export default function GameScreen() {
     gameOverSystem,
     particleSystem,
     screenShakeSystem,
-    createSyncRenderSystem(renderData, popupData, scrollYShared, scale),
+    createSyncRenderSystem(renderData, popupData, scrollYShared, dangerOverlayOpacity, scale),
   ]);
 
   // Pause game loop during skill choice overlay
@@ -196,7 +197,7 @@ export default function GameScreen() {
     <GestureDetector gesture={gesture}>
       <Animated.View style={styles.container}>
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <GameCanvas renderData={renderData} popupData={popupData} scrollY={scrollYShared} scale={scale} />
+          <GameCanvas renderData={renderData} popupData={popupData} scrollY={scrollYShared} dangerOverlayOpacity={dangerOverlayOpacity} scale={scale} />
         </View>
         <HUD
           onPause={handlePause}

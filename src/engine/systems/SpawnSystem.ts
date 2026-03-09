@@ -31,6 +31,7 @@ export function createSpawnSystem(stage: StageDefinition): GameSystem<GameEntiti
               -30, // spawn above screen
               stage.difficulty.enemyHpMultiplier
             );
+            enemy.spawnTime = entities.stageTime;
             if (!acquireFromPool(entities.enemies, enemy)) break;
             spawned++;
           }
@@ -57,6 +58,7 @@ export function createSpawnSystem(stage: StageDefinition): GameSystem<GameEntiti
               event.x + i * 50, // offset for multiple spawns
               -30 // spawn above screen
             );
+            debris.spawnTime = entities.stageTime;
             if (!acquireFromPool(entities.debris, debris)) break;
           }
           break;

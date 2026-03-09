@@ -14,7 +14,6 @@ import {
   vec,
 } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
-import { COLORS } from '@/constants/colors';
 import type { RenderEntity } from '@/types/rendering';
 import type { PopupRenderData } from '@/engine/systems/SyncRenderSystem';
 import { SCANLINE_PITCH, SCANLINE_OPACITY, SCORE_POPUP_FONT_SIZE, GRID_PITCH_MIN, GRID_PITCH_MAX, SHADOW_COLOR } from '@/constants/balance';
@@ -24,6 +23,7 @@ type GameCanvasProps = {
   renderData: ReturnType<typeof useSharedValue<RenderEntity[]>>;
   popupData: ReturnType<typeof useSharedValue<PopupRenderData[]>>;
   scrollY: ReturnType<typeof useSharedValue<number>>;
+  dangerOverlayOpacity: ReturnType<typeof useSharedValue<number>>;
   scale: number;
 };
 
@@ -353,7 +353,7 @@ function ScanlineOverlay({ width, height }: { width: number; height: number }) {
   );
 }
 
-function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasProps) {
+function GameCanvasInner({ renderData, popupData, scrollY, dangerOverlayOpacity, scale }: GameCanvasProps) {
   const { width, height } = useWindowDimensions();
 
   const entitySlots = React.useMemo(
@@ -392,8 +392,10 @@ function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasPr
 
   return (
     <Canvas style={{ width, height }}>
-      {/* Background */}
-      <Rect x={0} y={0} width={width} height={height} color={COLORS.bgDark} />
+      {/* Background: top-down gradient reinforcing 2.5D depth */}
+      <Rect x={0} y={0} width={width} height={height}>
+        <LinearGradient start={vec(0, 0)} end={vec(0, height)} colors={['#060610', '#12122a']} />
+      </Rect>
       {/* Star field (parallax) */}
       <StarField scrollY={scrollY} scale={scale} width={width} height={height} />
       {/* Grid: vertical lines (fixed) */}
@@ -417,6 +419,16 @@ function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasPr
       {entitySlots.map((index) => (
         <EntitySlot key={index} renderData={renderData} index={index} scale={scale} screenHeight={height} />
       ))}
+
+      {/* Low HP danger overlay: red edges pulsing when below threshold */}
+      <Rect x={0} y={0} width={width} height={height} opacity={dangerOverlayOpacity}>
+        <LinearGradient
+          start={vec(0, 0)}
+          end={vec(0, height)}
+          colors={['#FF003366', '#FF003300', '#FF003300', '#FF003366']}
+          positions={[0, 0.3, 0.7, 1]}
+        />
+      </Rect>
 
       {/* Score popup text rendering */}
       <ScorePopups popupData={popupData} scale={scale} />

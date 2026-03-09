@@ -44,6 +44,8 @@ export interface EnemyEntity extends BaseEntity {
   moveDirection: number; // -1 or 1, for patrol type
   /** Hit flash timer (ms) — when > 0, entity renders white */
   flashTimer: number;
+  /** Stage time when entity was spawned (for fade-in effect) */
+  spawnTime: number;
 }
 
 export interface BulletEntity extends BaseEntity {
@@ -98,6 +100,8 @@ export interface DebrisEntity extends BaseEntity {
   type: 'debris';
   hp: number;
   maxHp: number;
+  /** Stage time when entity was spawned (for fade-in effect) */
+  spawnTime: number;
 }
 
 export interface ParticleEntity {

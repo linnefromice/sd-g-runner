@@ -37,6 +37,7 @@ export function createEnemy(
     moveTimer: 0,
     moveDirection: 1,
     flashTimer: 0,
+    spawnTime: 0,
   };
 }
 
