@@ -13,6 +13,8 @@ import {
   FORM_XP_THRESHOLDS,
 } from '@/constants/balance';
 import { useSaveDataStore } from '@/stores/saveDataStore';
+import { AudioManager } from '@/audio/AudioManager';
+import { HapticsManager } from '@/audio/HapticsManager';
 import { getUpgradeEffect } from '@/game/upgrades';
 
 interface GameSessionState {
@@ -224,14 +226,17 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
 
   resetCombo: () => set({ comboCount: 0 }),
 
-  activateAwakened: () =>
+  activateAwakened: () => {
+    AudioManager.playSe('awaken');
+    HapticsManager.awaken();
     set((s) => ({
       isAwakened: true,
       previousForm: s.currentForm,
       currentForm: 'SD_Awakened',
       comboCount: 0,
       awakenedCount: s.awakenedCount + 1,
-    })),
+    }));
+  },
 
   deactivateAwakened: () =>
     set((s) => ({

@@ -4,7 +4,9 @@ import { checkAABBOverlap, getPlayerHitbox, getPlayerVisualHitbox, getCenter, ge
 import { deactivateBullet } from '@/engine/entities/Bullet';
 import { createEnemy } from '@/engine/entities/Enemy';
 import { acquireFromPool } from '@/engine/pool';
-import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, GROWTH_GATE_INITIAL_RATIO, GROWTH_GATE_PER_HIT, JUST_TF_SHOCKWAVE_RADIUS, JUST_TF_SHOCKWAVE_DAMAGE, JUST_TF_SCORE, JUST_TF_EX_GAIN, SHOCKWAVE_EFFECT_DURATION, BOSS_COLLISION_DAMAGE, HIT_FLASH_DURATION, GRAZE_CLOSE_EXPAND, GRAZE_EXTREME_EXPAND, GRAZE_CLOSE_SCORE, GRAZE_CLOSE_EX_GAIN, GRAZE_CLOSE_TF_GAIN, GRAZE_EXTREME_SCORE, GRAZE_EXTREME_EX_GAIN, GRAZE_EXTREME_TF_GAIN, FORM_XP_GRAZE, FORM_XP_GRAZE_CLOSE, FORM_XP_GRAZE_EXTREME, SPLITTER_SPAWN_OFFSETS } from '@/constants/balance';
+import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, GROWTH_GATE_INITIAL_RATIO, GROWTH_GATE_PER_HIT, JUST_TF_SHOCKWAVE_RADIUS, JUST_TF_SHOCKWAVE_DAMAGE, JUST_TF_SCORE, JUST_TF_EX_GAIN, SHOCKWAVE_EFFECT_DURATION, BOSS_COLLISION_DAMAGE, HIT_FLASH_DURATION, GRAZE_CLOSE_EXPAND, GRAZE_EXTREME_EXPAND, GRAZE_CLOSE_SCORE, GRAZE_CLOSE_EX_GAIN, GRAZE_CLOSE_TF_GAIN, GRAZE_EXTREME_SCORE, GRAZE_EXTREME_EX_GAIN, GRAZE_EXTREME_TF_GAIN, FORM_XP_GRAZE, FORM_XP_GRAZE_CLOSE, FORM_XP_GRAZE_EXTREME, SPLITTER_SPAWN_OFFSETS, SENTINEL_SHIELD_REDUCTION } from '@/constants/balance';
+import { AudioManager } from '@/audio/AudioManager';
+import { HapticsManager } from '@/audio/HapticsManager';
 import { generateGateLabel } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { FORM_DEFINITIONS } from '@/game/forms';
@@ -62,7 +64,8 @@ function checkPlayerBulletsVsEnemies(entities: GameEntities, store: Store) {
       }
 
       const hit = getCenter(bullet);
-      enemy.hp -= bullet.damage;
+      const dmgMul = enemy.enemyType === 'sentinel' ? SENTINEL_SHIELD_REDUCTION : 1;
+      enemy.hp -= bullet.damage * dmgMul;
       enemy.flashTimer = HIT_FLASH_DURATION;
 
       if (bullet.specialAbility === 'pierce') {
@@ -75,6 +78,8 @@ function checkPlayerBulletsVsEnemies(entities: GameEntities, store: Store) {
       }
 
       if (enemy.hp <= 0) {
+        AudioManager.playSe('enemyDestroy');
+        HapticsManager.enemyDestroy();
         // Splitter: spawn 3 swarms on death
         if (enemy.enemyType === 'splitter') {
           const cx = enemy.x + enemy.width / 2;
@@ -324,6 +329,8 @@ function applyDamage(
   const form = FORM_DEFINITIONS[formId];
   const finalDamage = form?.specialAbility === 'damage_reduce' ? Math.round(damage * 0.7) : damage;
   store.takeDamage(finalDamage);
+  AudioManager.playSe('damage');
+  HapticsManager.damage();
   player.isInvincible = true;
   player.invincibleTimer = IFRAME_DURATION;
   store.resetCombo();
