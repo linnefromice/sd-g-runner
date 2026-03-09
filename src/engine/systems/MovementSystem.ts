@@ -11,6 +11,8 @@ import { PLAYER_MOVE_SPEED, BASE_SCROLL_SPEED, BOOST_LANE_SCROLL_MULTIPLIER } fr
 import { deactivateBullet } from '@/engine/entities/Bullet';
 import { deactivateEnemy } from '@/engine/entities/Enemy';
 import { deactivateDebris } from '@/engine/entities/Debris';
+import { resolveFormSkills } from '@/engine/formSkillResolver';
+import { useGameSessionStore } from '@/stores/gameSessionStore';
 
 /** How strongly homing bullets turn toward targets (0-1 blend per second) */
 const HOMING_TURN_RATE = 3.0;
@@ -24,13 +26,18 @@ export function createMovementSystem(
   const form = getForm();
   const scrollSpeed = BASE_SCROLL_SPEED * (entities.isPlayerBoosted ? BOOST_LANE_SCROLL_MULTIPLIER : 1) * dt;
 
+  // Resolve form skill move speed multiplier (once per frame)
+  const store = useGameSessionStore.getState();
+  const formXPState = store.formXP[store.currentForm];
+  const skillMoveSpeed = formXPState ? resolveFormSkills(store.currentForm, formXPState.skills).moveSpeedMul : 1;
+
   // Smooth slide toward tap target (if set)
   const p = entities.player;
   if (p.targetX != null && p.targetY != null) {
     const dx = p.targetX - p.x;
     const dy = p.targetY - p.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const step = PLAYER_MOVE_SPEED * form.moveSpeedMultiplier * dt;
+    const step = PLAYER_MOVE_SPEED * form.moveSpeedMultiplier * skillMoveSpeed * dt;
 
     if (dist <= step) {
       // Arrived at target
