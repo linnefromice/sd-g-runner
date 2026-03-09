@@ -6,7 +6,9 @@ type SoundId =
   | 'gatePass'
   | 'refit'
   | 'damage'
-  | 'exBurst';
+  | 'exBurst'
+  | 'bossAppear'
+  | 'awaken';
 
 type BgmId = 'stage' | 'boss';
 

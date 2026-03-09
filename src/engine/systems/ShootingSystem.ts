@@ -6,6 +6,7 @@ import { createPlayerBullet } from '@/engine/entities/Bullet';
 import { acquireFromPool } from '@/engine/pool';
 import { resolveFormSkills } from '@/engine/formSkillResolver';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
+import { AudioManager } from '@/audio/AudioManager';
 
 const SPREAD_ANGLE = 15; // degrees between spread bullets
 
@@ -28,6 +29,8 @@ export function createShootingSystem(getForm: () => MechaFormDefinition): GameSy
 
     const p = entities.player;
     if (!p.active) return;
+
+    AudioManager.playSe('shoot');
 
     const bulletConfig = form.bulletConfig;
     const damage = 10 * form.attackMultiplier * (skills?.damageMul ?? 1);

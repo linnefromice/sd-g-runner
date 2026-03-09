@@ -6,6 +6,8 @@ import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { SCORE, EX_GAIN, TRANSFORM_GAIN_GATE_PASS, ROULETTE_INTERVAL, FORM_XP_GATE_ENHANCE, COMBO_THRESHOLD, GATE_FLASH_DURATION } from '@/constants/balance';
 import { onGatePass, onComboMax } from '@/engine/effects';
 import { GATE_COLORS } from '@/constants/colors';
+import { AudioManager } from '@/audio/AudioManager';
+import { HapticsManager } from '@/audio/HapticsManager';
 
 export const gateSystem: GameSystem<GameEntities> = (entities, { time }) => {
   const player = entities.player;
@@ -34,6 +36,10 @@ export const gateSystem: GameSystem<GameEntities> = (entities, { time }) => {
 
     gate.passed = true;
 
+    // Audio & haptics
+    AudioManager.playSe('gatePass');
+    HapticsManager.gatePass();
+
     // Apply effects
     for (const effect of gate.effects) {
       switch (effect.kind) {
@@ -45,6 +51,7 @@ export const gateSystem: GameSystem<GameEntities> = (entities, { time }) => {
           break;
         case 'refit':
           store.setForm(effect.targetForm);
+          AudioManager.playSe('refit');
           break;
         case 'heal':
           store.heal(effect.value);
