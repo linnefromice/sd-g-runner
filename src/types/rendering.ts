@@ -23,4 +23,6 @@ export type RenderEntity = {
   blendMode?: string;
   /** Y-based depth scale (0.75–1.0) for 2.5D perspective — visual only, no collision impact */
   depthScale?: number;
+  /** Pre-computed SVG path for directional shadow (offset behind main shape) */
+  shadowPath?: string;
 };
