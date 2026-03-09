@@ -13,6 +13,9 @@ const SELECTABLE_FORMS: MechaFormId[] = [
   'SD_Standard',
   'SD_HeavyArtillery',
   'SD_HighSpeed',
+  'SD_Sniper',
+  'SD_Scatter',
+  'SD_Guardian',
 ];
 
 /** Decorative corner brackets for HUD/sci-fi framing */

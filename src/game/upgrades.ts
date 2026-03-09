@@ -26,6 +26,7 @@ export const FORM_UNLOCK_CONDITIONS: Record<MechaFormId, FormUnlockCondition> = 
   SD_HighSpeed:      { type: 'unlock', requiredStage: 5, cost: 500 },
   SD_Sniper:         { type: 'unlock', requiredStage: 7, cost: 800 },
   SD_Scatter:        { type: 'unlock', requiredStage: 8, cost: 800 },
+  SD_Guardian:       { type: 'unlock', requiredStage: 10, cost: 1000 },
   SD_Awakened:       { type: 'combo_only' },
 };
 

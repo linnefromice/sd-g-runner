@@ -56,6 +56,17 @@ export const FORM_DEFINITIONS: Record<string, MechaFormDefinition> = {
     spriteConfig: { bodyColor: '#FF8844', accentColor: '#FFFFFF', glowColor: '#FFAA44' },
     bulletConfig: { width: 4, height: 10, speed: 380, color: '#FFAA44', count: 5 },
   },
+  SD_Guardian: {
+    id: 'SD_Guardian',
+    displayName: 'Guardian',
+    moveSpeedMultiplier: 0.7,
+    attackMultiplier: 0.8,
+    fireRateMultiplier: 0.8,
+    specialAbility: 'damage_reduce',
+    isTimeLimited: false,
+    spriteConfig: { bodyColor: '#4466CC', accentColor: '#6688FF', glowColor: '#4466CC' },
+    bulletConfig: { width: 6, height: 10, speed: 400, color: '#44AAFF', count: 1 },
+  },
   SD_Awakened: {
     id: 'SD_Awakened',
     displayName: 'Awakened',

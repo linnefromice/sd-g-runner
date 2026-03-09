@@ -81,6 +81,22 @@ export const FORM_SKILL_TREE: FormSkillLevel[] = [
     choiceA: { label: 'Omnidirectional', effect: { type: 'passive', id: 'omnidirectional' } },
     choiceB: { label: 'Heal on Hit', effect: { type: 'passive', id: 'heal_on_hit' } },
   },
+  // === SD_Guardian ===
+  {
+    formId: 'SD_Guardian', level: 1,
+    choiceA: { label: 'HP Regen', effect: { type: 'passive', id: 'hp_regen' } },
+    choiceB: { label: 'DMG Reduce +10%', effect: { type: 'stat_multiply', stat: 'damageReduce', value: 1.1 } },
+  },
+  {
+    formId: 'SD_Guardian', level: 2,
+    choiceA: { label: 'Counter Shot', effect: { type: 'passive', id: 'counter_shot' } },
+    choiceB: { label: 'Shield', effect: { type: 'passive', id: 'shield' } },
+  },
+  {
+    formId: 'SD_Guardian', level: 3,
+    choiceA: { label: 'Ally Bullet Speed +20%', effect: { type: 'stat_multiply', stat: 'bulletSpeed', value: 1.2 } },
+    choiceB: { label: 'EX on Hit', effect: { type: 'passive', id: 'ex_on_hit' } },
+  },
 ];
 
 export function getFormSkillTree(formId: string): FormSkillLevel[] {

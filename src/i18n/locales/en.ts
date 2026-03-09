@@ -108,6 +108,7 @@ export const en = {
     SD_HighSpeed: 'High Speed',
     SD_Sniper: 'Sniper',
     SD_Scatter: 'Scatter',
+    SD_Guardian: 'Guardian',
     SD_Awakened: 'Awakened',
   },
   abilities: {
@@ -115,6 +116,7 @@ export const en = {
     explosion_radius: 'Explosion',
     pierce: 'Pierce',
     homing_invincible: 'Homing + Invincible',
+    damage_reduce: 'Damage Reduce',
   },
   howToPlay: howToPlayEn,
 } as const;
