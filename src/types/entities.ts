@@ -162,6 +162,8 @@ export interface GameEntities {
   justTFTimer: number;
   /** Shockwave visual effect timer (ms) */
   shockwaveTimer: number;
+  /** Graze ring visual effect timer (ms) */
+  grazeRingTimer: number;
   /** Awakened mode countdown timer (ms) — managed by AwakenedSystem */
   awakenedTimer: number;
   /** EX Burst countdown timer (ms) — managed by EXBurstSystem */

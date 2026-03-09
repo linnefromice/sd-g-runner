@@ -225,3 +225,15 @@ export const SPAWN_FADE_DURATION = 0.3;
 export const DANGER_HP_THRESHOLD = 0.25;
 export const DANGER_PULSE_SPEED = 6;
 
+/** Boss HP color shift (D1) — starts shifting below this ratio */
+export const BOSS_COLOR_SHIFT_THRESHOLD = 0.5;
+
+/** Kill flash burst (F1) */
+export const PARTICLE_KILL_FLASH_COUNT = 3;
+export const PARTICLE_KILL_FLASH_LIFE = 80;
+export const PARTICLE_KILL_FLASH_SIZE = 8;
+
+/** Graze ring (F3) */
+export const GRAZE_RING_RADIUS = 25;
+export const GRAZE_RING_DURATION = 150;
+

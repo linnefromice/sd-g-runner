@@ -85,6 +85,7 @@ export function createGameEntities(
     isPlayerBoosted: false,
     justTFTimer: 0,
     shockwaveTimer: 0,
+    grazeRingTimer: 0,
     awakenedTimer: 0,
     exBurstTimer: 0,
     exBurstTickTimer: 0,

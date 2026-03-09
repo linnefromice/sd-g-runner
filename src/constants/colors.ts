@@ -1,4 +1,5 @@
 import type { GateType } from '@/types/gates';
+import type { EnemyType } from '@/types/enemies';
 
 /** Color palette from §17.1 */
 export const COLORS = {
@@ -40,4 +41,14 @@ export const GATE_COLORS: Record<GateType, string> = {
   recovery: COLORS.gateRecovery,
   growth: COLORS.gateGrowth,
   roulette: COLORS.gateRoulette,
+};
+
+/** Per-enemy-type colors for glow differentiation (D2) */
+export const ENEMY_TYPE_COLORS: Record<EnemyType, string> = {
+  stationary: '#FF3366',  // pink (same as base)
+  patrol: '#FF8844',      // orange — stands out as aimed-shot threat
+  rush: '#FF4466',        // red-pink — aggressive
+  swarm: '#FF3366',       // pink (same as base)
+  phalanx: '#4488FF',     // blue — shield/formation type
+  juggernaut: '#AA44FF',  // purple — heavy/elite
 };

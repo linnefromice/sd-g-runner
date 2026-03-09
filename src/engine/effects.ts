@@ -35,6 +35,10 @@ import {
   PARTICLE_GRAZE_CLOSE_COUNT,
   PARTICLE_GRAZE_EXTREME_COUNT,
   DEBRIS_DESTROY_SCORE,
+  PARTICLE_KILL_FLASH_COUNT,
+  PARTICLE_KILL_FLASH_LIFE,
+  PARTICLE_KILL_FLASH_SIZE,
+  GRAZE_RING_DURATION,
 } from '@/constants/balance';
 
 export type GrazeTier = 'normal' | 'close' | 'extreme';
@@ -127,6 +131,8 @@ function triggerShake(entities: GameEntities, intensity: number, duration: numbe
 export function onEnemyKill(entities: GameEntities, x: number, y: number, score: number) {
   triggerHitStop(entities, HIT_STOP_ENEMY_KILL);
   triggerShake(entities, SHAKE_ENEMY_KILL_INTENSITY, SHAKE_ENEMY_KILL_DURATION);
+  // White flash burst: large, very brief particles for impact feel (F1)
+  spawnParticles(entities, x, y, PARTICLE_KILL_FLASH_COUNT, '#FFFFFF', PARTICLE_KILL_FLASH_LIFE, PARTICLE_DEFAULT_SPEED * 0.5, PARTICLE_KILL_FLASH_SIZE);
   spawnParticles(entities, x, y, PARTICLE_ENEMY_KILL_COUNT, '#FF4444');
   spawnScorePopup(entities, x, y, `+${score}`, '#FFD600');
 }
@@ -188,6 +194,8 @@ export function onGraze(entities: GameEntities, x: number, y: number, tier: Graz
 
   spawnParticles(entities, x, y, particleCount, color);
   spawnScorePopup(entities, x, y, `+${score}`, color);
+  // Graze ring visual effect (F3)
+  entities.grazeRingTimer = GRAZE_RING_DURATION;
 }
 
 export function onDebrisDestroy(entities: GameEntities, x: number, y: number) {

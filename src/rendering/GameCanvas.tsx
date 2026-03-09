@@ -15,7 +15,7 @@ import {
 } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import type { RenderEntity } from '@/types/rendering';
-import type { PopupRenderData } from '@/engine/systems/SyncRenderSystem';
+import type { PopupRenderData, OverlayState } from '@/engine/systems/SyncRenderSystem';
 import { SCANLINE_PITCH, SCANLINE_OPACITY, SCORE_POPUP_FONT_SIZE, GRID_PITCH_MIN, GRID_PITCH_MAX, SHADOW_COLOR } from '@/constants/balance';
 export type { RenderEntity };
 
@@ -23,7 +23,7 @@ type GameCanvasProps = {
   renderData: ReturnType<typeof useSharedValue<RenderEntity[]>>;
   popupData: ReturnType<typeof useSharedValue<PopupRenderData[]>>;
   scrollY: ReturnType<typeof useSharedValue<number>>;
-  dangerOverlayOpacity: ReturnType<typeof useSharedValue<number>>;
+  overlayState: ReturnType<typeof useSharedValue<OverlayState>>;
   scale: number;
 };
 
@@ -353,7 +353,7 @@ function ScanlineOverlay({ width, height }: { width: number; height: number }) {
   );
 }
 
-function GameCanvasInner({ renderData, popupData, scrollY, dangerOverlayOpacity, scale }: GameCanvasProps) {
+function GameCanvasInner({ renderData, popupData, scrollY, overlayState, scale }: GameCanvasProps) {
   const { width, height } = useWindowDimensions();
 
   const entitySlots = React.useMemo(
@@ -420,8 +420,12 @@ function GameCanvasInner({ renderData, popupData, scrollY, dangerOverlayOpacity,
         <EntitySlot key={index} renderData={renderData} index={index} scale={scale} screenHeight={height} />
       ))}
 
-      {/* Low HP danger overlay: red edges pulsing when below threshold */}
-      <Rect x={0} y={0} width={width} height={height} opacity={dangerOverlayOpacity}>
+      {/* Boss phase atmosphere overlay: subtle dark red tint (E1) */}
+      <Rect x={0} y={0} width={width} height={height} color="#440011" opacity={useDerivedValue(() => overlayState.value.bossPhaseOpacity)} />
+      {/* Awakened mode overlay: golden glow (E2) */}
+      <Rect x={0} y={0} width={width} height={height} color="#FFD60033" opacity={useDerivedValue(() => overlayState.value.awakenedOpacity)} />
+      {/* Low HP danger overlay: red edges pulsing (C2) */}
+      <Rect x={0} y={0} width={width} height={height} opacity={useDerivedValue(() => overlayState.value.dangerOpacity)}>
         <LinearGradient
           start={vec(0, 0)}
           end={vec(0, height)}

@@ -5,7 +5,7 @@ import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { useSharedValue } from 'react-native-reanimated';
 import { useGameLoop, type GameSystem } from '@/engine/GameLoop';
 import { GameCanvas, type RenderEntity } from '@/rendering/GameCanvas';
-import type { PopupRenderData } from '@/engine/systems/SyncRenderSystem';
+import type { PopupRenderData, OverlayState } from '@/engine/systems/SyncRenderSystem';
 import { HUD } from '@/ui/HUD';
 import { PauseMenu } from '@/ui/PauseMenu';
 import { SkillChoiceOverlay } from '@/ui/SkillChoiceOverlay';
@@ -61,7 +61,7 @@ export default function GameScreen() {
   const renderData = useSharedValue<RenderEntity[]>([]);
   const popupData = useSharedValue<PopupRenderData[]>([]);
   const scrollYShared = useSharedValue(0);
-  const dangerOverlayOpacity = useSharedValue(0);
+  const overlayState = useSharedValue<OverlayState>({ dangerOpacity: 0, bossPhaseOpacity: 0, awakenedOpacity: 0 });
 
   // Reset session store
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function GameScreen() {
     gameOverSystem,
     particleSystem,
     screenShakeSystem,
-    createSyncRenderSystem(renderData, popupData, scrollYShared, dangerOverlayOpacity, scale),
+    createSyncRenderSystem(renderData, popupData, scrollYShared, overlayState, scale),
   ]);
 
   // Pause game loop during skill choice overlay
@@ -197,7 +197,7 @@ export default function GameScreen() {
     <GestureDetector gesture={gesture}>
       <Animated.View style={styles.container}>
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <GameCanvas renderData={renderData} popupData={popupData} scrollY={scrollYShared} dangerOverlayOpacity={dangerOverlayOpacity} scale={scale} />
+          <GameCanvas renderData={renderData} popupData={popupData} scrollY={scrollYShared} overlayState={overlayState} scale={scale} />
         </View>
         <HUD
           onPause={handlePause}

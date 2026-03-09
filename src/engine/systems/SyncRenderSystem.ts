@@ -2,8 +2,8 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import type { RenderEntity } from '@/types/rendering';
 import type { SharedValue } from 'react-native-reanimated';
-import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS, EX_BURST_WIDTH, BOSS_LASER_WIDTH, TRAIL_HISTORY_SIZE, TRAIL_BASE_OPACITY, TRAIL_OPACITY_DECAY, GLOW_SCALE, DEPTH_SCALE_MIN, SHADOW_OFFSET_X, SHADOW_OFFSET_Y, SPAWN_FADE_DURATION, DANGER_HP_THRESHOLD, DANGER_PULSE_SPEED } from '@/constants/balance';
-import { COLORS, GATE_COLORS } from '@/constants/colors';
+import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS, EX_BURST_WIDTH, BOSS_LASER_WIDTH, TRAIL_HISTORY_SIZE, TRAIL_BASE_OPACITY, TRAIL_OPACITY_DECAY, GLOW_SCALE, DEPTH_SCALE_MIN, SHADOW_OFFSET_X, SHADOW_OFFSET_Y, SPAWN_FADE_DURATION, DANGER_HP_THRESHOLD, DANGER_PULSE_SPEED, BOSS_COLOR_SHIFT_THRESHOLD, GRAZE_RING_RADIUS, GRAZE_RING_DURATION } from '@/constants/balance';
+import { COLORS, GATE_COLORS, ENEMY_TYPE_COLORS } from '@/constants/colors';
 import { getEntityPath } from '@/rendering/shapes';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 
@@ -13,6 +13,12 @@ export type PopupRenderData = {
   text: string;
   color: string;
   opacity: number;
+};
+
+export type OverlayState = {
+  dangerOpacity: number;
+  bossPhaseOpacity: number;
+  awakenedOpacity: number;
 };
 
 export type RenderSyncTarget = SharedValue<RenderEntity[]>;
@@ -49,21 +55,36 @@ function buildShadowPath(type: string, x: number, y: number, w: number, h: numbe
   return getEntityPath(type, (x + SHADOW_OFFSET_X * depthScale) * scale, (y + SHADOW_OFFSET_Y * depthScale) * scale, w * scale, h * scale) ?? undefined;
 }
 
+/** Linearly interpolate two hex colors (#RRGGBB). t=0 → a, t=1 → b */
+function lerpColor(a: string, b: string, t: number): string {
+  const ar = parseInt(a.slice(1, 3), 16), ag = parseInt(a.slice(3, 5), 16), ab = parseInt(a.slice(5, 7), 16);
+  const br = parseInt(b.slice(1, 3), 16), bg = parseInt(b.slice(3, 5), 16), bb = parseInt(b.slice(5, 7), 16);
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${bl.toString(16).padStart(2, '0')}`;
+}
+
 export function createSyncRenderSystem(
   renderData: RenderSyncTarget,
   popupData: PopupSyncTarget,
   scrollYShared: SharedValue<number>,
-  dangerOverlayOpacity: SharedValue<number>,
+  overlayState: SharedValue<OverlayState>,
   scale: number = 1,
 ): GameSystem<GameEntities> {
   const out: RenderEntity[] = [];
   const popups: PopupRenderData[] = [];
 
-  return (entities) => {
+  return (entities, { time }) => {
     out.length = 0;
     popups.length = 0;
 
     const visibleHeight = entities.screen.visibleHeight;
+
+    // Tick graze ring timer (F3)
+    if (entities.grazeRingTimer > 0) {
+      entities.grazeRingTimer = Math.max(0, entities.grazeRingTimer - time.delta);
+    }
 
     // Boost Lane (background overlay) — no path, rect-based
     if (entities.boostLane?.active) {
@@ -130,7 +151,8 @@ export function createSyncRenderSystem(
     for (const e of entities.enemies) {
       if (!e.active) continue;
       const enemyRenderType = `enemy_${e.enemyType}`;
-      const enemyColor = e.flashTimer > 0 ? '#FF6644' : COLORS.entityEnemy;
+      const enemyBaseColor = ENEMY_TYPE_COLORS[e.enemyType] ?? COLORS.entityEnemy;
+      const enemyColor = e.flashTimer > 0 ? '#FF6644' : enemyBaseColor;
       const ds = computeDepthScale(e.y, visibleHeight);
       const ew = e.width * ds;
       const eh = e.height * ds;
@@ -248,20 +270,26 @@ export function createSyncRenderSystem(
       });
     }
 
-    // Boss
+    // Boss — color shifts toward orange as HP decreases below threshold (D1)
     if (entities.boss?.active) {
       const b = entities.boss;
+      const bossHpRatio = b.hp / b.maxHp;
+      let bossColor: string = COLORS.entityBoss;
+      if (bossHpRatio < BOSS_COLOR_SHIFT_THRESHOLD) {
+        const t = 1 - bossHpRatio / BOSS_COLOR_SHIFT_THRESHOLD;
+        bossColor = lerpColor(COLORS.entityBoss, '#FF8800', t);
+      }
       out.push({
         type: 'boss',
         x: b.x,
         y: b.y,
         width: b.width,
         height: b.height,
-        color: COLORS.entityBoss,
+        color: bossColor,
         opacity: 1.0,
         path: buildPath('boss', b.x, b.y, b.width, b.height, scale),
         glowPath: buildGlowPath('boss', b.x, b.y, b.width, b.height, scale),
-        glowColor: toGlowColor(COLORS.entityBoss),
+        glowColor: toGlowColor(bossColor),
         shadowPath: buildShadowPath('boss', b.x, b.y, b.width, b.height, scale),
       });
     }
@@ -330,6 +358,27 @@ export function createSyncRenderSystem(
       });
     }
 
+    // Graze ring effect (F3) — smaller ring than shockwave, cyan tint
+    if (entities.grazeRingTimer > 0 && entities.player.active) {
+      const gcx = entities.player.x + entities.player.width / 2;
+      const gcy = entities.player.y + entities.player.height / 2;
+      const grOpacity = entities.grazeRingTimer / GRAZE_RING_DURATION;
+      const grX = gcx - GRAZE_RING_RADIUS;
+      const grY = gcy - GRAZE_RING_RADIUS;
+      const grSize = GRAZE_RING_RADIUS * 2;
+      out.push({
+        type: 'shockwave',
+        x: grX,
+        y: grY,
+        width: grSize,
+        height: grSize,
+        color: COLORS.neonBlue,
+        opacity: grOpacity * 0.4,
+        path: buildPath('shockwave', grX, grY, grSize, grSize, scale),
+        blendMode: 'screen',
+      });
+    }
+
     // Particles
     for (const pt of entities.particles) {
       if (!pt.active) continue;
@@ -383,14 +432,15 @@ export function createSyncRenderSystem(
       });
     }
 
-    // Low HP danger overlay — pulsing red when below threshold
+    // Screen overlays — danger (C2), boss phase (E1), awakened (E2)
     const store = useGameSessionStore.getState();
     const hpRatio = store.maxHp > 0 ? store.hp / store.maxHp : 1;
-    if (hpRatio < DANGER_HP_THRESHOLD && hpRatio > 0 && entities.player.active) {
-      dangerOverlayOpacity.value = 0.15 + Math.sin(entities.stageTime * DANGER_PULSE_SPEED) * 0.1;
-    } else {
-      dangerOverlayOpacity.value = 0;
-    }
+    const dangerOpacity = (hpRatio < DANGER_HP_THRESHOLD && hpRatio > 0 && entities.player.active)
+      ? 0.15 + Math.sin(entities.stageTime * DANGER_PULSE_SPEED) * 0.1
+      : 0;
+    const bossPhaseOpacity = entities.isBossPhase ? 0.06 : 0;
+    const awakenedOpacity = store.isAwakened ? 0.08 + Math.sin(entities.stageTime * 4) * 0.04 : 0;
+    overlayState.value = { dangerOpacity, bossPhaseOpacity, awakenedOpacity };
 
     // Reanimated freezes objects assigned to SharedValue — pass copies to keep out/popups mutable
     renderData.value = out.slice();
