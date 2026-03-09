@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { MechaFormId } from '@/types/forms';
 import type { StatKey } from '@/types/gates';
+import type { FormXPState } from '@/types/formSkills';
 import {
   PLAYER_INITIAL_HP,
   PLAYER_INITIAL_ATK,
@@ -9,6 +10,7 @@ import {
   COMBO_THRESHOLD,
   EX_GAUGE_MAX,
   TRANSFORM_GAUGE_MAX,
+  FORM_XP_THRESHOLDS,
 } from '@/constants/balance';
 import { useSaveDataStore } from '@/stores/saveDataStore';
 import { getUpgradeEffect } from '@/game/upgrades';
@@ -55,6 +57,10 @@ interface GameSessionState {
   isGameOver: boolean;
   isStageClear: boolean;
 
+  // Form XP
+  formXP: Record<string, FormXPState>;
+  pendingSkillChoice: { formId: MechaFormId; level: number } | null;
+
   // Actions
   setHp: (hp: number) => void;
   takeDamage: (damage: number) => void;
@@ -82,6 +88,9 @@ interface GameSessionState {
   setGameOver: (value: boolean) => void;
   setStageClear: (value: boolean) => void;
   setPaused: (value: boolean) => void;
+  addFormXP: (formId: MechaFormId, amount: number) => void;
+  selectFormSkill: (formId: MechaFormId, level: number, choice: 'A' | 'B') => void;
+  dismissSkillChoice: () => void;
   resetSession: (stageId: number, formId?: MechaFormId, secondaryFormId?: MechaFormId) => void;
 }
 
@@ -113,6 +122,14 @@ const INITIAL_STATE = {
   isPaused: false,
   isGameOver: false,
   isStageClear: false,
+  formXP: {
+    SD_Standard: { xp: 0, level: 0, skills: [] },
+    SD_HeavyArtillery: { xp: 0, level: 0, skills: [] },
+    SD_HighSpeed: { xp: 0, level: 0, skills: [] },
+    SD_Sniper: { xp: 0, level: 0, skills: [] },
+    SD_Scatter: { xp: 0, level: 0, skills: [] },
+  },
+  pendingSkillChoice: null,
 };
 
 export const useGameSessionStore = create<GameSessionState>((set, get) => ({
@@ -225,6 +242,36 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
   setGameOver: (value) => set({ isGameOver: value }),
   setStageClear: (value) => set({ isStageClear: value }),
   setPaused: (value) => set({ isPaused: value }),
+
+  addFormXP: (formId, amount) => set(s => {
+    const state = s.formXP[formId];
+    if (!state || state.level >= 3) return {};
+    const newXP = state.xp + amount;
+    const threshold = FORM_XP_THRESHOLDS[state.level];
+    if (newXP >= threshold && !s.pendingSkillChoice) {
+      return {
+        formXP: { ...s.formXP, [formId]: { ...state, xp: newXP } },
+        pendingSkillChoice: { formId, level: state.level + 1 },
+      };
+    }
+    return {
+      formXP: { ...s.formXP, [formId]: { ...state, xp: newXP } },
+    };
+  }),
+
+  selectFormSkill: (formId, level, choice) => set(s => {
+    const state = s.formXP[formId];
+    if (!state) return {};
+    return {
+      formXP: {
+        ...s.formXP,
+        [formId]: { ...state, level, skills: [...state.skills, { level, choice }] },
+      },
+      pendingSkillChoice: null,
+    };
+  }),
+
+  dismissSkillChoice: () => set({ pendingSkillChoice: null }),
 
   resetSession: (stageId, formId, secondaryFormId) => {
     const { upgrades } = useSaveDataStore.getState();
