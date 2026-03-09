@@ -213,3 +213,8 @@ export const DEPTH_SCALE_MIN = 0.75;
 export const GRID_PITCH_MIN = 0.6;
 export const GRID_PITCH_MAX = 1.4;
 
+/** Directional shadow */
+export const SHADOW_OFFSET_X = 3;
+export const SHADOW_OFFSET_Y = 5;
+export const SHADOW_COLOR = '#00000040';
+
