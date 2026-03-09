@@ -66,6 +66,8 @@ export const STAGE_12: StageDefinition = {
     { time: 55, type: 'enemy_spawn', enemyType: 'splitter', x: 160 },
     { time: 56, type: 'enemy_spawn', enemyType: 'splitter', x: 240 },
     { time: 59, type: 'enemy_spawn', enemyType: 'swarm', x: 120, count: 6 },
+    // Mini-boss: sentinel
+    { time: 60, type: 'enemy_spawn', enemyType: 'sentinel', x: 160 },
     // Tradeoff gate
     {
       time: 65,

@@ -20,6 +20,8 @@ export const HITBOX = {
   dodger:    { width: 28, height: 28 },
   splitter:  { width: 32, height: 32 },
   summoner:  { width: 36, height: 36 },
+  sentinel:  { width: 44, height: 44 },
+  carrier:   { width: 52, height: 48 },
   enemyBullet:  { width: 6,  height: 6  },
   gate:         { width: 140, height: 24 },
   boss:         { width: 200, height: 120 },

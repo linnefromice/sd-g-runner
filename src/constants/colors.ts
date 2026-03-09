@@ -68,4 +68,6 @@ export const ENEMY_TYPE_COLORS: Record<EnemyType, string> = {
   dodger: '#44DDFF',
   splitter: '#FF8800',
   summoner: '#DDAA00',
+  sentinel: '#FF2222',   // red — elite guardian
+  carrier: '#22FF88',    // green — spawner/transport
 };

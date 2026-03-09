@@ -41,6 +41,14 @@ describe('Stage data', () => {
   });
 
   test('throws for unknown stage', () => {
-    expect(() => getStage(99)).toThrow('Unknown stage: 99');
+    expect(() => getStage(999)).toThrow('Unknown stage: 999');
+  });
+
+  test('endless stage (99) is registered but excluded from available stage list', () => {
+    const stage = getStage(99);
+    expect(stage.id).toBe(99);
+    expect(stage.isEndless).toBe(true);
+    expect(stage.duration).toBe(Infinity);
+    expect(getAvailableStageIds()).not.toContain(99);
   });
 });

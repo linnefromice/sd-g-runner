@@ -52,6 +52,8 @@ export const STAGE_14: StageDefinition = {
     { time: 35, type: 'enemy_spawn', enemyType: 'phalanx', x: 240 },
     { time: 37, type: 'enemy_spawn', enemyType: 'juggernaut', x: 160 },
     { time: 39, type: 'enemy_spawn', enemyType: 'dodger', x: 80 },
+    // Mini-boss: carrier
+    { time: 40, type: 'enemy_spawn', enemyType: 'carrier', x: 120 },
     { time: 41, type: 'boost_lane_end' },
     // Recovery gate
     {
@@ -83,6 +85,8 @@ export const STAGE_14: StageDefinition = {
       type: 'gate_spawn',
       gateConfig: { layout: 'forced', left: GATE_REFIT_HEAVY, right: GATE_REFIT_SPEED },
     },
+    // Mini-boss: sentinel
+    { time: 80, type: 'enemy_spawn', enemyType: 'sentinel', x: 200 },
     // Wave 6: all-type assault in boost lane
     { time: 82, type: 'boost_lane_start', x: 60, width: 200 },
     { time: 83, type: 'enemy_spawn', enemyType: 'summoner', x: 160 },

@@ -31,6 +31,23 @@ const STAGES: Record<number, StageDefinition> = {
   13: STAGE_13,
   14: STAGE_14,
   15: STAGE_15,
+  99: {
+    id: 99,
+    name: 'Endless',
+    duration: Infinity,
+    isBossStage: false,
+    isEndless: true,
+    timeline: [], // generated dynamically by createEndlessSpawnSystem
+    difficulty: {
+      scrollSpeedMultiplier: 1.0,
+      enemySpawnInterval: 2.5,
+      enemyHpMultiplier: 1.0,
+      enemyAtkMultiplier: 1.0,
+      maxConcurrentEnemies: 6,
+      bulletSpeedMultiplier: 1.0,
+      attackIntervalMultiplier: 1.0,
+    },
+  },
 };
 
 export function getStage(id: number): StageDefinition {
@@ -39,6 +56,10 @@ export function getStage(id: number): StageDefinition {
   return stage;
 }
 
+/** Returns stage IDs for normal campaign stages (1-15). Endless mode (99) is excluded. */
 export function getAvailableStageIds(): number[] {
-  return Object.keys(STAGES).map(Number).sort((a, b) => a - b);
+  return Object.keys(STAGES)
+    .map(Number)
+    .filter((id) => id <= 15)
+    .sort((a, b) => a - b);
 }

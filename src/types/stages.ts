@@ -25,6 +25,7 @@ export interface StageDefinition {
   id: number;
   name: string;
   isBossStage: boolean;
+  isEndless?: boolean;
   duration: number;
   difficulty: DifficultyParams;
   timeline: StageEvent[];

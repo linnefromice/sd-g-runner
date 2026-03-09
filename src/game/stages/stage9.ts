@@ -55,6 +55,8 @@ export const STAGE_9: StageDefinition = {
       type: 'gate_spawn',
       gateConfig: { layout: 'forced', left: GATE_REFIT_HEAVY, right: GATE_REFIT_SPEED },
     },
+    // Mini-boss: carrier
+    { time: 45, type: 'enemy_spawn', enemyType: 'carrier', x: 140 },
     // Wave 4: double juggernaut + debris
     { time: 49, type: 'debris_spawn', x: 80, count: 3 },
     { time: 50, type: 'enemy_spawn', enemyType: 'juggernaut', x: 100 },

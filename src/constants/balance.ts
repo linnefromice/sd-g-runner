@@ -22,6 +22,8 @@ export const ENEMY_STATS = {
   dodger:    { hp: 35, attackDamage: 12, attackInterval: 1.8, scoreValue: 250, creditValue: 3 },
   splitter:  { hp: 50, attackDamage: 8,  attackInterval: 2.0, scoreValue: 200, creditValue: 3 },
   summoner:  { hp: 80, attackDamage: 0,  attackInterval: 0,   scoreValue: 400, creditValue: 5 },
+  sentinel:  { hp: 150, attackDamage: 20, attackInterval: 1.2, scoreValue: 600, creditValue: 8 },
+  carrier:   { hp: 200, attackDamage: 10, attackInterval: 0,   scoreValue: 800, creditValue: 10 },
 } as const;
 
 /** Scoring (§12.1) */
