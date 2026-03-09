@@ -10,6 +10,9 @@ function getEnemyHitbox(enemyType: EnemyType) {
     case 'swarm':      return HITBOX.swarm;
     case 'phalanx':    return HITBOX.phalanx;
     case 'juggernaut': return HITBOX.juggernaut;
+    case 'dodger':     return HITBOX.dodger;
+    case 'splitter':   return HITBOX.splitter;
+    case 'summoner':   return HITBOX.summoner;
     default:           return HITBOX.enemy;
   }
 }
