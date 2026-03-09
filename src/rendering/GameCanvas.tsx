@@ -215,8 +215,10 @@ function EntitySlot({
       <Path path={shadowPathStr} color={SHADOW_COLOR} opacity={fillOpacity} />
       {/* Fake glow: enlarged path at embedded alpha */}
       <Path path={glowPathStr} color={glowColor} opacity={fillOpacity} />
-      {/* Main shape with top-down lighting gradient */}
-      <Path path={pathStr} color={color} opacity={fillOpacity} blendMode={blendMode}>
+      {/* Main shape: entity color */}
+      <Path path={pathStr} color={color} opacity={fillOpacity} blendMode={blendMode} />
+      {/* Lighting overlay: top-down gradient for volume */}
+      <Path path={pathStr} opacity={fillOpacity}>
         <LinearGradient
           start={vec(0, 0)}
           end={vec(0, screenHeight)}

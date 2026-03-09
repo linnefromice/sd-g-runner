@@ -45,8 +45,8 @@ function computeDepthScale(y: number, visibleHeight: number): number {
   return DEPTH_SCALE_MIN + (1 - DEPTH_SCALE_MIN) * ratio;
 }
 
-function buildShadowPath(type: string, x: number, y: number, w: number, h: number, scale: number): string | undefined {
-  return getEntityPath(type, (x + SHADOW_OFFSET_X) * scale, (y + SHADOW_OFFSET_Y) * scale, w * scale, h * scale) ?? undefined;
+function buildShadowPath(type: string, x: number, y: number, w: number, h: number, scale: number, depthScale: number = 1): string | undefined {
+  return getEntityPath(type, (x + SHADOW_OFFSET_X * depthScale) * scale, (y + SHADOW_OFFSET_Y * depthScale) * scale, w * scale, h * scale) ?? undefined;
 }
 
 export function createSyncRenderSystem(
@@ -146,7 +146,7 @@ export function createSyncRenderSystem(
         path: buildPath(enemyRenderType, ex, ey, ew, eh, scale),
         glowPath: buildGlowPath(enemyRenderType, ex, ey, ew, eh, scale),
         glowColor: toGlowColor(enemyColor),
-        shadowPath: buildShadowPath(enemyRenderType, ex, ey, ew, eh, scale),
+        shadowPath: buildShadowPath(enemyRenderType, ex, ey, ew, eh, scale, ds),
         hpRatio: e.hp / e.maxHp,
         hpBarColor: getHpBarColor(e.hp / e.maxHp),
         depthScale: ds,
@@ -171,7 +171,7 @@ export function createSyncRenderSystem(
         color: COLORS.entityDebris,
         opacity: 1.0,
         path: buildPath('debris', dx, dy, dw, dh, scale),
-        shadowPath: buildShadowPath('debris', dx, dy, dw, dh, scale),
+        shadowPath: buildShadowPath('debris', dx, dy, dw, dh, scale, dds),
         hpRatio: dRatio,
         hpBarColor: getHpBarColor(dRatio),
         depthScale: dds,
