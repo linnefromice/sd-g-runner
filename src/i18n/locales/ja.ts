@@ -116,6 +116,7 @@ export const ja: Translations = {
     explosion_radius: '爆発',
     pierce: '貫通',
     homing_invincible: 'ホーミング + 無敵',
+    shield_pierce: 'シールド貫通',
     damage_reduce: 'ダメージ軽減',
   },
   howToPlay: howToPlayJa,

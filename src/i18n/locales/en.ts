@@ -116,6 +116,7 @@ export const en = {
     explosion_radius: 'Explosion',
     pierce: 'Pierce',
     homing_invincible: 'Homing + Invincible',
+    shield_pierce: 'Shield Pierce',
     damage_reduce: 'Damage Reduce',
   },
   howToPlay: howToPlayEn,
