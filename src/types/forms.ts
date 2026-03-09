@@ -4,6 +4,7 @@ export type MechaFormId =
   | 'SD_HighSpeed'
   | 'SD_Sniper'
   | 'SD_Scatter'
+  | 'SD_Guardian'
   | 'SD_Awakened';
 
 export type SpecialAbilityType =
@@ -11,6 +12,7 @@ export type SpecialAbilityType =
   | 'pierce'
   | 'shield_pierce'
   | 'homing_invincible'
+  | 'damage_reduce'
   | 'none';
 
 export interface BulletConfig {

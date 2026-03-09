@@ -1,4 +1,4 @@
-export type EnemyType = 'stationary' | 'patrol' | 'rush' | 'swarm' | 'phalanx' | 'juggernaut';
+export type EnemyType = 'stationary' | 'patrol' | 'rush' | 'swarm' | 'phalanx' | 'juggernaut' | 'dodger' | 'splitter' | 'summoner';
 export type BossAttackPattern = 'spread_shot' | 'laser_beam' | 'drone_summon';
 
 export interface MovePattern {
