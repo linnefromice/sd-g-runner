@@ -2,17 +2,20 @@ import React from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import {
   Canvas,
+  Group,
+  Image,
   matchFont,
   Path,
   Rect,
   RoundedRect,
   Text as SkiaText,
+  useTexture,
 } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { COLORS } from '@/constants/colors';
 import type { RenderEntity } from '@/types/rendering';
 import type { PopupRenderData } from '@/engine/systems/SyncRenderSystem';
-import { SCORE_POPUP_FONT_SIZE } from '@/constants/balance';
+import { SCANLINE_PITCH, SCANLINE_OPACITY, SCORE_POPUP_FONT_SIZE } from '@/constants/balance';
 export type { RenderEntity };
 
 type GameCanvasProps = {
@@ -311,6 +314,30 @@ function GridHLine({
   return <Rect x={0} y={y} width={width} height={1} color="#2a2a4e" opacity={gridOpacity} />;
 }
 
+function ScanlineOverlay({ width, height }: { width: number; height: number }) {
+  const TILE_H = SCANLINE_PITCH * 64;
+  const texture = useTexture(
+    <Group>
+      {Array.from({ length: Math.floor(TILE_H / SCANLINE_PITCH) }, (_, i) => (
+        <Rect key={i} x={0} y={i * SCANLINE_PITCH} width={4} height={1} color="#000000" />
+      ))}
+    </Group>,
+    { width: 4, height: TILE_H }
+  );
+  if (!texture) return null;
+  return (
+    <Image
+      image={texture}
+      x={0}
+      y={0}
+      width={width}
+      height={height}
+      opacity={SCANLINE_OPACITY}
+      fit="cover"
+    />
+  );
+}
+
 function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasProps) {
   const { width, height } = useWindowDimensions();
 
@@ -356,6 +383,9 @@ function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasPr
 
       {/* Score popup text rendering */}
       <ScorePopups popupData={popupData} scale={scale} />
+
+      {/* CRT scanline overlay */}
+      <ScanlineOverlay width={width} height={height} />
     </Canvas>
   );
 }

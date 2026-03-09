@@ -199,3 +199,7 @@ export const TRAIL_MIN_DISTANCE_SQ = 9;
 export const TRAIL_BASE_OPACITY = 0.15;
 export const TRAIL_OPACITY_DECAY = 0.6;
 
+/** Scanline overlay */
+export const SCANLINE_PITCH = 2;
+export const SCANLINE_OPACITY = 0.04;
+
