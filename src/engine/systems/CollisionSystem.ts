@@ -1,8 +1,8 @@
 import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
-import { checkAABBOverlap, getPlayerHitbox, getPlayerVisualHitbox, getCenter, getDistance } from '@/engine/collision';
+import { checkAABBOverlap, getPlayerHitbox, getPlayerVisualHitbox, getCenter, getDistance, expandHitbox } from '@/engine/collision';
 import { deactivateBullet } from '@/engine/entities/Bullet';
-import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, GROWTH_GATE_INITIAL_RATIO, GROWTH_GATE_PER_HIT, JUST_TF_SHOCKWAVE_RADIUS, JUST_TF_SHOCKWAVE_DAMAGE, JUST_TF_SCORE, JUST_TF_EX_GAIN, SHOCKWAVE_EFFECT_DURATION, BOSS_COLLISION_DAMAGE, HIT_FLASH_DURATION } from '@/constants/balance';
+import { IFRAME_DURATION, EXPLOSION_RADIUS, ENEMY_STATS, GRAZE_EX_GAIN, GRAZE_TF_GAIN, GRAZE_SCORE, DEBRIS_CONTACT_DAMAGE, GROWTH_GATE_INITIAL_RATIO, GROWTH_GATE_PER_HIT, JUST_TF_SHOCKWAVE_RADIUS, JUST_TF_SHOCKWAVE_DAMAGE, JUST_TF_SCORE, JUST_TF_EX_GAIN, SHOCKWAVE_EFFECT_DURATION, BOSS_COLLISION_DAMAGE, HIT_FLASH_DURATION, GRAZE_CLOSE_EXPAND, GRAZE_EXTREME_EXPAND, GRAZE_CLOSE_SCORE, GRAZE_CLOSE_EX_GAIN, GRAZE_CLOSE_TF_GAIN, GRAZE_EXTREME_SCORE, GRAZE_EXTREME_EX_GAIN, GRAZE_EXTREME_TF_GAIN, FORM_XP_GRAZE, FORM_XP_GRAZE_CLOSE, FORM_XP_GRAZE_EXTREME } from '@/constants/balance';
 import { generateGateLabel } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
@@ -180,15 +180,46 @@ function checkGraze(
   if (player.isInvincible || store.isAwakened) return;
 
   const playerVisualHB = getPlayerVisualHitbox(player);
+  const closeHB = expandHitbox(playerHB, GRAZE_CLOSE_EXPAND);
+  const extremeHB = expandHitbox(playerHB, GRAZE_EXTREME_EXPAND);
+
   for (const bullet of entities.enemyBullets) {
     if (!bullet.active || bullet.grazed) continue;
     const overlapVisual = checkAABBOverlap(playerVisualHB, bullet);
     const overlapActual = checkAABBOverlap(playerHB, bullet);
     if (overlapVisual && !overlapActual) {
       bullet.grazed = true;
-      store.addScore(GRAZE_SCORE);
-      if (!store.isEXBurstActive) store.addExGauge(GRAZE_EX_GAIN);
-      store.addTransformGauge(GRAZE_TF_GAIN);
+
+      const overlapExtreme = checkAABBOverlap(extremeHB, bullet);
+      const overlapClose = checkAABBOverlap(closeHB, bullet);
+
+      let score: number;
+      let exGain: number;
+      let tfGain: number;
+      let xpGain: number;
+
+      if (overlapExtreme) {
+        score = GRAZE_EXTREME_SCORE;
+        exGain = GRAZE_EXTREME_EX_GAIN;
+        tfGain = GRAZE_EXTREME_TF_GAIN;
+        xpGain = FORM_XP_GRAZE_EXTREME;
+      } else if (overlapClose) {
+        score = GRAZE_CLOSE_SCORE;
+        exGain = GRAZE_CLOSE_EX_GAIN;
+        tfGain = GRAZE_CLOSE_TF_GAIN;
+        xpGain = FORM_XP_GRAZE_CLOSE;
+      } else {
+        score = GRAZE_SCORE;
+        exGain = GRAZE_EX_GAIN;
+        tfGain = GRAZE_TF_GAIN;
+        xpGain = FORM_XP_GRAZE;
+      }
+
+      store.addScore(score);
+      if (!store.isEXBurstActive) store.addExGauge(exGain);
+      store.addTransformGauge(tfGain);
+      store.addFormXP(store.currentForm, xpGain);
+
       const bc = getCenter(bullet);
       onGraze(entities, bc.x, bc.y);
     }

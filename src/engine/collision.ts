@@ -52,3 +52,16 @@ export function getPlayerVisualHitbox(player: { x: number; y: number; width: num
     height: hb.height,
   };
 }
+
+/** Expand a hitbox by px pixels on all sides */
+export function expandHitbox(
+  hb: { x: number; y: number; width: number; height: number },
+  px: number,
+): { x: number; y: number; width: number; height: number } {
+  return {
+    x: hb.x - px,
+    y: hb.y - px,
+    width: hb.width + px * 2,
+    height: hb.height + px * 2,
+  };
+}
