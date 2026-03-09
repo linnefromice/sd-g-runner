@@ -2,7 +2,7 @@ import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import type { RenderEntity } from '@/types/rendering';
 import type { SharedValue } from 'react-native-reanimated';
-import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS, EX_BURST_WIDTH, BOSS_LASER_WIDTH, TRAIL_HISTORY_SIZE, TRAIL_BASE_OPACITY, TRAIL_OPACITY_DECAY, GLOW_SCALE, DEPTH_SCALE_MIN } from '@/constants/balance';
+import { IFRAME_BLINK_INTERVAL, SHOCKWAVE_EFFECT_DURATION, JUST_TF_SHOCKWAVE_RADIUS, EX_BURST_WIDTH, BOSS_LASER_WIDTH, TRAIL_HISTORY_SIZE, TRAIL_BASE_OPACITY, TRAIL_OPACITY_DECAY, GLOW_SCALE, DEPTH_SCALE_MIN, SHADOW_OFFSET_X, SHADOW_OFFSET_Y } from '@/constants/balance';
 import { COLORS, GATE_COLORS } from '@/constants/colors';
 import { getEntityPath } from '@/rendering/shapes';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
@@ -43,6 +43,10 @@ function getHpBarColor(ratio: number): string {
 function computeDepthScale(y: number, visibleHeight: number): number {
   const ratio = Math.max(0, Math.min(1, y / visibleHeight));
   return DEPTH_SCALE_MIN + (1 - DEPTH_SCALE_MIN) * ratio;
+}
+
+function buildShadowPath(type: string, x: number, y: number, w: number, h: number, scale: number): string | undefined {
+  return getEntityPath(type, (x + SHADOW_OFFSET_X) * scale, (y + SHADOW_OFFSET_Y) * scale, w * scale, h * scale) ?? undefined;
 }
 
 export function createSyncRenderSystem(
@@ -117,6 +121,7 @@ export function createSyncRenderSystem(
         path: buildPath(playerType, p.x, p.y, p.width, p.height, scale),
         glowPath: buildGlowPath(playerType, p.x, p.y, p.width, p.height, scale),
         glowColor: toGlowColor(COLORS.entityPlayer),
+        shadowPath: buildShadowPath(playerType, p.x, p.y, p.width, p.height, scale),
       });
     }
 
@@ -141,6 +146,7 @@ export function createSyncRenderSystem(
         path: buildPath(enemyRenderType, ex, ey, ew, eh, scale),
         glowPath: buildGlowPath(enemyRenderType, ex, ey, ew, eh, scale),
         glowColor: toGlowColor(enemyColor),
+        shadowPath: buildShadowPath(enemyRenderType, ex, ey, ew, eh, scale),
         hpRatio: e.hp / e.maxHp,
         hpBarColor: getHpBarColor(e.hp / e.maxHp),
         depthScale: ds,
@@ -165,6 +171,7 @@ export function createSyncRenderSystem(
         color: COLORS.entityDebris,
         opacity: 1.0,
         path: buildPath('debris', dx, dy, dw, dh, scale),
+        shadowPath: buildShadowPath('debris', dx, dy, dw, dh, scale),
         hpRatio: dRatio,
         hpBarColor: getHpBarColor(dRatio),
         depthScale: dds,
@@ -254,6 +261,7 @@ export function createSyncRenderSystem(
         path: buildPath('boss', b.x, b.y, b.width, b.height, scale),
         glowPath: buildGlowPath('boss', b.x, b.y, b.width, b.height, scale),
         glowColor: toGlowColor(COLORS.entityBoss),
+        shadowPath: buildShadowPath('boss', b.x, b.y, b.width, b.height, scale),
       });
     }
 
