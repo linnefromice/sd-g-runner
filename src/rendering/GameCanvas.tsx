@@ -4,18 +4,20 @@ import {
   Canvas,
   Group,
   Image,
+  LinearGradient,
   matchFont,
   Path,
   Rect,
   RoundedRect,
   Text as SkiaText,
   useTexture,
+  vec,
 } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import { COLORS } from '@/constants/colors';
 import type { RenderEntity } from '@/types/rendering';
 import type { PopupRenderData } from '@/engine/systems/SyncRenderSystem';
-import { SCANLINE_PITCH, SCANLINE_OPACITY, SCORE_POPUP_FONT_SIZE, GRID_PITCH_MIN, GRID_PITCH_MAX } from '@/constants/balance';
+import { SCANLINE_PITCH, SCANLINE_OPACITY, SCORE_POPUP_FONT_SIZE, GRID_PITCH_MIN, GRID_PITCH_MAX, SHADOW_COLOR } from '@/constants/balance';
 export type { RenderEntity };
 
 type GameCanvasProps = {
@@ -98,10 +100,12 @@ function EntitySlot({
   renderData,
   index,
   scale,
+  screenHeight,
 }: {
   renderData: GameCanvasProps['renderData'];
   index: number;
   scale: number;
+  screenHeight: number;
 }) {
   // Base properties
   const x = useDerivedValue(() => (renderData.value[index]?.x ?? -200) * scale);
@@ -118,6 +122,7 @@ function EntitySlot({
   // Derive glowColor from pre-computed field and blendMode from type — avoids 2 extra useDerivedValues per slot
   const glowColor = useDerivedValue(() => renderData.value[index]?.glowColor ?? 'transparent');
   const blendMode = useDerivedValue(() => renderData.value[index]?.blendMode as any);
+  const shadowPathStr = useDerivedValue(() => renderData.value[index]?.shadowPath ?? '');
 
   // Opacity split: fill vs stroke (shockwave is stroke-only ring)
   const fillOpacity = useDerivedValue(() =>
@@ -206,10 +211,18 @@ function EntitySlot({
 
   return (
     <>
+      {/* Directional shadow: offset path in dark color */}
+      <Path path={shadowPathStr} color={SHADOW_COLOR} opacity={fillOpacity} />
       {/* Fake glow: enlarged path at embedded alpha */}
       <Path path={glowPathStr} color={glowColor} opacity={fillOpacity} />
-      {/* Main shape: no Shadow, with optional blendMode */}
-      <Path path={pathStr} color={color} opacity={fillOpacity} blendMode={blendMode} />
+      {/* Main shape with top-down lighting gradient */}
+      <Path path={pathStr} color={color} opacity={fillOpacity} blendMode={blendMode}>
+        <LinearGradient
+          start={vec(0, 0)}
+          end={vec(0, screenHeight)}
+          colors={['#FFFFFF15', '#00000030']}
+        />
+      </Path>
       {/* Stroke ring (shockwave only) with blendMode */}
       <Path path={pathStr} color={color} opacity={strokeOpacity} style="stroke" strokeWidth={2} blendMode={blendMode} />
       {/* Non-gate rect types (boostLane, beams) with blendMode */}
@@ -400,7 +413,7 @@ function GameCanvasInner({ renderData, popupData, scrollY, scale }: GameCanvasPr
 
       {/* All entities via pre-allocated slots */}
       {entitySlots.map((index) => (
-        <EntitySlot key={index} renderData={renderData} index={index} scale={scale} />
+        <EntitySlot key={index} renderData={renderData} index={index} scale={scale} screenHeight={height} />
       ))}
 
       {/* Score popup text rendering */}
