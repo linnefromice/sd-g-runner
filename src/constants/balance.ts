@@ -166,3 +166,29 @@ export const PARTICLE_DEBRIS_DESTROY_COUNT = 4;
 export const SCORE_POPUP_SPEED = 40;
 export const SCORE_POPUP_LIFE = 800;
 export const SCORE_POPUP_FONT_SIZE = 12;
+
+// --- Graze tiers ---
+export const GRAZE_CLOSE_EXPAND = 4;
+export const GRAZE_EXTREME_EXPAND = 1;
+export const GRAZE_CLOSE_EX_GAIN = 6;
+export const GRAZE_CLOSE_TF_GAIN = 4;
+export const GRAZE_CLOSE_SCORE = 50;
+export const GRAZE_EXTREME_EX_GAIN = 12;
+export const GRAZE_EXTREME_TF_GAIN = 8;
+export const GRAZE_EXTREME_SCORE = 150;
+
+// --- Form XP ---
+export const FORM_XP_ENEMY_KILL = 5;
+export const FORM_XP_STRONG_ENEMY_KILL = 10;
+export const FORM_XP_BOSS_HIT = 2;
+export const FORM_XP_GRAZE = 3;
+export const FORM_XP_GRAZE_CLOSE = 6;
+export const FORM_XP_GRAZE_EXTREME = 15;
+export const FORM_XP_GATE_ENHANCE = 8;
+export const FORM_XP_LV1 = 50;
+export const FORM_XP_LV2 = 150;
+export const FORM_XP_LV3 = 300;
+export const FORM_XP_THRESHOLDS = [FORM_XP_LV1, FORM_XP_LV2, FORM_XP_LV3];
+
+// --- Skill choice ---
+export const SKILL_CHOICE_TIMEOUT = 5000;
