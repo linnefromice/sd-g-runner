@@ -6,7 +6,6 @@ import {
   Path,
   Rect,
   RoundedRect,
-  Shadow,
   Text as SkiaText,
 } from '@shopify/react-native-skia';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
@@ -112,6 +111,9 @@ function EntitySlot({
   // Pre-computed SVG path string (already in screen coords from SyncRenderSystem)
   const pathStr = useDerivedValue(() => renderData.value[index]?.path ?? '');
   const type = useDerivedValue(() => renderData.value[index]?.type ?? '');
+  const glowPathStr = useDerivedValue(() => renderData.value[index]?.glowPath ?? '');
+  const glowColor = useDerivedValue(() => renderData.value[index]?.glowColor ?? 'transparent');
+  const blendMode = useDerivedValue(() => renderData.value[index]?.blendMode as any);
 
   // Opacity split: fill vs stroke (shockwave is stroke-only ring)
   const fillOpacity = useDerivedValue(() =>
@@ -200,14 +202,14 @@ function EntitySlot({
 
   return (
     <>
-      {/* Path: filled shape (all path-based entities except shockwave) */}
-      <Path path={pathStr} color={color} opacity={fillOpacity}>
-        <Shadow dx={0} dy={0} blur={10} color={color} />
-      </Path>
-      {/* Path: stroke ring (shockwave only) */}
-      <Path path={pathStr} color={color} opacity={strokeOpacity} style="stroke" strokeWidth={2} />
-      {/* Non-gate rect types (boostLane, beams) */}
-      <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={rectOpacity} />
+      {/* Fake glow: enlarged path at embedded alpha */}
+      <Path path={glowPathStr} color={glowColor} opacity={fillOpacity} />
+      {/* Main shape: no Shadow, with optional blendMode */}
+      <Path path={pathStr} color={color} opacity={fillOpacity} blendMode={blendMode} />
+      {/* Stroke ring (shockwave only) with blendMode */}
+      <Path path={pathStr} color={color} opacity={strokeOpacity} style="stroke" strokeWidth={2} blendMode={blendMode} />
+      {/* Non-gate rect types (boostLane, beams) with blendMode */}
+      <RoundedRect x={x} y={y} width={width} height={height} r={2} color={color} opacity={rectOpacity} blendMode={blendMode} />
 
       {/* === Gate rendering: translucent fill + neon border lines + symmetric accent bars === */}
       {/* Gate fill — translucent neon glow */}
