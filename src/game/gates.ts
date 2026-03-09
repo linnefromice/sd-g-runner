@@ -171,6 +171,39 @@ export const GATE_HEAL_15: GateDefinition = {
   effects: [{ kind: 'heal', value: 15 }],
 };
 
+// === Act 3 Enhance gates ===
+
+export const GATE_ATK_UP_20: GateDefinition = {
+  type: 'enhance',
+  displayLabel: 'ATK +20',
+  effects: [{ kind: 'stat_add', stat: 'atk', value: 20 }],
+};
+
+export const GATE_SHIELD: GateDefinition = {
+  type: 'enhance',
+  displayLabel: 'SHIELD',
+  effects: [{ kind: 'stat_add', stat: 'hp', value: 0 }],
+};
+
+// === Act 3 Refit gates ===
+
+export const GATE_REFIT_GUARDIAN: GateDefinition = {
+  type: 'refit',
+  displayLabel: '→ Guardian',
+  effects: [{ kind: 'refit', targetForm: 'SD_Guardian' }],
+};
+
+// === Act 3 Tradeoff gates ===
+
+export const GATE_TRADEOFF_BERSERK: GateDefinition = {
+  type: 'tradeoff',
+  displayLabel: 'ATK×1.5 HP-30',
+  effects: [
+    { kind: 'stat_multiply', stat: 'atk', value: 1.5 },
+    { kind: 'heal', value: -30 },
+  ],
+};
+
 // === Gate pair configs ===
 
 export const PAIR_ATK_SPD: GatePairConfig = {
@@ -231,4 +264,16 @@ export const PAIR_ROULETTE_ATK: GatePairConfig = {
   layout: 'forced',
   left: GATE_ROULETTE_ATK,
   right: GATE_ROULETTE_ATK_PENALTY,
+};
+
+export const PAIR_REFIT_GUARDIAN: GatePairConfig = {
+  layout: 'forced',
+  left: GATE_REFIT_GUARDIAN,
+  right: GATE_REFIT_SPEED,
+};
+
+export const PAIR_ENHANCE_ACT3: GatePairConfig = {
+  layout: 'forced',
+  left: GATE_ATK_UP_20,
+  right: GATE_SHIELD,
 };
