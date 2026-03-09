@@ -26,6 +26,12 @@ export interface PlayerEntity extends BaseEntity {
   /** When set, player slides toward this position (from tap gesture) */
   targetX: number | null;
   targetY: number | null;
+  /** Ring buffer of recent positions for trail rendering */
+  trailHistory: Array<{ x: number; y: number }>;
+  /** Current write index in trailHistory ring buffer */
+  trailIndex: number;
+  /** Frame counter for trail sampling */
+  trailFrameCount: number;
 }
 
 export interface EnemyEntity extends BaseEntity {

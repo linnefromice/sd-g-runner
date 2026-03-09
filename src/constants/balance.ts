@@ -192,3 +192,10 @@ export const FORM_XP_LV2 = 150;
 export const FORM_XP_LV3 = 300;
 export const FORM_XP_THRESHOLDS = [FORM_XP_LV1, FORM_XP_LV2, FORM_XP_LV3];
 
+/** Trail (afterimage) */
+export const TRAIL_HISTORY_SIZE = 3;
+export const TRAIL_SAMPLE_INTERVAL = 3;
+export const TRAIL_MIN_DISTANCE_SQ = 9;
+export const TRAIL_BASE_OPACITY = 0.15;
+export const TRAIL_OPACITY_DECAY = 0.6;
+
