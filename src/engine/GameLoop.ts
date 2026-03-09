@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { useGameSessionStore } from "@/stores/gameSessionStore";
 
 export type TimeInfo = {
   delta: number; // ms since last frame
@@ -37,7 +38,7 @@ export function useGameLoop<E extends Entities>(
 
       // Clamp delta to prevent tunneling when FPS drops below ~30fps
       const rawDelta = timestamp - prevTimeRef.current;
-      const delta = Math.min(rawDelta, 33);
+      const delta = Math.min(rawDelta, 33) * useGameSessionStore.getState().slowMotionFactor;
       prevTimeRef.current = timestamp;
 
       const time: TimeInfo = {

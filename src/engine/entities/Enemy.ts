@@ -13,6 +13,8 @@ function getEnemyHitbox(enemyType: EnemyType) {
     case 'dodger':     return HITBOX.dodger;
     case 'splitter':   return HITBOX.splitter;
     case 'summoner':   return HITBOX.summoner;
+    case 'sentinel':   return HITBOX.sentinel;
+    case 'carrier':    return HITBOX.carrier;
     default:           return HITBOX.enemy;
   }
 }

@@ -7,6 +7,7 @@ import { createBoss } from '@/engine/entities/Boss';
 import { createDebris } from '@/engine/entities/Debris';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
 import { acquireFromPool } from '@/engine/pool';
+import { AudioManager } from '@/audio/AudioManager';
 
 export function createSpawnSystem(stage: StageDefinition): GameSystem<GameEntities> {
   return (entities) => {
@@ -75,6 +76,8 @@ export function createSpawnSystem(stage: StageDefinition): GameSystem<GameEntiti
           const bossIndex = Math.ceil(stage.id / 5);
           entities.boss = createBoss(bossIndex);
           entities.isBossPhase = true;
+          AudioManager.playSe('bossAppear');
+          useGameSessionStore.getState().setBossEntrance(true);
           break;
         }
       }

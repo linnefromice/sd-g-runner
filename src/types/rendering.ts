@@ -25,4 +25,6 @@ export type RenderEntity = {
   depthScale?: number;
   /** Pre-computed SVG path for directional shadow (offset behind main shape) */
   shadowPath?: string;
+  /** Whether gate is forced (no gap to dodge) — triggers pulsing visual */
+  forced?: boolean;
 };

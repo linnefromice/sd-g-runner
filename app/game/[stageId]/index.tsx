@@ -18,6 +18,8 @@ import { JUST_TF_WINDOW } from '@/constants/balance';
 import type { GameEntities } from '@/types/entities';
 import type { MechaFormId } from '@/types/forms';
 import { onEXBurst } from '@/engine/effects';
+import { AudioManager } from '@/audio/AudioManager';
+import { HapticsManager } from '@/audio/HapticsManager';
 
 // Systems
 import { scrollSystem } from '@/engine/systems/ScrollSystem';
@@ -61,7 +63,7 @@ export default function GameScreen() {
   const renderData = useSharedValue<RenderEntity[]>([]);
   const popupData = useSharedValue<PopupRenderData[]>([]);
   const scrollYShared = useSharedValue(0);
-  const overlayState = useSharedValue<OverlayState>({ dangerOpacity: 0, bossPhaseOpacity: 0, awakenedOpacity: 0, gateFlashOpacity: 0, gateFlashColor: '#FFFFFF', exFlashOpacity: 0 });
+  const overlayState = useSharedValue<OverlayState>({ dangerOpacity: 0, bossPhaseOpacity: 0, awakenedOpacity: 0, gateFlashOpacity: 0, gateFlashColor: '#FFFFFF', exFlashOpacity: 0, bossEntranceOpacity: 0 });
 
   // Reset session store
   useEffect(() => {
@@ -71,6 +73,14 @@ export default function GameScreen() {
       (secondary as MechaFormId) || undefined,
     );
   }, [stageIdNum, form, secondary]);
+
+  // BGM management
+  useEffect(() => {
+    AudioManager.playBgm('stage');
+    return () => {
+      AudioManager.stopBgm();
+    };
+  }, []);
 
   // Watch for game-over or stage-clear
   useEffect(() => {
@@ -182,6 +192,8 @@ export default function GameScreen() {
 
   const handleEXBurst = useCallback(() => {
     useGameSessionStore.getState().activateEXBurst();
+    AudioManager.playSe('exBurst');
+    HapticsManager.exBurst();
     const p = entitiesRef.current.player;
     onEXBurst(entitiesRef.current, p.x + p.width / 2, p.y);
   }, []);
