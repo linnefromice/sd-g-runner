@@ -7,7 +7,7 @@ import {
   PLAYER_Y_TOP_RATIO,
   PLAYER_Y_BOTTOM_MARGIN,
 } from '@/constants/dimensions';
-import { PLAYER_MOVE_SPEED, BASE_SCROLL_SPEED, BOOST_LANE_SCROLL_MULTIPLIER } from '@/constants/balance';
+import { PLAYER_MOVE_SPEED, BASE_SCROLL_SPEED, BOOST_LANE_SCROLL_MULTIPLIER, TRAIL_SAMPLE_INTERVAL, TRAIL_MIN_DISTANCE_SQ, TRAIL_HISTORY_SIZE } from '@/constants/balance';
 import { deactivateBullet } from '@/engine/entities/Bullet';
 import { deactivateEnemy } from '@/engine/entities/Enemy';
 import { deactivateDebris } from '@/engine/entities/Debris';
@@ -56,6 +56,21 @@ export function createMovementSystem(
   const maxY = visibleHeight - PLAYER_Y_BOTTOM_MARGIN;
   p.x = Math.max(PLAYER_MIN_X, Math.min(PLAYER_MAX_X - p.width, p.x));
   p.y = Math.max(minY, Math.min(maxY - p.height, p.y));
+
+  // Record trail position (ring buffer, every N frames, only when moving)
+  p.trailFrameCount++;
+  if (p.trailFrameCount >= TRAIL_SAMPLE_INTERVAL) {
+    p.trailFrameCount = 0;
+    const lastIdx = p.trailIndex;
+    const last = p.trailHistory[lastIdx];
+    const tdx = p.x - last.x;
+    const tdy = p.y - last.y;
+    if (tdx * tdx + tdy * tdy >= TRAIL_MIN_DISTANCE_SQ) {
+      const nextIdx = (lastIdx + 1) % TRAIL_HISTORY_SIZE;
+      p.trailHistory[nextIdx] = { x: p.x, y: p.y };
+      p.trailIndex = nextIdx;
+    }
+  }
 
   // Move player bullets
   for (const b of entities.playerBullets) {
