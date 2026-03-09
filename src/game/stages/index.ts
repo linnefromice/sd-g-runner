@@ -9,6 +9,11 @@ import { STAGE_7 } from './stage7';
 import { STAGE_8 } from './stage8';
 import { STAGE_9 } from './stage9';
 import { STAGE_10 } from './stage10';
+import { STAGE_11 } from './stage11';
+import { STAGE_12 } from './stage12';
+import { STAGE_13 } from './stage13';
+import { STAGE_14 } from './stage14';
+import { STAGE_15 } from './stage15';
 
 const STAGES: Record<number, StageDefinition> = {
   1: STAGE_1,
@@ -21,6 +26,11 @@ const STAGES: Record<number, StageDefinition> = {
   8: STAGE_8,
   9: STAGE_9,
   10: STAGE_10,
+  11: STAGE_11,
+  12: STAGE_12,
+  13: STAGE_13,
+  14: STAGE_14,
+  15: STAGE_15,
 };
 
 export function getStage(id: number): StageDefinition {
