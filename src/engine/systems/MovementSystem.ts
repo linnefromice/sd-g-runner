@@ -69,6 +69,12 @@ export function createMovementSystem(
       const nextIdx = (lastIdx + 1) % TRAIL_HISTORY_SIZE;
       p.trailHistory[nextIdx] = { x: p.x, y: p.y };
       p.trailIndex = nextIdx;
+    } else {
+      // Player stopped — collapse trail positions to current pos so they fade out
+      for (let i = 0; i < TRAIL_HISTORY_SIZE; i++) {
+        p.trailHistory[i].x = p.x;
+        p.trailHistory[i].y = p.y;
+      }
     }
   }
 
