@@ -8,7 +8,10 @@ beforeEach(() => {
     unlockedStages: [1],
     credits: 0,
     upgrades: { baseAtk: 0, baseHp: 0, baseSpeed: 0, baseDef: 0, baseCreditBoost: 0 },
-    settings: { bgmVolume: 0.7, seVolume: 1.0, locale: 'system' as const },
+    achievements: [],
+    endlessBestTime: 0,
+    endlessBestScore: 0,
+    settings: { bgmVolume: 0.7, seVolume: 1.0, locale: 'system' as const, hapticsEnabled: true },
     isLoaded: false,
   });
 });
