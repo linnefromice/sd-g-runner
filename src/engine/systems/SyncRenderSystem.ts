@@ -348,13 +348,23 @@ export function createSyncRenderSystem(
       });
     }
 
-    // Apply screen shake offset to all entities
+    // Apply screen shake offset to all entities — must also rebuild SVG paths
+    // because path strings contain absolute coordinates baked during construction
     const shakeX = entities.shakeOffsetX;
     const shakeY = entities.shakeOffsetY;
     if (shakeX !== 0 || shakeY !== 0) {
       for (const e of out) {
         e.x += shakeX;
         e.y += shakeY;
+        if (e.path) {
+          e.path = buildPath(e.type, e.x, e.y, e.width, e.height, scale);
+        }
+        if (e.glowPath) {
+          e.glowPath = buildGlowPath(e.type, e.x, e.y, e.width, e.height, scale);
+        }
+        if (e.shadowPath) {
+          e.shadowPath = buildShadowPath(e.type, e.x, e.y, e.width, e.height, scale, e.depthScale);
+        }
       }
     }
 
