@@ -40,7 +40,7 @@ export default function UpgradeScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: Math.max(insets.top, 20) + 40 }]}>
       <View style={styles.header}>
         <Text style={styles.title}>{t.upgrade.title}</Text>
         <Text style={styles.credits}>{credits} Cr</Text>
@@ -115,7 +115,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.bgDark,
-    paddingTop: 60,
     paddingHorizontal: 24,
   },
   header: {

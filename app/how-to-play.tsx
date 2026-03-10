@@ -70,7 +70,7 @@ export default function HowToPlayScreen() {
   const sections = useSections();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: Math.max(insets.top, 20) + 40 }]}>
       <View style={styles.header}>
         <Text style={styles.title}>{t.howToPlay.title}</Text>
       </View>
@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.bgDark,
-    paddingTop: 60,
   },
   header: {
     paddingHorizontal: 24,
