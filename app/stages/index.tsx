@@ -144,14 +144,16 @@ export default function StageSelectScreen() {
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
-        <TouchableOpacity style={styles.footerButton} activeOpacity={0.7} onPress={() => router.push('/upgrade')}>
-          <CornerBrackets color={COLORS.neonBlue + '55'} size={6} />
-          <Text style={styles.footerButtonText}>{t.stageSelect.upgrade}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} activeOpacity={0.7} onPress={() => router.push('/achievements')}>
-          <CornerBrackets color={COLORS.neonBlue + '55'} size={6} />
-          <Text style={styles.footerButtonText}>{t.stageSelect.achievementsButton}</Text>
-        </TouchableOpacity>
+        <View style={styles.footerRow}>
+          <TouchableOpacity style={styles.footerButton} activeOpacity={0.7} onPress={() => router.push('/upgrade')}>
+            <CornerBrackets color={COLORS.neonBlue + '55'} size={6} />
+            <Text style={styles.footerButtonText}>{t.stageSelect.upgrade}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.footerButton} activeOpacity={0.7} onPress={() => router.push('/achievements')}>
+            <CornerBrackets color={COLORS.neonBlue + '55'} size={6} />
+            <Text style={styles.footerButtonText}>{t.stageSelect.achievementsButton}</Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity style={styles.footerButtonSecondary} activeOpacity={0.7} onPress={() => router.push('/')}>
           <Text style={styles.footerButtonSecondaryText}>{t.stageSelect.back}</Text>
         </TouchableOpacity>
@@ -307,11 +309,14 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   footer: {
-    flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     paddingHorizontal: 24,
     paddingBottom: 24,
     paddingTop: 12,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    gap: 12,
   },
   footerButton: {
     flex: 1,
