@@ -1,7 +1,7 @@
 import type { GameSystem } from '@/engine/GameLoop';
 import type { GameEntities } from '@/types/entities';
 import type { DifficultyParams } from '@/types/stages';
-import { ENEMY_STATS, ENEMY_BULLET_SPEED, BASE_SCROLL_SPEED, PATROL_SPEED, PHALANX_SPEED, JUGGERNAUT_SCROLL_FACTOR, DODGER_DETECT_RADIUS, DODGER_SPEED, DODGER_COOLDOWN, SUMMONER_INTERVAL, SUMMONER_MAX_SPAWNS, CARRIER_SPAWN_INTERVAL, CARRIER_SPAWN_COUNT } from '@/constants/balance';
+import { ENEMY_STATS, ENEMY_BULLET_SPEED, BASE_SCROLL_SPEED, RUSH_SPEED, PATROL_SPEED, PHALANX_SPEED, JUGGERNAUT_SCROLL_FACTOR, DODGER_DETECT_RADIUS, DODGER_SPEED, DODGER_COOLDOWN, SUMMONER_INTERVAL, SUMMONER_MAX_SPAWNS, CARRIER_SPAWN_INTERVAL, CARRIER_SPAWN_COUNT, SLOW_ON_HIT_FACTOR } from '@/constants/balance';
 import { createEnemyBullet } from '@/engine/entities/Bullet';
 import { createEnemy } from '@/engine/entities/Enemy';
 import { acquireFromPool } from '@/engine/pool';
@@ -25,34 +25,49 @@ export function createEnemyAISystem(difficulty: DifficultyParams): GameSystem<Ga
 
       // Tick flash timer
       if (enemy.flashTimer > 0) enemy.flashTimer = Math.max(0, enemy.flashTimer - time.delta);
+      // Tick slow debuff timer
+      if (enemy.slowTimer != null && enemy.slowTimer > 0) {
+        enemy.slowTimer = Math.max(0, enemy.slowTimer - time.delta);
+      }
+      const slowMul = (enemy.slowTimer ?? 0) > 0 ? SLOW_ON_HIT_FACTOR : 1;
 
       const stats = ENEMY_STATS[enemy.enemyType];
 
       // Movement
       switch (enemy.enemyType) {
+        case 'rush': {
+          // Fast descent toward player's X position + contact damage
+          enemy.y += RUSH_SPEED * slowMul * dt;
+          if (player.active) {
+            const targetX = player.x + player.width / 2 - enemy.width / 2;
+            const dx = targetX - enemy.x;
+            enemy.x += Math.sign(dx) * Math.min(Math.abs(dx), RUSH_SPEED * 0.5 * slowMul * dt);
+          }
+          break;
+        }
         case 'patrol': {
-          enemy.x += enemy.moveDirection * PATROL_SPEED * dt;
+          enemy.x += enemy.moveDirection * PATROL_SPEED * slowMul * dt;
           if (enemy.x < 16 || enemy.x + enemy.width > 304) {
             enemy.moveDirection *= -1;
           }
           break;
         }
         case 'swarm': {
-          enemy.y += BASE_SCROLL_SPEED * dt;
-          enemy.x += Math.cos(enemy.moveTimer * 3) * 40 * dt;
+          enemy.y += BASE_SCROLL_SPEED * slowMul * dt;
+          enemy.x += Math.cos(enemy.moveTimer * 3) * 40 * slowMul * dt;
           enemy.moveTimer += dt;
           break;
         }
         case 'phalanx': {
-          enemy.x += enemy.moveDirection * PHALANX_SPEED * dt;
+          enemy.x += enemy.moveDirection * PHALANX_SPEED * slowMul * dt;
           if (enemy.x < 16 || enemy.x + enemy.width > 304) {
             enemy.moveDirection *= -1;
           }
           break;
         }
         case 'juggernaut': {
-          enemy.y += BASE_SCROLL_SPEED * JUGGERNAUT_SCROLL_FACTOR * dt;
-          enemy.x += Math.sin(enemy.moveTimer * 1.5) * 20 * dt;
+          enemy.y += BASE_SCROLL_SPEED * JUGGERNAUT_SCROLL_FACTOR * slowMul * dt;
+          enemy.x += Math.sin(enemy.moveTimer * 1.5) * 20 * slowMul * dt;
           enemy.moveTimer += dt;
           break;
         }
@@ -103,8 +118,8 @@ export function createEnemyAISystem(difficulty: DifficultyParams): GameSystem<Ga
         }
         case 'carrier': {
           // Slow descent + patrol + spawn patrol enemies
-          enemy.y += BASE_SCROLL_SPEED * 0.5 * dt;
-          enemy.x += enemy.moveDirection * PATROL_SPEED * 0.6 * dt;
+          enemy.y += BASE_SCROLL_SPEED * 0.5 * slowMul * dt;
+          enemy.x += enemy.moveDirection * PATROL_SPEED * 0.6 * slowMul * dt;
           if (enemy.x < 16 || enemy.x + enemy.width > 304) {
             enemy.moveDirection *= -1;
           }

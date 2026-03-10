@@ -9,7 +9,7 @@ export function createPlayerBullet(
   x: number,
   y: number,
   damage: number,
-  config?: { width?: number; height?: number; speed?: number; homing?: boolean; specialAbility?: SpecialAbilityType }
+  config?: { width?: number; height?: number; speed?: number; homing?: boolean; specialAbility?: SpecialAbilityType; isCritical?: boolean; vx?: number; vy?: number }
 ): BulletEntity {
   const ability = config?.specialAbility ?? 'none';
   return {
@@ -25,6 +25,9 @@ export function createPlayerBullet(
     homing: config?.homing ?? false,
     specialAbility: ability,
     ...(ability === 'pierce' ? { piercedEnemyIds: new Set<string>() } : {}),
+    ...(config?.isCritical ? { isCritical: true } : {}),
+    ...(config?.vx != null ? { vx: config.vx } : {}),
+    ...(config?.vy != null ? { vy: config.vy } : {}),
   };
 }
 

@@ -36,6 +36,12 @@ class AudioManagerClass {
     // Placeholder: no-op until audio assets are added
   }
 
+  async resumeBgm() {
+    if (this.bgm) {
+      await this.bgm.playAsync();
+    }
+  }
+
   async stopBgm() {
     if (this.bgm) {
       await this.bgm.stopAsync();

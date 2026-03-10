@@ -83,6 +83,7 @@ export const BOSS_LASER_TICK_INTERVAL = 300;
 export const BOSS_LASER_COOLDOWN = 4000;
 
 /** Enemy AI movement (logical units/sec) */
+export const RUSH_SPEED = 200;
 export const PATROL_SPEED = 60;
 export const PHALANX_SPEED = 40;
 export const JUGGERNAUT_SCROLL_FACTOR = 0.3;
@@ -98,6 +99,13 @@ export const TRANSFORM_GAUGE_MAX = 100;
 export const TRANSFORM_GAIN_ENEMY_KILL = 8;
 export const TRANSFORM_GAIN_GATE_PASS = 12;
 export const TRANSFORM_GAIN_PER_SECOND = 2;
+
+/** Transform Bonus */
+export const TRANSFORM_BONUS_DURATION = 5000;
+export const TRANSFORM_BONUS_HP_HEAL = 5;
+export const TRANSFORM_BONUS_ATK_MUL = 1.25;
+export const TRANSFORM_BONUS_SPEED_MUL = 1.15;
+export const TRANSFORM_BONUS_FIRE_RATE_MUL = 1.2;
 
 /** Explosion bullet */
 export const EXPLOSION_RADIUS = 40;
@@ -283,6 +291,14 @@ export const CARRIER_SPAWN_COUNT = 2;
 
 /** Splitter spawn offsets */
 export const SPLITTER_SPAWN_OFFSETS = [-20, 0, 20];
+
+/** Phase 3 Passives */
+export const SLOW_ON_HIT_DURATION = 2000;
+export const SLOW_ON_HIT_FACTOR = 0.5;
+export const AUTO_CHARGE_INTERVAL = 3000;
+export const AUTO_CHARGE_DAMAGE_MUL = 3.0;
+export const SHIELD_REGEN_COOLDOWN = 15000;
+export const AFTERIMAGE_DAMAGE_MUL = 0.3;
 
 /** Boss 3 */
 export const BOSS_3_LASER_WIDTH = 40;

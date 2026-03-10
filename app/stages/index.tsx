@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     paddingHorizontal: 24,
     paddingBottom: 24,
     paddingTop: 12,
@@ -319,6 +319,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 2,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: COLORS.neonBlue + '55',
     shadowColor: COLORS.neonBlue,
@@ -327,10 +328,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
   footerButtonText: {
-    fontSize: 15,
+    fontSize: 11,
     color: COLORS.neonBlue,
     fontWeight: '700',
-    letterSpacing: 2,
+    letterSpacing: 1,
     textTransform: 'uppercase',
   },
   endlessCard: {
@@ -388,11 +389,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 2,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#ffffff1a',
   },
   footerButtonSecondaryText: {
-    fontSize: 15,
+    fontSize: 11,
     color: COLORS.lightGray,
     fontWeight: '600',
     letterSpacing: 1,

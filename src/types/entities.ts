@@ -46,6 +46,8 @@ export interface EnemyEntity extends BaseEntity {
   flashTimer: number;
   /** Stage time when entity was spawned (for fade-in effect) */
   spawnTime: number;
+  /** Slow debuff timer (ms) — when > 0, movement speed is halved */
+  slowTimer?: number;
 }
 
 export interface BulletEntity extends BaseEntity {
@@ -62,6 +64,8 @@ export interface BulletEntity extends BaseEntity {
   vy?: number;
   /** Sine-wave horizontal amplitude (logical units). Creates oscillating bullet trajectory. */
   waveAmplitude?: number;
+  /** Whether this bullet scored a critical hit (15% chance with critical_chance passive) */
+  isCritical?: boolean;
 }
 
 export interface GateEntity extends BaseEntity {
@@ -164,6 +168,8 @@ export interface GameEntities {
   justTFTimer: number;
   /** Shockwave visual effect timer (ms) */
   shockwaveTimer: number;
+  /** Transform bonus buff countdown timer (ms) */
+  transformBuffTimer: number;
   /** Graze ring visual effect timer (ms) */
   grazeRingTimer: number;
   /** Gate pass flash timer (ms) — B1 */
@@ -194,4 +200,6 @@ export interface GameEntities {
   particles: ParticleEntity[];
   /** Score popup pool */
   scorePopups: ScorePopupEntity[];
+  /** Shield passive regen cooldown timer (ms) */
+  shieldRegenTimer: number;
 }

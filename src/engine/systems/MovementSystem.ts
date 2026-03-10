@@ -37,7 +37,7 @@ export function createMovementSystem(
     const dx = p.targetX - p.x;
     const dy = p.targetY - p.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const step = PLAYER_MOVE_SPEED * form.moveSpeedMultiplier * skillMoveSpeed * dt;
+    const step = PLAYER_MOVE_SPEED * form.moveSpeedMultiplier * store.speed * skillMoveSpeed * store.transformBuffSpeedMul * dt;
 
     if (dist <= step) {
       // Arrived at target
@@ -84,11 +84,14 @@ export function createMovementSystem(
 
     if (b.homing) {
       moveHomingBullet(b, entities, dt);
+    } else if (b.vx != null && b.vy != null) {
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
     } else {
       b.y -= b.speed * dt;
     }
 
-    if (b.y + b.height < 0 || b.y > visibleHeight) deactivateBullet(b);
+    if (b.y + b.height < 0 || b.y > visibleHeight || b.x + b.width < -20 || b.x > 340) deactivateBullet(b);
   }
 
   // Move enemy bullets (directional or straight down, with optional sine-wave)

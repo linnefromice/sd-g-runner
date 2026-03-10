@@ -1,4 +1,5 @@
 import type { StageDefinition } from '@/types/stages';
+import { getDifficultyForStage } from '@/game/difficulty';
 import {
   GATE_ATK_UP,
   GATE_SPD_UP,
@@ -18,15 +19,7 @@ export const STAGE_15: StageDefinition = {
   name: 'Terminus Core',
   isBossStage: true,
   duration: 180,
-  difficulty: {
-    scrollSpeedMultiplier: 1.0,
-    enemySpawnInterval: 2.5,
-    enemyHpMultiplier: 1.5,
-    enemyAtkMultiplier: 1.3,
-    maxConcurrentEnemies: 8,
-    bulletSpeedMultiplier: 1.2,
-    attackIntervalMultiplier: 0.85,
-  },
+  difficulty: { ...getDifficultyForStage(15), maxConcurrentEnemies: 8 },
   timeline: [
     // Pre-boss wave 1: mixed opener
     { time: 3, type: 'enemy_spawn', enemyType: 'patrol', x: 100 },

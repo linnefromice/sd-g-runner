@@ -10,6 +10,9 @@ import {
   COMBO_THRESHOLD,
   EX_GAUGE_MAX,
   TRANSFORM_GAUGE_MAX,
+  TRANSFORM_BONUS_ATK_MUL,
+  TRANSFORM_BONUS_SPEED_MUL,
+  TRANSFORM_BONUS_FIRE_RATE_MUL,
   FORM_XP_THRESHOLDS,
 } from '@/constants/balance';
 import { useSaveDataStore } from '@/stores/saveDataStore';
@@ -40,6 +43,9 @@ interface GameSessionState {
   primaryForm: MechaFormId;
   secondaryForm: MechaFormId;
   transformGauge: number;
+  transformBuffAtkMul: number;
+  transformBuffSpeedMul: number;
+  transformBuffFireRateMul: number;
 
   // Score / Credits
   score: number;
@@ -63,6 +69,9 @@ interface GameSessionState {
   bossEntrance: boolean;
   slowMotionFactor: number;
 
+  // Shield passive
+  shieldHp: number;
+
   // Form XP
   formXP: Partial<Record<MechaFormId, FormXPState>>;
   pendingSkillChoice: { formId: MechaFormId; level: number } | null;
@@ -80,6 +89,8 @@ interface GameSessionState {
   deactivateEXBurst: () => void;
   addTransformGauge: (amount: number) => void;
   activateTransform: () => boolean;
+  activateTransformBuff: () => void;
+  deactivateTransformBuff: () => void;
   setForm: (formId: MechaFormId) => void;
   addStat: (stat: StatKey, value: number) => void;
   multiplyStat: (stat: StatKey, value: number) => void;
@@ -96,6 +107,7 @@ interface GameSessionState {
   setPaused: (value: boolean) => void;
   setBossEntrance: (value: boolean) => void;
   setSlowMotionFactor: (factor: number) => void;
+  setShieldHp: (hp: number) => void;
   addFormXP: (formId: MechaFormId, amount: number) => void;
   selectFormSkill: (formId: MechaFormId, level: number, choice: 'A' | 'B') => void;
   resetSession: (stageId: number, formId?: MechaFormId, secondaryFormId?: MechaFormId) => void;
@@ -117,6 +129,9 @@ const INITIAL_STATE = {
   primaryForm: 'SD_Standard' as MechaFormId,
   secondaryForm: 'SD_HeavyArtillery' as MechaFormId,
   transformGauge: 0,
+  transformBuffAtkMul: 1.0,
+  transformBuffSpeedMul: 1.0,
+  transformBuffFireRateMul: 1.0,
   score: 0,
   scoreMultiplier: 1,
   credits: 0,
@@ -131,6 +146,7 @@ const INITIAL_STATE = {
   isStageClear: false,
   bossEntrance: false,
   slowMotionFactor: 1.0,
+  shieldHp: 0,
   formXP: {
     SD_Standard: { xp: 0, level: 0, skills: [] },
     SD_HeavyArtillery: { xp: 0, level: 0, skills: [] },
@@ -190,6 +206,18 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
     });
     return true;
   },
+
+  activateTransformBuff: () => set({
+    transformBuffAtkMul: TRANSFORM_BONUS_ATK_MUL,
+    transformBuffSpeedMul: TRANSFORM_BONUS_SPEED_MUL,
+    transformBuffFireRateMul: TRANSFORM_BONUS_FIRE_RATE_MUL,
+  }),
+
+  deactivateTransformBuff: () => set({
+    transformBuffAtkMul: 1.0,
+    transformBuffSpeedMul: 1.0,
+    transformBuffFireRateMul: 1.0,
+  }),
 
   setForm: (formId) =>
     set((s) => ({
@@ -261,6 +289,8 @@ export const useGameSessionStore = create<GameSessionState>((set, get) => ({
   setPaused: (value) => set({ isPaused: value }),
   setBossEntrance: (value) => set({ bossEntrance: value }),
   setSlowMotionFactor: (factor) => set({ slowMotionFactor: factor }),
+
+  setShieldHp: (hp) => set({ shieldHp: hp }),
 
   addFormXP: (formId, amount) => set(s => {
     const state = s.formXP[formId];

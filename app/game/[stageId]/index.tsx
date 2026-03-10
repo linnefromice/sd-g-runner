@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AppState, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import Animated, { useSharedValue } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withDelay, withTiming, runOnJS } from 'react-native-reanimated';
 import { useGameLoop, type GameSystem } from '@/engine/GameLoop';
 import { GameCanvas, type RenderEntity } from '@/rendering/GameCanvas';
 import type { PopupRenderData, OverlayState } from '@/engine/systems/SyncRenderSystem';
@@ -15,7 +15,7 @@ import { getStage } from '@/game/stages';
 import { getFormDefinition } from '@/game/forms';
 import { createGameEntities } from '@/engine/createGameEntities';
 import { getScreenMetrics } from '@/constants/dimensions';
-import { JUST_TF_WINDOW } from '@/constants/balance';
+import { JUST_TF_WINDOW, TRANSFORM_BONUS_HP_HEAL, TRANSFORM_BONUS_DURATION } from '@/constants/balance';
 import type { GameEntities } from '@/types/entities';
 import type { MechaFormId } from '@/types/forms';
 import { onEXBurst } from '@/engine/effects';
@@ -52,6 +52,9 @@ export default function GameScreen() {
 
   const [running, setRunning] = useState(true);
 
+  // Fade overlay: 1 = fully black, 0 = transparent
+  const fadeOpacity = useSharedValue(1);
+
   // Initialize entities pool with stage metadata
   const entitiesRef = useRef<GameEntities>(
     Object.assign(createGameEntities(width, height), {
@@ -83,6 +86,17 @@ export default function GameScreen() {
     };
   }, []);
 
+  // Fade in on mount (delay 100ms for Canvas initialization)
+  useEffect(() => {
+    fadeOpacity.value = withDelay(100, withTiming(0, { duration: 400 }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Navigate to result screen (called from Reanimated callback via runOnJS)
+  const navigateToResult = useCallback(() => {
+    router.replace(`/game/${stageIdNum}/result`);
+  }, [stageIdNum, router]);
+
   // Watch for game-over or stage-clear
   useEffect(() => {
     const unsub = useGameSessionStore.subscribe((state) => {
@@ -97,13 +111,16 @@ export default function GameScreen() {
             saveStore.unlockAchievement('endless_survivor');
           }
         }
-        setTimeout(() => {
-          router.replace(`/game/${stageIdNum}/result`);
-        }, 1000);
+        // Fade out → navigate to result
+        fadeOpacity.value = withTiming(1, { duration: 800 }, (finished) => {
+          if (finished) {
+            runOnJS(navigateToResult)();
+          }
+        });
       }
     });
     return unsub;
-  }, [stageIdNum, router]);
+  }, [stageIdNum, fadeOpacity, navigateToResult]);
 
   // Build systems
   const getForm = useCallback(
@@ -141,10 +158,11 @@ export default function GameScreen() {
   useEffect(() => {
     const sub = AppState.addEventListener('change', (nextState) => {
       if (nextState !== 'active') {
-        const { isGameOver, isStageClear } = useGameSessionStore.getState();
-        if (!isGameOver && !isStageClear) {
+        const { isGameOver, isStageClear, pendingSkillChoice } = useGameSessionStore.getState();
+        if (!isGameOver && !isStageClear && !pendingSkillChoice) {
           setRunning(false);
           useGameSessionStore.getState().setPaused(true);
+          setShowPauseMenu(true);
         }
       }
     });
@@ -193,6 +211,7 @@ export default function GameScreen() {
     setShowPauseMenu(false);
     useGameSessionStore.getState().setPaused(false);
     setRunning(true);
+    AudioManager.resumeBgm();
   }, []);
 
   const handleExit = useCallback(() => {
@@ -209,31 +228,45 @@ export default function GameScreen() {
   }, []);
 
   const handleTransform = useCallback(() => {
-    const activated = useGameSessionStore.getState().activateTransform();
+    const store = useGameSessionStore.getState();
+    const activated = store.activateTransform();
     if (activated) {
       entitiesRef.current.justTFTimer = JUST_TF_WINDOW;
+      store.heal(TRANSFORM_BONUS_HP_HEAL);
+      store.activateTransformBuff();
+      entitiesRef.current.transformBuffTimer = TRANSFORM_BONUS_DURATION;
     }
   }, []);
 
+  const fadeStyle = useAnimatedStyle(() => ({
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#0a0a14',
+    opacity: fadeOpacity.value,
+  }));
+
   return (
-    <GestureDetector gesture={gesture}>
-      <Animated.View style={styles.container}>
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <GameCanvas renderData={renderData} popupData={popupData} scrollY={scrollYShared} overlayState={overlayState} scale={scale} />
-        </View>
-        <HUD
-          onPause={handlePause}
-          onEXBurst={handleEXBurst}
-          onTransform={handleTransform}
-          entitiesRef={entitiesRef}
-          stageDuration={stage.duration}
-        />
-        <SkillChoiceOverlay />
-        {showPauseMenu && (
-          <PauseMenu onResume={handleResume} onExit={handleExit} />
-        )}
-      </Animated.View>
-    </GestureDetector>
+    <View style={styles.container}>
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={StyleSheet.absoluteFill}>
+          <View style={StyleSheet.absoluteFill} pointerEvents="none">
+            <GameCanvas renderData={renderData} popupData={popupData} scrollY={scrollYShared} overlayState={overlayState} scale={scale} />
+          </View>
+        </Animated.View>
+      </GestureDetector>
+      <HUD
+        onPause={handlePause}
+        onEXBurst={handleEXBurst}
+        onTransform={handleTransform}
+        entitiesRef={entitiesRef}
+        stageDuration={stage.duration}
+      />
+      <SkillChoiceOverlay />
+      {showPauseMenu && (
+        <PauseMenu onResume={handleResume} onExit={handleExit} />
+      )}
+      {/* Fade overlay — topmost layer */}
+      <Animated.View style={fadeStyle} pointerEvents="none" />
+    </View>
   );
 }
 

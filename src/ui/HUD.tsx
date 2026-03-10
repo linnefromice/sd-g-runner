@@ -282,14 +282,14 @@ function HUDInner({ onPause, onEXBurst, onTransform, entitiesRef, stageDuration 
       pointerEvents="box-none"
     >
       {/* Top section */}
-      <View>
+      <View pointerEvents="box-none">
         {/* Boss HP bar (only visible during boss fight) */}
         <BossHPBar entitiesRef={entitiesRef} />
         {/* Stage progress bar */}
         <StageProgressBar entitiesRef={entitiesRef} stageDuration={stageDuration} />
         {/* Pause, HP, Score */}
-        <View style={styles.topRow}>
-          <View style={styles.topLeft}>
+        <View style={styles.topRow} pointerEvents="box-none">
+          <View style={styles.topLeft} pointerEvents="box-none">
             <PauseButton onPause={onPause} />
             <HPBar />
           </View>
@@ -299,11 +299,11 @@ function HUDInner({ onPause, onEXBurst, onTransform, entitiesRef, stageDuration 
       </View>
 
       {/* Bottom area: Form icon, Combo, EX */}
-      <View style={styles.bottomArea}>
+      <View style={styles.bottomArea} pointerEvents="box-none">
         <FormIndicator />
-        <View style={styles.bottomRight}>
+        <View style={styles.bottomRight} pointerEvents="box-none">
           <ComboGauge />
-          <View style={styles.buttonRow}>
+          <View style={styles.buttonRow} pointerEvents="box-none">
             <TransformButton onActivate={onTransform} />
             <EXButton onActivate={onEXBurst} />
           </View>

@@ -23,7 +23,7 @@ export default function SettingsScreen() {
   const hapticsEnabled = useSaveDataStore((s) => s.settings.hapticsEnabled);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: Math.max(insets.top, 20) + 40 }]}>
       <Text style={styles.title}>{t.settings.title}</Text>
       <View style={styles.titleLine} />
 
@@ -128,7 +128,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.bgDark,
-    paddingTop: 60,
     paddingHorizontal: 24,
   },
   title: {

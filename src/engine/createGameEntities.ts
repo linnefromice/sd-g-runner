@@ -85,6 +85,7 @@ export function createGameEntities(
     isPlayerBoosted: false,
     justTFTimer: 0,
     shockwaveTimer: 0,
+    transformBuffTimer: 0,
     grazeRingTimer: 0,
     gateFlashTimer: 0,
     gateFlashColor: '#FFFFFF',
@@ -105,5 +106,6 @@ export function createGameEntities(
     shakeOffsetY: 0,
     particles: Array.from({ length: MAX_PARTICLES }, createInactiveParticle),
     scorePopups: Array.from({ length: MAX_SCORE_POPUPS }, createInactiveScorePopup),
+    shieldRegenTimer: 0,
   };
 }
