@@ -9,6 +9,7 @@ export interface ResolvedFormStats {
   damageMul: number;
   moveSpeedMul: number;
   aoeRadiusMul: number;
+  damageReduceMul: number;
   bulletCountAdd: number;
   pierceCountAdd: number;
   passives: Set<FormSkillPassiveId>;
@@ -22,6 +23,7 @@ export function resolveFormSkills(formId: MechaFormId, skills: FormSkillChoice[]
     damageMul: 1,
     moveSpeedMul: 1,
     aoeRadiusMul: 1,
+    damageReduceMul: 1,
     bulletCountAdd: 0,
     pierceCountAdd: 0,
     passives: new Set(),
@@ -42,6 +44,7 @@ export function resolveFormSkills(formId: MechaFormId, skills: FormSkillChoice[]
           case 'damage': result.damageMul *= effect.value; break;
           case 'moveSpeed': result.moveSpeedMul *= effect.value; break;
           case 'aoeRadius': result.aoeRadiusMul *= effect.value; break;
+          case 'damageReduce': result.damageReduceMul *= effect.value; break;
         }
         break;
       case 'stat_add':
@@ -56,7 +59,5 @@ export function resolveFormSkills(formId: MechaFormId, skills: FormSkillChoice[]
     }
   }
 
-  // NOTE: aoeRadiusMul, pierceCountAdd, and passives are resolved here but their
-  // runtime application (e.g., modifying bullet behavior) is deferred to future phases.
   return result;
 }

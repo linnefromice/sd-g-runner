@@ -32,15 +32,18 @@ export function createShootingSystem(getForm: () => MechaFormDefinition): GameSy
 
     AudioManager.playSe('shoot');
 
+    const passives = skills?.passives;
     const bulletConfig = form.bulletConfig;
     const damage = store.atk * form.attackMultiplier * (skills?.damageMul ?? 1) * store.transformBuffAtkMul;
-    const isHoming = form.specialAbility === 'homing_invincible';
-    const specialAbility = form.specialAbility;
+    const isHoming = form.specialAbility === 'homing_invincible' || (passives?.has('weak_homing') ?? false);
+    // Passive pierce/explosion overrides form specialAbility
+    const specialAbility = passives?.has('pierce') ? 'pierce' as const : form.specialAbility;
     const bulletSpeed = bulletConfig.speed * (skills?.bulletSpeedMul ?? 1);
     const bulletWidth = bulletConfig.width * (skills?.bulletSizeMul ?? 1);
     const bulletHeight = bulletConfig.height * (skills?.bulletSizeMul ?? 1);
     const count = bulletConfig.count + (skills?.bulletCountAdd ?? 0);
     const centerX = p.x + p.width / 2;
+    const hasDoubleShot = passives?.has('double_shot') ?? false;
 
     if (count <= 1) {
       // Single bullet (original behavior)
@@ -52,6 +55,13 @@ export function createShootingSystem(getForm: () => MechaFormDefinition): GameSy
         specialAbility,
       });
       acquireFromPool(entities.playerBullets, bullet);
+      if (hasDoubleShot) {
+        const b2 = createPlayerBullet(centerX + 10, p.y, damage, {
+          width: bulletWidth, height: bulletHeight, speed: bulletSpeed,
+          homing: isHoming, specialAbility,
+        });
+        acquireFromPool(entities.playerBullets, b2);
+      }
     } else {
       // Multi-bullet spread
       const halfSpread = ((count - 1) * SPREAD_ANGLE) / 2;
@@ -66,6 +76,17 @@ export function createShootingSystem(getForm: () => MechaFormDefinition): GameSy
           specialAbility,
         });
         if (!acquireFromPool(entities.playerBullets, bullet)) break;
+      }
+      if (hasDoubleShot) {
+        for (let i = 0; i < count; i++) {
+          const angleDeg = -halfSpread + i * SPREAD_ANGLE;
+          const offsetX = Math.tan((angleDeg * Math.PI) / 180) * 20;
+          const b2 = createPlayerBullet(centerX + offsetX + 10, p.y, damage, {
+            width: bulletWidth, height: bulletHeight, speed: bulletSpeed,
+            homing: isHoming, specialAbility,
+          });
+          if (!acquireFromPool(entities.playerBullets, b2)) break;
+        }
       }
     }
   };

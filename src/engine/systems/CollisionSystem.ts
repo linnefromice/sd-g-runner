@@ -9,6 +9,7 @@ import { AudioManager } from '@/audio/AudioManager';
 import { HapticsManager } from '@/audio/HapticsManager';
 import { generateGateLabel } from '@/engine/entities/Gate';
 import { useGameSessionStore } from '@/stores/gameSessionStore';
+import { resolveFormSkills, type ResolvedFormStats } from '@/engine/formSkillResolver';
 import { FORM_DEFINITIONS } from '@/game/forms';
 import { updateBossPhase } from '@/engine/systems/bossPhase';
 import { applyEnemyKillReward } from '@/engine/systems/enemyKillReward';
@@ -17,6 +18,7 @@ import { applyDebrisDestroyReward } from '@/engine/systems/debrisDestroyReward';
 import { onPlayerHit, onParry, onGraze, onBulletImpact, type GrazeTier } from '@/engine/effects';
 
 type Store = ReturnType<typeof useGameSessionStore.getState>;
+type Passives = ResolvedFormStats['passives'];
 
 export const collisionSystem: GameSystem<GameEntities> = (entities) => {
   const player = entities.player;
@@ -25,24 +27,29 @@ export const collisionSystem: GameSystem<GameEntities> = (entities) => {
   const playerHB = getPlayerHitbox(player);
   const store = useGameSessionStore.getState();
 
+  // Resolve form skills once per frame
+  const formXPState = store.formXP[store.currentForm];
+  const skills = formXPState ? resolveFormSkills(store.currentForm, formXPState.skills) : null;
+  const passives = skills?.passives ?? new Set<never>();
+
   // Offensive collisions (player bullets outgoing)
-  checkPlayerBulletsVsEnemies(entities, store);
-  checkPlayerBulletsVsDebris(entities, store);
+  checkPlayerBulletsVsEnemies(entities, store, passives, skills?.aoeRadiusMul ?? 1);
+  checkPlayerBulletsVsDebris(entities, store, skills?.aoeRadiusMul ?? 1);
   checkPlayerBulletsVsGrowthGates(entities);
-  checkPlayerBulletsVsBoss(entities, store);
+  checkPlayerBulletsVsBoss(entities, store, passives, skills?.aoeRadiusMul ?? 1);
 
   // Graze detection
-  checkGraze(entities, player, playerHB, store);
+  checkGraze(entities, player, playerHB, store, passives);
 
   // Defensive collisions (damage to player)
   if (!player.isInvincible) {
-    checkDamageToPlayer(entities, player, playerHB, store);
+    checkDamageToPlayer(entities, player, playerHB, store, passives, skills?.damageReduceMul ?? 1);
   }
 };
 
 // --- Offensive: Player bullets outgoing ---
 
-function checkPlayerBulletsVsEnemies(entities: GameEntities, store: Store) {
+function checkPlayerBulletsVsEnemies(entities: GameEntities, store: Store, passives: Passives, aoeRadiusMul: number) {
   for (const bullet of entities.playerBullets) {
     if (!bullet.active) continue;
     for (const enemy of entities.enemies) {
@@ -72,9 +79,14 @@ function checkPlayerBulletsVsEnemies(entities: GameEntities, store: Store) {
         bullet.piercedEnemyIds?.add(enemy.id);
       } else if (bullet.specialAbility === 'explosion_radius') {
         deactivateBullet(bullet);
-        applyExplosionAoE(entities, hit.x, hit.y, bullet.damage);
+        applyExplosionAoE(entities, hit.x, hit.y, bullet.damage, aoeRadiusMul);
       } else {
         deactivateBullet(bullet);
+      }
+
+      // Passive: ex_on_hit — gain EX on every hit
+      if (passives.has('ex_on_hit') && !store.isEXBurstActive) {
+        store.addExGauge(1);
       }
 
       if (enemy.hp <= 0) {
@@ -91,6 +103,8 @@ function checkPlayerBulletsVsEnemies(entities: GameEntities, store: Store) {
           }
         }
         applyEnemyKillReward(enemy, entities);
+        // Passive: heal_on_hit — recover 1 HP per kill
+        if (passives.has('heal_on_hit')) store.heal(1);
       } else if (bullet.specialAbility !== 'pierce') {
         onBulletImpact(entities, hit.x, hit.y);
       }
@@ -100,7 +114,7 @@ function checkPlayerBulletsVsEnemies(entities: GameEntities, store: Store) {
   }
 }
 
-function checkPlayerBulletsVsDebris(entities: GameEntities, store: Store) {
+function checkPlayerBulletsVsDebris(entities: GameEntities, store: Store, aoeRadiusMul: number) {
   for (const bullet of entities.playerBullets) {
     if (!bullet.active) continue;
     for (const debris of entities.debris) {
@@ -113,7 +127,7 @@ function checkPlayerBulletsVsDebris(entities: GameEntities, store: Store) {
         debris.hp -= bullet.damage;
         const impact = getCenter(bullet);
         deactivateBullet(bullet);
-        applyExplosionAoE(entities, impact.x, impact.y, bullet.damage);
+        applyExplosionAoE(entities, impact.x, impact.y, bullet.damage, aoeRadiusMul);
         if (debris.hp <= 0) {
           applyDebrisDestroyReward(debris, entities);
         }
@@ -151,7 +165,7 @@ function checkPlayerBulletsVsGrowthGates(entities: GameEntities) {
   }
 }
 
-function checkPlayerBulletsVsBoss(entities: GameEntities, store: Store) {
+function checkPlayerBulletsVsBoss(entities: GameEntities, store: Store, passives: Passives, aoeRadiusMul: number) {
   if (!entities.boss?.active) return;
 
   for (const bullet of entities.playerBullets) {
@@ -168,9 +182,14 @@ function checkPlayerBulletsVsBoss(entities: GameEntities, store: Store) {
       bullet.piercedEnemyIds?.add(entities.boss.id);
     } else if (bullet.specialAbility === 'explosion_radius') {
       deactivateBullet(bullet);
-      applyExplosionAoE(entities, hit.x, hit.y, bullet.damage);
+      applyExplosionAoE(entities, hit.x, hit.y, bullet.damage, aoeRadiusMul);
     } else {
       deactivateBullet(bullet);
+    }
+
+    // Passive: ex_on_hit — gain EX on every boss hit
+    if (passives.has('ex_on_hit') && !store.isEXBurstActive) {
+      store.addExGauge(1);
     }
 
     const percentDamaged = prevPercent - newPercent;
@@ -194,10 +213,15 @@ function checkGraze(
   player: GameEntities['player'],
   playerHB: ReturnType<typeof getPlayerHitbox>,
   store: Store,
+  passives: Passives,
 ) {
   if (player.isInvincible || store.isAwakened) return;
 
-  const playerVisualHB = getPlayerVisualHitbox(player);
+  // Passive: graze_expand — widen graze detection area
+  const grazeExpand = passives.has('graze_expand') ? 4 : 0;
+  const playerVisualHB = grazeExpand > 0
+    ? expandHitbox(getPlayerVisualHitbox(player), grazeExpand)
+    : getPlayerVisualHitbox(player);
   const closeHB = expandHitbox(playerHB, GRAZE_CLOSE_EXPAND);
   const extremeHB = expandHitbox(playerHB, GRAZE_EXTREME_EXPAND);
 
@@ -255,6 +279,8 @@ function checkDamageToPlayer(
   player: GameEntities['player'],
   playerHB: ReturnType<typeof getPlayerHitbox>,
   store: Store,
+  passives: Passives,
+  damageReduceMul: number,
 ) {
   const isAwakenedInvincible = store.isAwakened;
 
@@ -269,7 +295,7 @@ function checkDamageToPlayer(
       return;
     }
     deactivateBullet(bullet);
-    applyDamage(entities, player, bullet.damage, store);
+    applyDamage(entities, player, bullet.damage, store, passives, damageReduceMul);
     return;
   }
 
@@ -278,7 +304,7 @@ function checkDamageToPlayer(
     for (const enemy of entities.enemies) {
       if (!enemy.active) continue;
       if (checkAABBOverlap(playerHB, enemy)) {
-        applyDamage(entities, player, ENEMY_STATS[enemy.enemyType].attackDamage, store);
+        applyDamage(entities, player, ENEMY_STATS[enemy.enemyType].attackDamage, store, passives, damageReduceMul);
         return;
       }
     }
@@ -289,7 +315,7 @@ function checkDamageToPlayer(
     for (const debris of entities.debris) {
       if (!debris.active) continue;
       if (checkAABBOverlap(playerHB, debris)) {
-        applyDamage(entities, player, DEBRIS_CONTACT_DAMAGE, store);
+        applyDamage(entities, player, DEBRIS_CONTACT_DAMAGE, store, passives, damageReduceMul);
         return;
       }
     }
@@ -301,17 +327,18 @@ function checkDamageToPlayer(
       applyParryShockwave(entities, store);
       return;
     }
-    applyDamage(entities, player, BOSS_COLLISION_DAMAGE, store);
+    applyDamage(entities, player, BOSS_COLLISION_DAMAGE, store, passives, damageReduceMul);
   }
 }
 
 // --- Shared helpers ---
 
-function applyExplosionAoE(entities: GameEntities, x: number, y: number, damage: number) {
+function applyExplosionAoE(entities: GameEntities, x: number, y: number, damage: number, aoeRadiusMul = 1) {
+  const radius = EXPLOSION_RADIUS * aoeRadiusMul;
   for (const other of entities.enemies) {
     if (!other.active) continue;
     const oc = getCenter(other);
-    if (getDistance(x, y, oc.x, oc.y) <= EXPLOSION_RADIUS) {
+    if (getDistance(x, y, oc.x, oc.y) <= radius) {
       other.hp -= damage;
       if (other.hp <= 0) applyEnemyKillReward(other, entities);
     }
@@ -323,11 +350,17 @@ function applyDamage(
   player: GameEntities['player'],
   damage: number,
   store: Store,
+  passives?: Passives,
+  damageReduceMul?: number,
 ) {
-  // Check for damage_reduce ability
+  // Check for damage_reduce ability (form + skill + passive armor)
   const formId = store.currentForm;
   const form = FORM_DEFINITIONS[formId];
-  const finalDamage = form?.specialAbility === 'damage_reduce' ? Math.round(damage * 0.7) : damage;
+  let finalDamage = form?.specialAbility === 'damage_reduce' ? Math.round(damage * 0.7) : damage;
+  // Passive: armor — 20% damage reduction (stacks with form ability)
+  if (passives?.has('armor')) finalDamage = Math.round(finalDamage * 0.8);
+  // Skill: damageReduce stat multiplier (Guardian Lv1-B)
+  if (damageReduceMul != null && damageReduceMul !== 1) finalDamage = Math.round(finalDamage / damageReduceMul);
   store.takeDamage(finalDamage);
   AudioManager.playSe('damage');
   HapticsManager.damage();
