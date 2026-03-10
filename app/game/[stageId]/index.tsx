@@ -216,24 +216,26 @@ export default function GameScreen() {
   }, []);
 
   return (
-    <GestureDetector gesture={gesture}>
-      <Animated.View style={styles.container}>
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <GameCanvas renderData={renderData} popupData={popupData} scrollY={scrollYShared} overlayState={overlayState} scale={scale} />
-        </View>
-        <HUD
-          onPause={handlePause}
-          onEXBurst={handleEXBurst}
-          onTransform={handleTransform}
-          entitiesRef={entitiesRef}
-          stageDuration={stage.duration}
-        />
-        <SkillChoiceOverlay />
-        {showPauseMenu && (
-          <PauseMenu onResume={handleResume} onExit={handleExit} />
-        )}
-      </Animated.View>
-    </GestureDetector>
+    <View style={styles.container}>
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={StyleSheet.absoluteFill}>
+          <View style={StyleSheet.absoluteFill} pointerEvents="none">
+            <GameCanvas renderData={renderData} popupData={popupData} scrollY={scrollYShared} overlayState={overlayState} scale={scale} />
+          </View>
+        </Animated.View>
+      </GestureDetector>
+      <HUD
+        onPause={handlePause}
+        onEXBurst={handleEXBurst}
+        onTransform={handleTransform}
+        entitiesRef={entitiesRef}
+        stageDuration={stage.duration}
+      />
+      <SkillChoiceOverlay />
+      {showPauseMenu && (
+        <PauseMenu onResume={handleResume} onExit={handleExit} />
+      )}
+    </View>
   );
 }
 
