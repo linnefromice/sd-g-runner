@@ -21,7 +21,7 @@ export function createShootingSystem(getForm: () => MechaFormDefinition): GameSy
     const formXPState = store.formXP[store.currentForm];
     const skills = formXPState ? resolveFormSkills(store.currentForm, formXPState.skills) : null;
 
-    const interval = BASE_FIRE_INTERVAL / (form.fireRateMultiplier * (skills?.fireRateMul ?? 1));
+    const interval = BASE_FIRE_INTERVAL / (form.fireRateMultiplier * store.fireRate * (skills?.fireRateMul ?? 1));
 
     fireTimer += time.delta;
     if (fireTimer < interval) return;
@@ -33,7 +33,7 @@ export function createShootingSystem(getForm: () => MechaFormDefinition): GameSy
     AudioManager.playSe('shoot');
 
     const bulletConfig = form.bulletConfig;
-    const damage = 10 * form.attackMultiplier * (skills?.damageMul ?? 1);
+    const damage = store.atk * form.attackMultiplier * (skills?.damageMul ?? 1);
     const isHoming = form.specialAbility === 'homing_invincible';
     const specialAbility = form.specialAbility;
     const bulletSpeed = bulletConfig.speed * (skills?.bulletSpeedMul ?? 1);

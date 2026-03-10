@@ -37,7 +37,7 @@ export function createMovementSystem(
     const dx = p.targetX - p.x;
     const dy = p.targetY - p.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const step = PLAYER_MOVE_SPEED * form.moveSpeedMultiplier * skillMoveSpeed * dt;
+    const step = PLAYER_MOVE_SPEED * form.moveSpeedMultiplier * store.speed * skillMoveSpeed * dt;
 
     if (dist <= step) {
       // Arrived at target
