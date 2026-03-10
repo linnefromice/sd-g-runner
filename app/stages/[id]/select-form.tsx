@@ -255,12 +255,20 @@ export default function SelectFormScreen() {
         </View>
       </ScrollView>
 
-      {primaryForm && secondaryForm && (
-        <TouchableOpacity style={styles.startButton} activeOpacity={0.7} onPress={handleStart}>
-          <CornerBrackets color={COLORS.neonBlue + '88'} size={8} />
-          <Text style={styles.startButtonText}>{t.selectForm.startStage}</Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={[styles.startButton, !(primaryForm && secondaryForm) && styles.startButtonDisabled]}
+        activeOpacity={0.7}
+        disabled={!(primaryForm && secondaryForm)}
+        onPress={handleStart}
+      >
+        <CornerBrackets
+          color={primaryForm && secondaryForm ? COLORS.neonBlue + '88' : '#ffffff22'}
+          size={8}
+        />
+        <Text style={[styles.startButtonText, !(primaryForm && secondaryForm) && styles.startButtonTextDisabled]}>
+          {t.selectForm.startStage}
+        </Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.backButton, { marginBottom: Math.max(insets.bottom, 24) }]}
@@ -467,6 +475,15 @@ const styles = StyleSheet.create({
     color: COLORS.neonBlue,
     letterSpacing: 3,
     textTransform: 'uppercase',
+  },
+  startButtonDisabled: {
+    backgroundColor: '#ffffff06',
+    borderColor: '#ffffff22',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  startButtonTextDisabled: {
+    color: '#444444',
   },
   unlockRow: {
     flexDirection: 'row',
