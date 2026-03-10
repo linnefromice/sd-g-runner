@@ -34,6 +34,8 @@ function useSections(): Section[] {
         { ...s.gates.items.recovery, color: COLORS.gateRecovery },
         { ...s.gates.items.tradeoff, color: COLORS.gateTradeoff },
         { ...s.gates.items.refit, color: COLORS.gateRefit },
+        { ...s.gates.items.growth, color: COLORS.gateGrowth },
+        { ...s.gates.items.roulette, color: COLORS.gateRoulette },
       ],
     },
     {
