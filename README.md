@@ -109,7 +109,18 @@ src/
   game/         Data definitions — forms, stages, difficulty, scoring, upgrades
   ui/           React Native HUD components
   i18n/         Internationalization — locale dictionaries and hooks
-  audio/        Sound management (BGM, SE)
+  audio/        Sound management (BGM, SE, haptics)
   constants/    Shared constants — balance, colors, dimensions
   types/        TypeScript type definitions
+docs/           Documentation (see below)
 ```
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Architecture Guide](docs/ARCHITECTURE.md) | Data flow, system pipeline, entity pool, Reanimated safety patterns |
+| [Game Design Overview](docs/GAME_DESIGN.md) | Forms, stages, enemies, gates, bosses, scoring, economy, achievements |
+| [Changelog](docs/CHANGELOG.md) | Version history (v0.1.0–v0.5.0) |
+| [Testing Guide](docs/TESTING.md) | Test strategy, coverage, patterns, adding new tests |
+| [Requirements](docs/v1/REQUIREMENTS-r3.md) | Full game specification (v3.1, authoritative) |
